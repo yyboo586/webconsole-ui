@@ -26853,25 +26853,33 @@ UE.plugin.register("simpleupload", function() {
 
         function callback() {
           try {
-            var link,
-              json,
-              loader,
-              body = (iframe.contentDocument || iframe.contentWindow.document)
-                .body,
-              result = body.innerText || body.textContent || "";
-            json = new Function("return " + result)();
-            link = me.options.imageUrlPrefix + json.url;
-            if (json.state == "SUCCESS" && json.url) {
-              loader = me.document.getElementById(loadingId);
-              domUtils.removeClasses(loader, "loadingclass");
-              loader.setAttribute("src", link);
-              loader.setAttribute("_src", link);
-              loader.setAttribute("alt", json.original || "");
-              loader.removeAttribute("id");
-              me.fireEvent("contentchange");
-            } else {
-              showErrorLoader && showErrorLoader(json.state);
-            }
+            var link,loader;
+            var imageActionUrl = me.getActionUrl(me.getOpt("imageActionName"));
+            var imageUrlPrefix = me.getOpt("imageUrlPrefix");
+            var allowFiles = me.getOpt("imageAllowFiles");
+            var formData = new FormData()
+            formData.append('upfile', input.files[0]);
+            // 替换你的URL
+            fetch(imageActionUrl,{
+              method: "post",
+              body: formData
+            }).then(p=>p.json()).then(json=>{
+              link = me.options.imageUrlPrefix + json.url;
+              if (json.state == "SUCCESS" && json.url) {
+                loader = me.document.getElementById(loadingId);
+                domUtils.removeClasses(loader, "loadingclass");
+                loader.setAttribute("src", link);
+                loader.setAttribute("_src", link);
+                loader.setAttribute("alt", json.original || "");
+                loader.removeAttribute("id");
+                me.fireEvent("contentchange");
+              } else {
+                showErrorLoader && showErrorLoader(json.state);
+              }
+            }).catch(e=>{
+              showErrorLoader &&
+              showErrorLoader(me.getLang("simpleupload.loadError"));
+            })
           } catch (er) {
             showErrorLoader &&
               showErrorLoader(me.getLang("simpleupload.loadError"));
