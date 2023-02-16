@@ -100,7 +100,7 @@ export default {
           return false
         },
         headers: {
-          Authorization:"Bearer "+getToken()
+          Authorization:null
         },
         query: (file, chunk) => {
           return {
@@ -145,7 +145,9 @@ export default {
     },
     uploadFile () {
       // console.log("uploadFile")
-
+      if(!this.options.headers.Authorization){
+        this.options.headers.Authorization = "Bearer "+getToken()
+      }
       if (this.uploadBtn) {
         this.uploadBtn.click()
       }
