@@ -32,6 +32,12 @@
 				<el-table-column type="index" label="序号" width="60" />
 				<el-table-column prop="name" label="角色名称" show-overflow-tooltip></el-table-column>
 				<el-table-column prop="listOrder" label="排序" show-overflow-tooltip></el-table-column>
+				<el-table-column prop="userCnt" label="用户数量" align="center">
+
+					<template #default="scope">
+						<el-link  type="primary" @click="onOpenUserList(scope.row)">{{scope.row.userCnt}}</el-link>
+					</template>
+				</el-table-column>
 				<el-table-column prop="status" label="角色状态" show-overflow-tooltip>
 					<template #default="scope">
 						<el-tag type="success" v-if="scope.row.status===1">启用</el-tag>
@@ -58,6 +64,10 @@
 		</el-card>
 		<EditRole ref="editRoleRef" @getRoleList="roleList"/>
 		<DataScope ref="dataScopeRef" @getRoleList="roleList"/>
+
+		<el-dialog :title="selectRow.name+'-用户列表'" v-model="isShowDialog" width="70vw">
+			<UserList v-if="isShowDialog" ref="userListRef" :dept-data="deptData" :gender-data="sys_user_sex" :param="userListParam" @getUserList="userList"/>
+		</el-dialog>
 	</div>
 </template>
 
@@ -67,6 +77,9 @@ import { ElMessageBox, ElMessage } from 'element-plus';
 import EditRole from '/@/views/system/role/component/editRole.vue';
 import DataScope from '/@/views/system/role/component/dataScope.vue';
 import {deleteRole, getRoleList} from "/@/api/system/role";
+import {getDeptTree} from '/@/api/system/user/index';
+import UserList from '/@/views/system/user/component/userList.vue'; 
+
 // 定义接口来定义对象的类型
 interface TableData {
   id:number;
@@ -76,8 +89,15 @@ interface TableData {
   remark: string;
   dataScope:number;
   createdAt: string;
+  userCnt: number;
 }
 interface TableDataState {
+	isShowDialog:boolean;
+	selectRow:object;
+	deptData:any[];
+	userListParam: {
+		roleId:number | undefined;
+	};
 	tableData: {
 		data: Array<TableData>;
 		total: number;
@@ -93,25 +113,33 @@ interface TableDataState {
 
 export default defineComponent({
 	name: 'apiV1SystemRoleList',
-	components: {EditRole,DataScope},
+	components: {EditRole,DataScope,UserList},
 	setup() {
     const {proxy} = getCurrentInstance() as any;
+    const {sys_user_sex} = proxy.useDict('sys_user_sex')
 		const addRoleRef = ref();
+		const userListRef = ref();
 		const editRoleRef = ref();
     const dataScopeRef =ref();
 		const state = reactive<TableDataState>({
-			tableData: {
-				data: [],
-				total: 0,
-				loading: false,
-				param: {
-          roleName:'',
-          roleStatus:'',
-					pageNum: 1,
-					pageSize: 10,
-				},
-			},
-		});
+      isShowDialog: false,
+      deptData: [],
+      userListParam: {
+        roleId: undefined,
+      },
+			selectRow:{},
+      tableData: {
+        data: [],
+        total: 0,
+        loading: false,
+        param: {
+          roleName: '',
+          roleStatus: '',
+          pageNum: 1,
+          pageSize: 10,
+        },
+      },
+    });
 		// 初始化表格数据
 		const initTableData = () => {
 			roleList()
@@ -128,6 +156,7 @@ export default defineComponent({
             name: item.name,
             remark: item.remark,
             dataScope:item.dataScope,
+            userCnt:item.userCnt,
             createdAt: item.createdAt,
           });
         })
@@ -135,6 +164,19 @@ export default defineComponent({
         state.tableData.total = res.data.total;
       })
     };
+		// 打开角色用户列表
+		const onOpenUserList = (row: TableData) => {
+			state.selectRow = row
+			state.userListParam.roleId = row.id
+			if (state.deptData.length == 0){
+				getDeptTree().then((res:any)=>{
+					state.deptData = res.data.deps
+					state.isShowDialog = true
+				})
+			}else{
+				state.isShowDialog = true
+			}
+		};
 		// 打开新增角色弹窗
 		const onOpenAddRole = () => {
       editRoleRef.value.openDialog();
@@ -171,6 +213,9 @@ export default defineComponent({
 		const onHandleCurrentChange = (val: number) => {
 			state.tableData.param.pageNum = val;
 		};
+    const userList = ()=>{
+      userListRef.value.userList();
+    };
 		// 页面加载时
 		onMounted(() => {
 			initTableData();
@@ -179,6 +224,9 @@ export default defineComponent({
 			addRoleRef,
 			editRoleRef,
       dataScopeRef,
+      sys_user_sex,
+			userList,
+			onOpenUserList,
 			onOpenAddRole,
 			onOpenEditRole,
 			onRowDel,
