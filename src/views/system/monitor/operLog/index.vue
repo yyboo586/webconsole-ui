@@ -51,7 +51,7 @@
             <el-col :span="8" :class="showAll ? 'colBlock' : 'colNone'">
               <el-form-item label="操作时间" prop="dateRange">
                 <el-date-picker
-                    clearable size="small" style="width: 200px"
+                    clearable style="width: 200px"
                     v-model="tableData.param.dateRange"
                     type="daterange"
                     range-separator="-"
