@@ -4,15 +4,14 @@
 			<div class="system-user-search mb15">
         <el-form :inline="true" ref="queryRef" :model="tableData.param">
           <el-form-item label="表名称" prop="tableName">
-            <el-input size="default" v-model="tableData.param.tableName" placeholder="请输入表名称" class="w-50 m-2" clearable/>
+            <el-input v-model="tableData.param.tableName" placeholder="请输入表名称" class="w-50 m-2" clearable/>
           </el-form-item>
           <el-form-item label="表描述" prop="tableComment">
-            <el-input size="default" v-model="tableData.param.tableComment" placeholder="请输入岗位编码" class="w-50 m-2" clearable/>
+            <el-input v-model="tableData.param.tableComment" placeholder="请输入岗位编码" class="w-50 m-2" clearable/>
           </el-form-item>
           <el-form-item label="创建时间" prop="dateRange">
             <el-date-picker
                 v-model="tableData.param.dateRange"
-                size="default"
                 style="width: 240px"
                 value-format="YYYY-MM-DD"
                 type="daterange"

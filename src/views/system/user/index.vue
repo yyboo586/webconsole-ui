@@ -28,7 +28,6 @@
                     v-model="param.keyWords"
                     placeholder="请输入用户账号或姓名"
                     clearable
-                    size="default"
                     style="width: 240px"
                     @keyup.enter.native="userList"
                 />
@@ -38,7 +37,6 @@
                     v-model="param.mobile"
                     placeholder="请输入手机号码"
                     clearable
-                    size="default"
                     style="width: 240px"
                     @keyup.enter.native="userList"
                 />
@@ -48,7 +46,6 @@
                     v-model="param.status"
                     placeholder="用户状态"
                     clearable
-                    size="default"
                     style="width: 240px"
                 >
                   <el-option label="启用"  :value="1"/>
@@ -58,7 +55,6 @@
               <el-form-item label="创建时间" prop="dateRange">
                 <el-date-picker
                     v-model="param.dateRange"
-                    size="default"
                     style="width: 240px"
                     value-format="YYYY-MM-DD"
                     type="daterange"
@@ -95,7 +91,7 @@
               </el-form-item>
             </el-form>
           </div>
-          
+
           <UserList ref="userListRef" :dept-data="deptData" :gender-data="sys_user_sex" :param="param" @getUserList="userList"/>
         </el-card>
       </el-col>
@@ -107,14 +103,14 @@
 import {toRefs, reactive, onMounted, ref, defineComponent, watch, getCurrentInstance} from 'vue';
 import {ElTree,FormInstance} from 'element-plus';
 import { Search } from '@element-plus/icons-vue'
-import UserList from '/@/views/system/user/component/userList.vue'; 
+import UserList from '/@/views/system/user/component/userList.vue';
 import {getDeptTree} from '/@/api/system/user/index';
- 
-interface QueryParam { 
+
+interface QueryParam {
   ids:number[];
   deptProps:{};
   deptData:any[];
-  param: { 
+  param: {
     deptId:string;
     mobile:string;
     status:string;
@@ -182,11 +178,11 @@ export default defineComponent({
 		// 打开新增用户弹窗
 		const onOpenAddUser = () => {
       userListRef.value.onOpenAddUser();
-		}; 
+		};
 		// 删除用户
 		const onRowDel = () => {
-      userListRef.value.onRowDel(null); 
-		}; 
+      userListRef.value.onRowDel(null);
+		};
 		// 页面加载时
 		onMounted(() => {
 			initTableData();
@@ -197,12 +193,12 @@ export default defineComponent({
     const deptFilterNode = (value: string, data:any) => {
       if (!value) return true;
       return data.deptName.includes(value)
-    }; 
+    };
     // 节点单击事件
     const handleNodeClick = (data:any) => {
       state.param.deptId = data.deptId;
       userList();
-    }; 
+    };
     /** 重置按钮操作 */
     const resetQuery = (formEl: FormInstance | undefined) => {
       if (!formEl) return
@@ -212,14 +208,14 @@ export default defineComponent({
 		return {
       queryRef,
 			userListRef,
-			onOpenAddUser, 
-			onRowDel, 
+			onOpenAddUser,
+			onRowDel,
       deptFilterNode,
       filterText,
       treeRef,
       search,
       sys_user_sex,
-      userList, 
+      userList,
       handleNodeClick,
       resetQuery,
 			...toRefs(state),

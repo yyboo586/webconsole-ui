@@ -6,12 +6,12 @@
 					<el-row>
 						<el-col :span="8" class="colBlock">
 							<el-form-item label="任务名称" prop="jobName">
-								<el-input v-model="tableData.param.jobName" placeholder="请输入任务名称" clearable size="small" @keyup.enter.native="sysJobList" />
+								<el-input v-model="tableData.param.jobName" placeholder="请输入任务名称" clearable @keyup.enter.native="sysJobList" />
 							</el-form-item>
 						</el-col>
 						<el-col :span="8" class="colBlock">
 							<el-form-item label="任务组名" prop="jobGroup">
-								<el-select v-model="tableData.param.jobGroup" placeholder="请选择任务组名" clearable size="small">
+								<el-select v-model="tableData.param.jobGroup" placeholder="请选择任务组名" clearable >
 									<el-option v-for="dict in sys_job_group" :key="dict.value" :label="dict.label" :value="dict.value" />
 								</el-select>
 							</el-form-item>

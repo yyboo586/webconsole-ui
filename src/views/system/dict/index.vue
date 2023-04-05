@@ -8,7 +8,6 @@
                 v-model="tableData.param.dictName"
                 placeholder="请输入字典名称"
                 clearable
-                size="default"
                 style="width: 240px"
                 @keyup.enter.native="typeList"
             />
@@ -18,7 +17,6 @@
                 v-model="tableData.param.dictType"
                 placeholder="请输入字典类型"
                 clearable
-                size="default"
                 style="width: 240px"
                 @keyup.enter.native="typeList"
             />
@@ -28,7 +26,6 @@
                 v-model="tableData.param.status"
                 placeholder="字典状态"
                 clearable
-                size="default"
                 style="width: 240px"
             >
               <el-option label="启用"  :value="1"/>
@@ -38,7 +35,6 @@
           <el-form-item label="创建时间" prop="dateRange">
             <el-date-picker
                 v-model="tableData.param.dateRange"
-                size="default"
                 style="width: 240px"
                 value-format="YYYY-MM-DD"
                 type="daterange"

@@ -1109,7 +1109,7 @@ export const demoRoutes:Array<RouteRecordRaw> = [
  */
 export const notFoundAndNoPower = [
 	{
-		path: '/:path(.*)*',
+		path: '/:path(.*)',
 		name: 'notFound',
 		component: () => import('/@/views/error/404.vue'),
 		meta: {

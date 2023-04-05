@@ -4,10 +4,10 @@
 			<div class="system-user-search mb15">
         <el-form :inline="true">
           <el-form-item label="角色名称">
-            <el-input size="default" v-model="tableData.param.roleName" placeholder="请输入角色名称" class="w-50 m-2" clearable/>
+            <el-input v-model="tableData.param.roleName" placeholder="请输入角色名称" class="w-50 m-2" clearable/>
           </el-form-item>
           <el-form-item label="状态">
-            <el-select size="default" placeholder="请选择状态" class="w-50 m-2" v-model="tableData.param.roleStatus" clearable>
+            <el-select placeholder="请选择状态" class="w-50 m-2" v-model="tableData.param.roleStatus" clearable>
               <el-option label="启用"  value="1" />
               <el-option label="禁用"  value="0" />
             </el-select>
@@ -78,7 +78,7 @@ import EditRole from '/@/views/system/role/component/editRole.vue';
 import DataScope from '/@/views/system/role/component/dataScope.vue';
 import {deleteRole, getRoleList} from "/@/api/system/role";
 import {getDeptTree} from '/@/api/system/user/index';
-import UserList from '/@/views/system/user/component/userList.vue'; 
+import UserList from '/@/views/system/user/component/userList.vue';
 
 // 定义接口来定义对象的类型
 interface TableData {

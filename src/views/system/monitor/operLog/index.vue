@@ -10,14 +10,13 @@
                     v-model="tableData.param.title"
                     placeholder="请输入系统模块"
                     clearable
-                    size="small"
                     @keyup.enter.native="sysOperLogList"
                 />
               </el-form-item>
             </el-col>
             <el-col :span="8" class="colBlock">
               <el-form-item label="请求方式" prop="requestMethod">
-                <el-select v-model="tableData.param.requestMethod" placeholder="请选择请求方式" clearable size="small">
+                <el-select v-model="tableData.param.requestMethod" placeholder="请选择请求方式" clearable >
                   <el-option
                       v-for="dict in sys_oper_log_type"
                       :key="dict.value"
