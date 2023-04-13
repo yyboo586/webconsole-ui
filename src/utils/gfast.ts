@@ -29,7 +29,7 @@ export function getUpFileUrl(url:string){
  * @param {*} children 孩子节点字段 默认 'children'
  * @param {*} rootId 根Id 默认 0
  */
-export function handleTree(data:any[], id:string, parentId:string, children:string, rootId:number):any[] {
+export function handleTree(data:any[], id:string, parentId:string, children:string, rootId:any):any[] {
     id = id || 'id'
     parentId = parentId || 'parentId'
     children = children || 'children'
@@ -44,7 +44,16 @@ export function handleTree(data:any[], id:string, parentId:string, children:stri
         });
         branchArr.length > 0 ? father[children] = branchArr : '';
         //返回第一层
-        return father[parentId] === rootId;
+        switch (typeof father[parentId]){
+            case 'string':
+                if(father[parentId]===''&&rootId===0){
+                    return true
+                }
+                return father[parentId]===rootId.toString();
+            case 'number':
+                return father[parentId] === rootId;
+        }
+        return false;
     });
     return treeData != '' ? treeData : data;
 }
