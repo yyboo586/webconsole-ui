@@ -89,6 +89,7 @@ interface RoleState {
 	menuProps: {
 		children: string;
 		label: string;
+		disabled: string;
 	};
   rules: object;
 }
@@ -108,7 +109,7 @@ export default defineComponent({
         status: 1,
         listOrder: 0,
         remark: '',
-        menuIds:[]
+        menuIds:[],
 			},
       // 表单校验
       rules: {
@@ -123,6 +124,7 @@ export default defineComponent({
 			menuProps: {
 				children: 'children',
 				label: 'title',
+				disabled:'disabled'
 			},
 		});
 		// 打开弹窗
@@ -182,7 +184,12 @@ export default defineComponent({
 		// 获取菜单结构数据
 		const getMenuData = () => {
       getRoleParams().then((res:any)=>{
-        state.menuData = proxy.handleTree(res.data.menu, "id","pid");
+				const menus = res.data.menu??[]
+				const accessMenus = res.data.accessMenus??[]
+				menus.map((item:any)=>{
+					item.disabled = !accessMenus.includes(item.id)
+				})
+        state.menuData = proxy.handleTree(menus, "id","pid");
       })
 		};
     const resetForm = ()=>{
@@ -195,7 +202,7 @@ export default defineComponent({
         status: 1,
         listOrder: 0,
         remark: '',
-        menuIds:[]
+        menuIds:[],
       }
     };
     /** 树权限（展开/折叠）*/

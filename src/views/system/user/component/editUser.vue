@@ -25,7 +25,8 @@
                     v-for="role in roleList"
                     :key="'role-'+role.id"
                     :label="role.name"
-                    :value="role.id">
+                    :value="role.id"
+										:disabled="role.disabled">
                 </el-option>
 							</el-select>
 						</el-form-item>
@@ -245,7 +246,14 @@ export default defineComponent({
 		const initTableData = () => {
       //获取角色岗位选项
       getParams().then((res:any)=>{
-        roleList.value = res.data.roleList??[];
+        const roles = res.data.roleList??[];
+				const roleAccess = res.data.roleAccess??[];
+				roles.map((item:any)=>{
+					if(!roleAccess.includes(item.id)){
+						item.disabled = true
+					}
+				})
+				roleList.value = roles
         postList.value = res.data.posts??[];
       });
 		};
