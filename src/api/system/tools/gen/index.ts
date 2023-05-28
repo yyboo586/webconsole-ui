@@ -72,3 +72,12 @@ export function batchGenCode(ids:number[]){
         data: {ids}
     })
 }
+
+
+export function syncTable(tableId:number){
+    return request({
+        url: '/api/v1/system/tools/gen/syncTable',
+        method: 'post',
+        data: {tableId}
+    })
+}

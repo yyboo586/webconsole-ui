@@ -9,6 +9,11 @@ export interface TableData {
     updateTime:string;
 }
 
+export interface DictOpt{
+    dictName :string;
+    dictType:string;
+}
+
 export interface TableColumns {
     columnId: number;
     tableId: number;
@@ -22,7 +27,6 @@ export interface TableColumns {
     isPk: boolean;
     isIncrement: boolean;
     isRequired: boolean;
-    isInsert: boolean;
     isEdit: boolean;
     isList: boolean;
     isDetail: boolean;

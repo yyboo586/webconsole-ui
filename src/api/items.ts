@@ -4,12 +4,13 @@ export function getItems(f: Function, query: Object) {
 	return f(query);
 }
 
-export function setItems(response: any, k: string, v: string):Array<ItemOptions> {
+export function setItems(response: any, k: string, v: string,rk:string):Array<ItemOptions> {
 	const data: Array<ItemOptions> = [];
 	k = k || 'id';
 	v = v || 'name';
-	if (response.data && response.data.list && response.data.list.length > 0) {
-		response.data.list.forEach((e: any) => {
+	rk = rk || 'list'
+	if (response.data && response['data'][rk] && response['data'][rk].length > 0) {
+		response['data'][rk].forEach((e: any) => {
 			data.push({
 				key: e[k].toString(),
 				value: e[v].toString(),

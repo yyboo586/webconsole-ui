@@ -51,19 +51,6 @@
 				</template>
 			</el-table-column>
 
-			<el-table-column label="插入" width="50">
-				<template #default="scope">
-					<el-checkbox
-						v-model="scope.row.isInsert"
-						:disabled="
-							scope.row.isPk == '1' ||
-							scope.row.columnName == 'created_at' ||
-							scope.row.columnName == 'created_by' ||
-							scope.row.columnName == 'updated_by'
-						"
-					></el-checkbox>
-				</template>
-			</el-table-column>
 			<el-table-column label="编辑" width="50">
 				<template #default="scope">
 					<el-checkbox
@@ -126,7 +113,10 @@
 					<el-select v-model="scope.row.htmlType" :disabled="scope.row.htmlField == info.treeParentCode">
 						<el-option label="文本框" value="input" />
 						<el-option label="文本域" value="textarea" />
-						<el-option label="下拉框" value="select" />
+						<el-option label="下拉单选框" value="select" />
+						<el-option label="下拉多选框" value="selects" />
+						<el-option label="树形单选框" value="treeSelect" />
+						<el-option label="树形多选框" value="treeSelects" />
 						<el-option label="单选框" value="radio" />
 						<el-option label="复选框" value="checkbox" />
 						<el-option label="日期控件" value="date" />
@@ -227,7 +217,7 @@
 <script lang="ts">
 import {defineComponent, inject, onBeforeMount, ref} from 'vue';
 import type { FormInstance } from 'element-plus';
-import {TableDataInfo} from '/@/views/system/tools/gen/component/model';
+import {DictOpt, TableDataInfo} from '/@/views/system/tools/gen/component/model';
 import {getRelationTable} from "/@/api/system/tools/gen";
 import {optionselect} from "/@/api/system/dict/type";
 export default defineComponent({
@@ -237,7 +227,7 @@ export default defineComponent({
 		const info = inject<TableDataInfo>('tableData') as TableDataInfo;
 		// 表格的高度
 		const tableHeight = ref(document.documentElement.scrollHeight - 300 + 'px');
-    const dictOptions = ref([])
+    const dictOptions = ref(<DictOpt[]>[])
     const relationTable = ref<TableDataInfo[]>([])
     onBeforeMount(()=>{
       //获取字典选项

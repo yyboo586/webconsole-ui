@@ -77,10 +77,11 @@
 				<el-table-column prop="className" label="实体" show-overflow-tooltip></el-table-column>
         <el-table-column prop="createTime" label="创建时间" show-overflow-tooltip></el-table-column>
         <el-table-column prop="updateTime" label="更新时间" show-overflow-tooltip></el-table-column>
-				<el-table-column label="操作" width="300">
+				<el-table-column label="操作" width="320">
 					<template #default="scope">
 						<el-button size="small" text type="primary" @click="handlePreview(scope.row)"><el-icon><ele-View /></el-icon>预览</el-button>
 						<el-button size="small" text type="primary" @click="handleEditTable(scope.row)"><el-icon><ele-EditPen /></el-icon>编辑</el-button>
+						<el-button size="small" text type="primary" @click="handleSyncTable(scope.row)"><el-icon><ele-Refresh /></el-icon>同步</el-button>
 						<el-button size="small" text type="primary" @click="handleGenTable(scope.row)"><el-icon><ele-Download /></el-icon>生成代码</el-button>
 						<el-button size="small" text type="primary" @click="onRowDel(scope.row)"><el-icon><ele-DeleteFilled /></el-icon>删除</el-button>
 					</template>
@@ -102,7 +103,7 @@
 <script lang="ts">
 import {toRefs, reactive, onMounted, ref, defineComponent} from 'vue';
 import {ElMessageBox, ElMessage, FormInstance} from 'element-plus';
-import {getTableList,deleteTables,batchGenCode} from "/@/api/system/tools/gen";
+import {getTableList, deleteTables, batchGenCode, syncTable} from "/@/api/system/tools/gen";
 import {TableData,TableDataState} from "/@/views/system/tools/gen/component/model"
 import importTable from "/@/views/system/tools/gen/component/importTable.vue";
 import { useRouter } from 'vue-router';
@@ -244,6 +245,14 @@ export default defineComponent({
       const tableId = row?.tableId || state.ids[0];
       router.push({ path: "/system/tools/gen/edit", query: { tableId: tableId } });
     }
+    const handleSyncTable=((row:TableData)=>{
+        const tableId = row?.tableId || state.ids[0];
+        syncTable(tableId).then((res:any)=>{
+            if (res.code === 0) {
+                ElMessage.success('同步成功');
+            }
+        })
+    })
 		return {
 			addPostRef,
 			editPostRef,
@@ -260,6 +269,7 @@ export default defineComponent({
       openImportTable,
       handleEditTable,
       handlePreview,
+      handleSyncTable,
 			...toRefs(state),
 		};
 	},
