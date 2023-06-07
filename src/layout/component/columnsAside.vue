@@ -98,15 +98,14 @@ export default defineComponent({
 		};
 		// 鼠标移入时，显示当前的子级菜单
 		const onColumnsAsideMenuMouseenter = (v: RouteRecordRaw, k: number) => {
-			let { path } = v;
-			state.liOldPath = path;
-			state.liOldIndex = k;
-			state.liHoverIndex = k;
-      if(v.children&&v.children.length>0){
-			  proxy.mittBus.emit('setSendColumnsChildren', setSendChildren(v.children[0].path));
-      }
-			stores.setColumnsMenuHover(false);
-			stores.setColumnsNavHover(true);
+      if (!themeConfig.value.isColumnsMenuHoverPreload) return false;
+      let { path } = v;
+      state.liOldPath = path;
+      state.liOldIndex = k;
+      state.liHoverIndex = k;
+      proxy.mittBus.emit('setSendColumnsChildren', setSendChildren(path));
+      stores.setColumnsMenuHover(false);
+      stores.setColumnsNavHover(true);
 		};
 		// 鼠标移走时，显示原来的子级菜单
 		const onColumnsAsideMenuMouseleave = async () => {
