@@ -24,6 +24,8 @@ export interface SysJobInfoData {
     remark:string|undefined; // 备注信息
     createdAt:string|undefined; // 创建时间
     updatedAt:string|undefined; // 更新时间
+    createdUser:{userNickname:string};
+    updatedUser:{userNickname:string};
 }
 
 

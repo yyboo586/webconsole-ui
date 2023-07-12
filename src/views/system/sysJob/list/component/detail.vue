@@ -32,10 +32,10 @@
             <el-form-item label="状态">{{ proxy.getOptionValue(formData.status, statusOptions,'value','label') }}</el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="创建者">{{ formData.createdBy }}</el-form-item>
+            <el-form-item label="创建者">{{ formData.createdUser.userNickname }}</el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="更新者">{{ formData.updatedBy }}</el-form-item>
+            <el-form-item label="更新者">{{ formData.updatedUser.userNickname }}</el-form-item>
           </el-col>
           <el-col :span="12">
             <el-form-item label="备注信息">{{ formData.remark }}</el-form-item>
@@ -146,6 +146,8 @@
           remark: undefined,
           createdAt: undefined,
           updatedAt: undefined,
+          createdUser:{userNickname:''},
+          updatedUser:{userNickname:''}
         },
         // 表单校验
         rules: {}
@@ -155,21 +157,7 @@
           resetForm();
           if(row) {
             getSysJob(row.jobId!).then((res:any)=>{
-              const data = res.data;
-              let listUid = [];
-              listUid.push(data.createdBy,data.updatedBy)
-              getUserList(listUid).then((response:any) =>{
-                let users = response.data.list||[]
-                users.forEach((user:any)=>{
-                  if(data.createdBy==user.id){
-                    data.createdBy = user.userNickname
-                  }
-                  if(data.updatedBy==user.id){
-                    data.updatedBy = user.userNickname
-                  }
-                })
-                state.formData = data;
-              })
+              state.formData = res.data;
             })
             logList.loading=true
             getLogList(row.invokeTarget!);
@@ -208,6 +196,8 @@
             remark: undefined,
             createdAt: undefined,
             updatedAt: undefined,
+            createdUser:{userNickname:''},
+            updatedUser:{userNickname:''}
           }
         };
         // 多选框选中数据
