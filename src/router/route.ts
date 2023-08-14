@@ -1099,6 +1099,21 @@ export const demoRoutes:Array<RouteRecordRaw> = [
 					icon: 'iconfont icon-neiqianshujuchucun',
 				},
 			},
+			{
+				path: '/demo/mqueue',
+				name: 'mqueueDemoView',
+				component: () => import('/@/views/mqueue/index.vue'),
+				meta: {
+					title: '消息队列测试',
+					isHide: false,
+					isLink: '',
+					isKeepAlive: false,
+					isAffix: false,
+					isIframe: false,
+					roles: ['admin'],
+					icon: 'iconfont icon-shouye_dongtaihui',
+				},
+			},
 		]
 	}
 ]
