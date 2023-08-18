@@ -46,12 +46,17 @@
 							<el-input type="textarea" :rows="3" v-model="info.remark"></el-input>
 						</el-form-item>
 					</el-col>
-					<el-col class="mb20" :span="12">
+					<el-col class="mb20" :span="8">
 						<el-form-item label="是否覆盖原有文件" prop="overwrite">
 							<el-checkbox v-model="info.overwrite" />
 						</el-form-item>
 					</el-col>
-					<el-col class="mb20" :span="12">
+          <el-col class="mb20" :span="8">
+            <el-form-item label="是否可导出到excel" prop="overwrite">
+              <el-checkbox v-model="info.excelPort" />
+            </el-form-item>
+          </el-col>
+					<el-col class="mb20" :span="8">
 						<el-form-item label="是否有显示详情功能" prop="showDetail">
 							<el-checkbox v-model="info.showDetail" />
 						</el-form-item>
@@ -99,7 +104,6 @@ export default defineComponent({
 			return tag;
 		};
     const close = ()=>{
-      console.log('xxxxxxxxxxxxxxxxxxxxxxx')
       emit('close')
     }
 		const rules = reactive<FormRules>({

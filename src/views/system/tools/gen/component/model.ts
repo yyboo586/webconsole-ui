@@ -66,6 +66,7 @@ export interface TableDataInfo extends TableData{
     remark:string;
     overwrite:boolean;
     showDetail:boolean;
+    excelPort:boolean;
     tplCategory:string;
     packageName:string;
     moduleName:string;
