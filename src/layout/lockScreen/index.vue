@@ -233,7 +233,8 @@ export default defineComponent({
 }
 .layout-lock-screen-img {
 	@extend .layout-lock-screen-fixed;
-	background-image: url('https://img-blog.csdnimg.cn/afa9c317667f47d5bea34b85af45979e.png#pic_center');
+	background-image: url('/@/assets/lock.png');
+  background-color: aquamarine;
 	background-size: 100% 100%;
 	z-index: 9999991;
 }
