@@ -126,6 +126,7 @@
 						<el-option label="多图上传" value="images" />
 						<el-option label="单文件上传" value="file" />
 						<el-option label="多文件上传" value="files" />
+						<el-option label="键值对" value="keyValue" />
 					</el-select>
 				</template>
 			</el-table-column>

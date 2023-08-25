@@ -13,6 +13,7 @@
         :on-change="handleChange"
         :on-success="handleSuccess"
         :data="dataParam"
+        :on-preview="handlePreview"
     >
     <el-icon class="el-icon--upload"><ele-UploadFilled /></el-icon>
     <div class="el-upload__text">
@@ -126,6 +127,9 @@ export default defineComponent({
     const setDataFileList = () => {
       dataFileList.value = uploadedFile
     };
+    const handlePreview = (file:UploadUserFile)=>{
+      window.open(file.url)
+    }
     return {
       dataFileList,
       handleSuccess,
@@ -134,6 +138,7 @@ export default defineComponent({
       beforeUpload,
       handleChange,
       handleExceed,
+      handlePreview,
       dataParam
     };
   },
