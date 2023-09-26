@@ -65,6 +65,7 @@ export interface TableDataInfo extends TableData{
     sortType:string;
     remark:string;
     overwrite:boolean;
+    useSnowId:boolean;
     showDetail:boolean;
     excelPort:boolean;
     tplCategory:string;

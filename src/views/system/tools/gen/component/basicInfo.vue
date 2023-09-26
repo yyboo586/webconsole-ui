@@ -46,17 +46,30 @@
 							<el-input type="textarea" :rows="3" v-model="info.remark"></el-input>
 						</el-form-item>
 					</el-col>
-					<el-col class="mb20" :span="8">
-						<el-form-item label="是否覆盖原有文件" prop="overwrite">
-							<el-checkbox v-model="info.overwrite" />
+          <el-col class="mb20" :span="6">
+            <el-form-item label="是否覆盖原有文件" prop="overwrite">
+              <el-checkbox v-model="info.overwrite" />
+            </el-form-item>
+          </el-col>
+					<el-col class="mb20" :span="6">
+						<el-form-item prop="useSnowId">
+              <template #label>
+							<span>
+								主键使用雪花ID
+								<el-tooltip content="选择此项，数据表中主键不要使用自增" placement="top">
+									<el-icon><ele-QuestionFilled /></el-icon>
+								</el-tooltip>
+							</span>
+              </template>
+							<el-checkbox v-model="info.useSnowId" />
 						</el-form-item>
 					</el-col>
-          <el-col class="mb20" :span="8">
+          <el-col class="mb20" :span="6">
             <el-form-item label="是否可导出到excel" prop="overwrite">
               <el-checkbox v-model="info.excelPort" />
             </el-form-item>
           </el-col>
-					<el-col class="mb20" :span="8">
+					<el-col class="mb20" :span="6">
 						<el-form-item label="是否有显示详情功能" prop="showDetail">
 							<el-checkbox v-model="info.showDetail" />
 						</el-form-item>
