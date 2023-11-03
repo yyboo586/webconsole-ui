@@ -1,5 +1,5 @@
 import axios from 'axios'
-import {getToken} from "/@/utils/gfast"
+import {baseURL, getToken} from "/@/utils/gfast"
 import { ElMessage,ElLoading } from 'element-plus';
 const mimeMap = {
   xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -22,9 +22,17 @@ export function downLoadZip(str:string, filename:string) {
   })
 }
 
+const getHost = ():string=>{
+  return window.location.origin
+}
+
 // 下载插件
 export function downLoadXml (url:string,params:any,rType='get') {
-  url = baseUrl + url
+  if (baseUrl=='' ||baseURL=='/'){
+    url = getHost() + url
+  }else{
+    url = baseUrl + url
+  }
   const loading = ElLoading.service({
     lock: true,
     text: '正在生成导出数据...',

@@ -74,6 +74,7 @@ export interface TableDataInfo extends TableData{
     businessName:string;
     functionName:string;
     linkTableName:string;
+    useVirtual:boolean;
     columns:TableColumns[]
 }
 export interface TableDataState {

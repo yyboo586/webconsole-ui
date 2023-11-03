@@ -19,26 +19,12 @@
 						<template #label>
 							<span>
 								生成包路径
-								<el-tooltip content="生成在哪个包下，例如 gfast/app/system" placement="top">
+								<el-tooltip content="生成在哪个包下，例如 gfast/app/system，不可/结尾" placement="top">
 									<el-icon><ele-QuestionFilled /></el-icon>
 								</el-tooltip>
 							</span>
 						</template>
-						<el-input v-model="info.packageName" />
-					</el-form-item>
-				</el-col>
-
-				<el-col class="mb20" :span="12">
-					<el-form-item prop="moduleName">
-						<template #label>
-							<span>
-								生成模块名
-								<el-tooltip content="可理解为子系统名，例如 system" placement="top">
-									<el-icon><ele-QuestionFilled /></el-icon>
-								</el-tooltip>
-							</span>
-						</template>
-						<el-input v-model="info.moduleName" />
+						<el-input v-model="info.packageName" @input="setModuleName"/>
 					</el-form-item>
 				</el-col>
 
@@ -135,6 +121,19 @@
 							</el-select>
 						</el-form-item>
 					</el-col>
+          <el-col class="mb20" :span="8">
+            <el-form-item>
+              <template #label>
+								<span>
+									使用虚拟化树表
+									<el-tooltip content="如果该表数据量较大，请选择使用虚拟表，否则请勿选择，因为虚拟表会增加代码复杂度，后续如果修改所生成的页面会增加工作量" placement="top">
+										<el-icon><ele-QuestionFilled /></el-icon>
+									</el-tooltip>
+								</span>
+              </template>
+              <el-checkbox v-model="info.useVirtual" />
+            </el-form-item>
+          </el-col>
 				</el-row>
 			</div>
 		</el-form>
@@ -156,12 +155,13 @@ import {defineComponent, inject, reactive, ref, unref} from 'vue';
 import type { FormInstance, FormRules } from 'element-plus';
 import { TableDataInfo } from '/@/views/system/tools/gen/component/model';
 import {ElMessage} from "element-plus";
+import {Ref, UnwrapRef} from "@vue/reactivity";
 export default defineComponent({
 	name: 'genInfoForm',
   emits:['goNext','close'],
 	setup(props,{emit}) {
 		const genInfoFormRef = ref<FormInstance>();
-		const info = inject<TableDataInfo>('tableData') as TableDataInfo;
+		const info = inject<Ref<UnwrapRef<TableDataInfo>>>('tableData') as Ref<UnwrapRef<TableDataInfo>>;
 		const rules = reactive<FormRules>({
 			tplCategory: [{ required: true, message: '请选择生成模板', trigger: 'blur' }],
 			packageName: [{ required: true, message: '请输入生成包路径', trigger: 'blur' }],
@@ -187,10 +187,22 @@ export default defineComponent({
     const close = ()=>{
       emit('close')
     }
+    const getLastSubstring = (str:string):string => {
+      let lastIndex = str.lastIndexOf('/');
+      if (lastIndex !== -1) {
+        return str.substring(lastIndex + 1);
+      } else {
+        return str;
+      }
+    }
+    const setModuleName = (value:string)=>{
+      info.value.moduleName = getLastSubstring(value)
+    }
 		return {
       genInfoFormRef,
 			info,
 			rules,
+      setModuleName,
       nextTip,
       close
 		};
