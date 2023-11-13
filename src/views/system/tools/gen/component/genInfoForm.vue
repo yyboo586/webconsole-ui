@@ -19,7 +19,7 @@
 						<template #label>
 							<span>
 								生成包路径
-								<el-tooltip content="生成在哪个包下，例如 gfast/app/system，不可/结尾" placement="top">
+								<el-tooltip content="生成在哪个包下，例如 internal/app/system，必须internal/app开头，不可/结尾" placement="top">
 									<el-icon><ele-QuestionFilled /></el-icon>
 								</el-tooltip>
 							</span>
