@@ -41,10 +41,11 @@ export function getGenTable(tableId:any){
     })
 }
 
-export function getRelationTable(){
+export function getRelationTable(query:Object){
     return request({
         url: '/api/v1/system/tools/gen/relationTable',
         method: 'get',
+        params:query
     })
 }
 

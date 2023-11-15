@@ -17,6 +17,7 @@ export interface DictOpt{
 export interface TableColumns {
     columnId: number;
     tableId: number;
+    tableName:string;
     columnName: string;
     columnComment: string;
     columnType: string;
