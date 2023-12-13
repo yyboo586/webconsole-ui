@@ -25,11 +25,11 @@ export function importTable(tables:string[]) {
     })
 }
 
-export function deleteTables(query:number[]) {
+export function deleteTables(ids:number[]) {
     return request({
         url: '/api/v1/system/tools/gen/tableDelete',
         method: 'delete',
-        params:{ids:query}
+        data:{ids}
     })
 }
 

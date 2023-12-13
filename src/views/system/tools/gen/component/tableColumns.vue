@@ -113,6 +113,7 @@
           <template #default="scope">
             <el-select v-model="scope.row.htmlType" :disabled="scope.row.htmlField == info.treeParentCode">
               <el-option label="文本框" value="input" />
+              <el-option label="数字输入框" value="inputNumber" />
               <el-option label="文本域" value="textarea" />
               <el-option label="下拉单选框" value="select" />
               <el-option label="下拉多选框" value="selects" />

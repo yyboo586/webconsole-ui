@@ -69,6 +69,7 @@ export interface TableDataInfo extends TableData{
     useSnowId:boolean;
     showDetail:boolean;
     excelPort:boolean;
+    excelImp:boolean;
     tplCategory:string;
     packageName:string;
     moduleName:string;
