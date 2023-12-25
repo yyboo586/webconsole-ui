@@ -33,28 +33,50 @@ export function handleTree(data:any[], id:string, parentId:string, children:stri
     id = id || 'id'
     parentId = parentId || 'parentId'
     children = children || 'children'
-    rootId = rootId || 0
+    let rootIds:any = []
+    if(typeof rootId === 'boolean' && rootId){
+        //自动获取rootId
+        let idSet:any = {}
+        data.map((item:any)=>{
+            idSet[item[id]] = true
+        })
+        data.map((item:any)=>{
+            if(!idSet[item[parentId]]){
+                rootIds.push(item[parentId])
+            }
+        })
+    }else{
+        rootId = rootId || 0
+        rootIds = [rootId]
+    }
+    rootIds = [...new Set(rootIds)]
+    let treeData:any = []
     //对源数据深度克隆
     const cloneData = JSON.parse(JSON.stringify(data))
-    //循环所有项
-    const treeData =  cloneData.filter((father:any) => {
-        let branchArr = cloneData.filter((child:any) => {
-            //返回每一项的子级数组
-            return father[id] === child[parentId]
+    rootIds.map((rItem:any)=>{
+        //循环所有项
+        const td =  cloneData.filter((father:any) => {
+            let branchArr = cloneData.filter((child:any) => {
+                //返回每一项的子级数组
+                return father[id] === child[parentId]
+            });
+            branchArr.length > 0 ? father[children] = branchArr : '';
+            //返回第一层
+            switch (typeof father[parentId]){
+                case 'string':
+                    if(father[parentId]===''&&rItem===0){
+                        return true
+                    }
+                    return father[parentId]===rItem.toString();
+                case 'number':
+                    return father[parentId] === rItem;
+            }
+            return false;
         });
-        branchArr.length > 0 ? father[children] = branchArr : '';
-        //返回第一层
-        switch (typeof father[parentId]){
-            case 'string':
-                if(father[parentId]===''&&rootId===0){
-                    return true
-                }
-                return father[parentId]===rootId.toString();
-            case 'number':
-                return father[parentId] === rootId;
+        if(td.length>0){
+            treeData = [...treeData,...td]
         }
-        return false;
-    });
+    })
     return treeData != '' ? treeData : data;
 }
 

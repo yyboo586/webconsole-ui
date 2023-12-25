@@ -23,6 +23,27 @@ export function captcha(){
 }
 
 /**
+ * 获取验证码V2
+ */
+export function captchaV2(){
+	return request({
+		url:"/api/v1/pub/captcha/v2",
+		method:"get"
+	})
+}
+
+/**
+ * 检查v2验证码
+ */
+export function checkCaptchaV2(data: { dots: string, key: string }){
+	return request({
+		url:"/api/v1/pub/captcha/v2Check",
+		data:data,
+		method:"post"
+	})
+}
+
+/**
  * 退出登录
  */
 export function logout(){

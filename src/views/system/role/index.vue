@@ -28,8 +28,10 @@
           </el-form-item>
         </el-form>
 			</div>
-			<el-table :data="tableData.data" style="width: 100%">
-				<el-table-column type="index" label="序号" width="60" />
+			<el-table :data="tableData.data" style="width: 100%"
+        row-key="id"
+        default-expand-all
+        :tree-props="{ children: 'children', hasChildren: 'hasChildren' }">
 				<el-table-column prop="name" label="角色名称" show-overflow-tooltip></el-table-column>
 				<el-table-column prop="listOrder" label="排序" show-overflow-tooltip></el-table-column>
 				<el-table-column prop="userCnt" label="用户数量" align="center">
@@ -54,15 +56,8 @@
 					</template>
 				</el-table-column>
 			</el-table>
-      <pagination
-          v-show="tableData.total>0"
-          :total="tableData.total"
-          v-model:page="tableData.param.pageNum"
-          v-model:limit="tableData.param.pageSize"
-          @pagination="roleList"
-      />
 		</el-card>
-		<EditRole ref="editRoleRef" @getRoleList="roleList"/>
+		<EditRole ref="editRoleRef" @getRoleList="roleList" :roleData="tableData.data"/>
 		<DataScope ref="dataScopeRef" @getRoleList="roleList"/>
 
 		<el-dialog :title="selectRow.name+'-用户列表'" v-model="isShowDialog" width="70vw">
@@ -83,6 +78,7 @@ import UserList from '/@/views/system/user/component/userList.vue';
 // 定义接口来定义对象的类型
 interface TableData {
   id:number;
+  pid:number;
 	status: number;
 	listOrder: number;
 	name: string;
@@ -151,6 +147,7 @@ export default defineComponent({
         list.map((item:TableData)=>{
           data.push({
             id:item.id,
+            pid:item.pid,
             status: item.status,
             listOrder: item.listOrder,
             name: item.name,
@@ -160,8 +157,7 @@ export default defineComponent({
             createdAt: item.createdAt,
           });
         })
-        state.tableData.data = data;
-        state.tableData.total = res.data.total;
+        state.tableData.data = proxy.handleTree(data??[], "id","pid","children",true);
       })
     };
 		// 打开角色用户列表

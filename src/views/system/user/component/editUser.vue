@@ -20,15 +20,19 @@
 					</el-col>
 					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
 						<el-form-item label="关联角色" prop="roleIds">
-							<el-select v-model="ruleForm.roleIds" placeholder="请选择" clearable class="w100" multiple>
-								<el-option
-                    v-for="role in roleList"
-                    :key="'role-'+role.id"
-                    :label="role.name"
-                    :value="role.id"
-										:disabled="role.disabled">
-                </el-option>
-							</el-select>
+              <el-cascader
+                  :options="roleList"
+                  :props="{ checkStrictly: true,emitPath: false, value: 'id', label: 'name',multiple: true }"
+                  placeholder="请选择角色"
+                  clearable
+                  class="w100"
+                  v-model="ruleForm.roleIds"
+              >
+                <template #default="{ node, data }">
+                  <span>{{ data.name }}</span>
+                  <span v-if="!node.isLeaf"> ({{ data.children.length }}) </span>
+                </template>
+              </el-cascader>
 						</el-form-item>
 					</el-col>
 					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
@@ -116,7 +120,7 @@
 </template>
 
 <script lang="ts">
-import { reactive, toRefs, onMounted, defineComponent,ref,unref } from 'vue';
+import {reactive, toRefs, onMounted, defineComponent, ref, unref, getCurrentInstance} from 'vue';
 import {getParams, addUser, editUser, getEditUser} from "/@/api/system/user";
 import {ElMessage} from "element-plus";
 
@@ -134,6 +138,7 @@ export default defineComponent({
     }
   },
 	setup(prop,{emit}) {
+    const {proxy} = getCurrentInstance() as any;
     const roleList = ref([]);
     const postList = ref([]);
     const formRef = ref<HTMLElement | null>(null);
@@ -253,7 +258,7 @@ export default defineComponent({
 						item.disabled = true
 					}
 				})
-				roleList.value = roles
+				roleList.value = proxy.handleTree(roles??[], "id","pid","children",true);
         postList.value = res.data.posts??[];
       });
 		};

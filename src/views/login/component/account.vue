@@ -33,7 +33,16 @@
       </el-input>
     </el-form-item>
     <el-form-item class="login-animation3" prop="verifyCode">
-      <el-col :span="15">
+      <el-col :span="24">
+        <GoCaptchaBtn
+            class="go-captcha-btn"
+            v-model="checkCaptchaResult"
+            width="100%"
+            height="50px"
+            @handleConfirm="handleVerifyCodeConfirm"
+        />
+      </el-col>
+      <el-col :span="15" v-if="false">
         <el-input
             type="text"
             maxlength="4"
@@ -48,8 +57,8 @@
           </template>
         </el-input>
       </el-col>
-      <el-col :span="1"></el-col>
-      <el-col :span="8">
+      <el-col :span="1" v-if="false"></el-col>
+      <el-col :span="8" v-if="false">
         <div class="login-content-code">
           <img
               class="login-content-code-img"
@@ -57,7 +66,7 @@
               width="130"
               height="38"
               :src="captchaSrc"
-              style="cursor: pointer"
+              style="cursor: pointer;display: none"
           />
         </div>
       </el-col>
@@ -91,9 +100,11 @@ import { initBackEndControlRoutes } from '/@/router/backEnd';
 import { Session } from '/@/utils/storage';
 import { formatAxis } from '/@/utils/formatTime';
 import { NextLoading } from '/@/utils/loading';
-import {login,captcha} from "/@/api/login";
+import {login} from "/@/api/login";
+import GoCaptchaBtn from "/@/components/goCaptcha/GoCaptchaBtn.vue";
 export default defineComponent({
 	name: 'loginAccount',
+  components: {GoCaptchaBtn},
 	setup() {
 		const { t } = useI18n();
     const {proxy} = <any>getCurrentInstance();
@@ -102,6 +113,7 @@ export default defineComponent({
 		const route = useRoute();
 		const router = useRouter();
     const loginForm = ref(null)
+    const checkCaptchaResult = ref('default')
 		const state = reactive({
 			isShowPassword: false,
 			ruleForm: {
@@ -117,7 +129,7 @@ export default defineComponent({
         password: [
           { required: true, trigger: "blur", message: "密码不能为空" }
         ],
-        verifyCode: [{ required: true, trigger: "blur", message: "验证码不能为空" }]
+        verifyCode: [{ required: true, trigger: "blur", message: "请先进行人机验证" }]
       },
 			loading: {
 				signIn: false,
@@ -128,10 +140,11 @@ export default defineComponent({
       getCaptcha();
     });
     const getCaptcha = () => {
-      captcha().then((res:any)=>{
-        state.captchaSrc = res.data.img
-        state.ruleForm.verifyKey = res.data.key
-      })
+      // 验证码V1版
+      // captcha().then((res:any)=>{
+      //   state.captchaSrc = res.data.img
+      //   state.ruleForm.verifyKey = res.data.key
+      // })
     };
 		// 时间获取
 		const currentTime = computed(() => {
@@ -173,7 +186,11 @@ export default defineComponent({
             }
           }).catch(()=>{
             state.loading.signIn = false;
-            getCaptcha();
+            state.ruleForm.verifyKey = ''
+            state.ruleForm.verifyCode = ''
+            checkCaptchaResult.value = 'default'
+            // 验证码V1版
+            //getCaptcha();
           })
         }
       })
@@ -200,9 +217,17 @@ export default defineComponent({
 			// 添加 loading，防止第一次进入界面时出现短暂空白
 			NextLoading.start();
 		};
+
+    const handleVerifyCodeConfirm = (data:{key:string,dots:string})=>{
+      state.ruleForm.verifyCode = data.dots
+      state.ruleForm.verifyKey = data.key
+    }
+
 		return {
 			onSignIn,
       getCaptcha,
+      checkCaptchaResult,
+      handleVerifyCodeConfirm,
       loginForm,
 			...toRefs(state),
 		};

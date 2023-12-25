@@ -3,6 +3,23 @@
 		<el-dialog :title="(formData.id===0?'添加':'修改')+'角色'" v-model="isShowDialog" width="769px">
 			<el-form ref="formRef" :model="formData" :rules="rules" size="default" label-width="90px">
 				<el-row :gutter="35">
+          <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" class="mb20">
+            <el-form-item label="上级角色">
+              <el-cascader
+                  :options="roleData"
+                  :props="{ checkStrictly: true,emitPath: false, value: 'id', label: 'name' }"
+                  placeholder="请选择上级"
+                  clearable
+                  class="w100"
+                  v-model="formData.pid"
+              >
+                <template #default="{ node, data }">
+                  <span>{{ data.name }}</span>
+                  <span v-if="!node.isLeaf"> ({{ data.children.length }}) </span>
+                </template>
+              </el-cascader>
+            </el-form-item>
+          </el-col>
 					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
 						<el-form-item label="角色名称" prop="name">
 							<el-input v-model="formData.name" placeholder="请输入角色名称" clearable></el-input>
@@ -72,6 +89,7 @@ interface MenuDataTree {
 }
 interface DialogRow {
   id:number;
+  pid:number;
 	name: string;
 	status: number;
   listOrder: number;
@@ -96,6 +114,12 @@ interface RoleState {
 
 export default defineComponent({
 	name: 'systemEditRole',
+  props:{
+    roleData:{
+      type:Array,
+      default:()=>[]
+    }
+  },
 	setup(props,{emit}) {
     const {proxy} = getCurrentInstance() as any;
     const formRef = ref<HTMLElement | null>(null);
@@ -105,6 +129,7 @@ export default defineComponent({
 			isShowDialog: false,
 			formData: {
         id:0,
+        pid:0,
         name: '',
         status: 1,
         listOrder: 0,
@@ -198,6 +223,7 @@ export default defineComponent({
       state.menuNodeAll = false;
       state.formData = {
         id:0,
+        pid:0,
         name: '',
         status: 1,
         listOrder: 0,
