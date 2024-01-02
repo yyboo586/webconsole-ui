@@ -13,6 +13,7 @@ import '/@/theme/index.scss';
 import mitt from 'mitt';
 import VueGridLayout from 'vue-grid-layout';
 import {getUpFileUrl, handleTree, parseTime, selectDictLabel} from '/@/utils/gfast';
+import Websocket from '/@/utils/websocket';
 import {useDict} from '/@/api/system/dict/data';
 import {getItems, setItems, getOptionValue, isEmpty} from '/@/api/items'
 // 分页组件
@@ -26,6 +27,16 @@ import VueUeditorWrap from 'vue-ueditor-wrap';
 
 
 const app = createApp(App);
+
+// 全局websocket
+const onMessageList: Array<Function> = [];
+app.provide('onMessageList', onMessageList);
+const onMessage = (event: any) => {
+    onMessageList.forEach((f) => {
+        f.call(null, event);
+    });
+};
+Websocket(onMessage);
 
 directive(app);
 other.elSvg(app);

@@ -95,3 +95,13 @@ export interface ThemeConfigStates {
 export interface bigUploadStates {
 	panelShow : boolean
 }
+
+export interface NoticeMessage{
+	id:number;
+	title:string;
+	tag:number;
+	type:number;
+}
+export interface NoticeStates{
+	message:NoticeMessage;
+}

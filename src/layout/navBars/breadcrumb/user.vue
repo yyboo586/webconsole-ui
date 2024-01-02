@@ -36,7 +36,7 @@
       <i class="fa-trash fa" title="清除缓存"></i>
     </div>
 		<div class="layout-navbars-breadcrumb-user-icon">
-			<el-popover placement="bottom" trigger="click" transition="el-zoom-in-top" :width="300" :persistent="false">
+			<el-popover  ref="newPopoverRef"  placement="bottom" trigger="click" transition="el-zoom-in-top" :width="500" :persistent="false">
 				<template #reference>
 					<el-badge :is-dot="true">
 						<el-icon :title="$t('message.user.title4')">
@@ -45,7 +45,7 @@
 					</el-badge>
 				</template>
 				<template #default>
-					<UserNews />
+					<UserNews @hideNews="hideNews" />
 				</template>
 			</el-popover>
 		</div>
@@ -80,9 +80,9 @@
 </template>
 
 <script lang="ts">
-import { ref, getCurrentInstance, computed, reactive, toRefs, onMounted, defineComponent } from 'vue';
-import { useRouter } from 'vue-router';
-import { ElMessageBox, ElMessage } from 'element-plus';
+import {ref, getCurrentInstance, computed, reactive, toRefs, onMounted, defineComponent, watch} from 'vue';
+import { useRoute,useRouter } from 'vue-router';
+import {ElMessageBox, ElMessage, ElNotification} from 'element-plus';
 import screenfull from 'screenfull';
 import { useI18n } from 'vue-i18n';
 import { storeToRefs } from 'pinia';
@@ -94,6 +94,8 @@ import UserNews from '/@/layout/navBars/breadcrumb/userNews.vue';
 import Search from '/@/layout/navBars/breadcrumb/search.vue';
 import {logout} from "/@/api/login";
 import {removeCache} from "/@/api/system/cache";
+import {noticeStore} from "/@/stores/noticeStore";
+
 
 export default defineComponent({
 	name: 'layoutBreadcrumbUser',
@@ -102,11 +104,13 @@ export default defineComponent({
 		const { t } = useI18n();
 		const { proxy } = <any>getCurrentInstance();
 		const router = useRouter();
+    const route = useRoute();
 		const stores = useUserInfo();
 		const storesThemeConfig = useThemeConfig();
 		const { userInfos } = storeToRefs(stores);
 		const { themeConfig } = storeToRefs(storesThemeConfig);
 		const searchRef = ref();
+    const newPopoverRef=ref();
 		const state = reactive({
 			isScreenfull: false,
 			disabledI18n: 'zh-cn',
@@ -194,6 +198,10 @@ export default defineComponent({
 		const onSearchClick = () => {
 			searchRef.value.openSearch();
 		};
+    const  hideNews=()=>{
+      debugger
+      newPopoverRef.value.hide()
+    }
 		// 组件大小改变
 		const onComponentSizeChange = (size: string) => {
 			Local.remove('themeConfig');
@@ -253,6 +261,32 @@ export default defineComponent({
 				initComponentSize();
 			}
 		});
+    const noticeStoreAct = noticeStore()
+    const getMessages = computed(() => {
+      return noticeStoreAct.message;
+    });
+    watch(getMessages,(nv,ov)=>{
+      if (!nv || !nv.id) {
+        return;
+      }
+      showNotice(nv)
+    },{ immediate: true, deep: true })
+    const showNotice = (data:any) => {
+      const eln = ElNotification({
+        title: '新消息',
+        message: `您有一条新消息：【${data.title}】，请点击查看详情。`,
+        type: 'warning',
+        duration:3600000,
+        onClick(){
+          if(route.fullPath=="/system/sysNotice/show?type="+data.type){
+            router.go(0)
+          }else{
+            router.push("/system/sysNotice/show?type="+data.type)
+          }
+          eln.close()
+        }
+      })
+    }
 		return {
 			userInfos,
 			onLayoutSetingClick,
@@ -262,6 +296,7 @@ export default defineComponent({
 			onComponentSizeChange,
 			onLanguageChange,
       removeCacheClick,
+      hideNews,
 			searchRef,
 			layoutUserFlexNum,
 			...toRefs(state),
