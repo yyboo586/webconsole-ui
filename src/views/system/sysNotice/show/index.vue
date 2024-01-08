@@ -118,7 +118,7 @@ export default defineComponent({
         loading: false,
         param: {
           pageNum: 1,
-          pageSize: 3,
+          pageSize: 10,
           id: undefined,
           title: undefined,
           type: 1,

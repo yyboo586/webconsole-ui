@@ -13,14 +13,15 @@
               <div class="content-box-item" v-for="(v, k) in noticeList" :key="k">
                 <div @click="handleRead(v)">
                   <div>{{ v.title }}</div>
-                  <div class="content-box-msg">
-                    {{ v.content }}
+                  <div class="content-box-msg" v-html="v.content">
                   </div>
-                  <span class="content-box-time">{{ v.createdAt }}</span>
-                  <span style="float: right">
-                  <el-tag type="success" effect="plain" v-if="v.isRead==true">已读</el-tag>
-                  <el-tag type="danger" effect="plain" v-else>未读</el-tag>
-                  </span>
+                  <div class="msg-box-attr">
+                    <span class="content-box-time">{{ v.createdAt }}</span>
+                    <span>
+                    <el-tag type="success" effect="plain" v-if="v.isRead==true">已读</el-tag>
+                    <el-tag type="danger" effect="plain" v-else>未读</el-tag>
+                    </span>
+                  </div>
                 </div>
               </div>
             </template>
@@ -51,13 +52,13 @@
                   <div class="content-box-msg" v-html="v.content">
 
                   </div>
-                  <span class="content-box-time">{{ v.createdAt }}</span>
-                  <span style="float: right">
-
-                  <el-tag type="success" effect="plain" v-if="v.isRead==true">已读</el-tag>
-                  <el-tag type="danger" effect="plain" v-else>未读</el-tag>
-                  </span>
-
+                  <div class="msg-box-attr">
+                    <span class="content-box-time">{{ v.createdAt }}</span>
+                    <span>
+                    <el-tag type="success" effect="plain" v-if="v.isRead==true">已读</el-tag>
+                    <el-tag type="danger" effect="plain" v-else>未读</el-tag>
+                    </span>
+                  </div>
                 </div>
               </div>
             </template>
@@ -302,7 +303,12 @@ export default defineComponent({
 
 :deep(.el-tabs__item) {
   width: 200px;
-
-
+}
+.msg-box-attr{
+  padding-bottom: 5px;
+  flex-direction: row;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 </style>
