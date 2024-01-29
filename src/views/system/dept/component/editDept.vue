@@ -3,7 +3,7 @@
 		<el-dialog :title="(ruleForm.deptId!==0?'修改':'添加')+'部门'" v-model="isShowDialog" width="769px">
 			<el-form ref="formRef" :model="ruleForm" :rules="rules" size="default" label-width="90px">
 				<el-row :gutter="35">
-					<el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" class="mb20">
+					<el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" >
 						<el-form-item label="上级部门">
 							<el-cascader
 								:options="deptData"
@@ -20,32 +20,40 @@
 							</el-cascader>
 						</el-form-item>
 					</el-col>
-					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
+					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" >
 						<el-form-item label="部门名称" prop="deptName">
 							<el-input v-model="ruleForm.deptName" placeholder="请输入部门名称" clearable></el-input>
 						</el-form-item>
 					</el-col>
-					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
+					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" >
 						<el-form-item label="负责人">
-							<el-input v-model="ruleForm.leader" placeholder="请输入负责人" clearable></el-input>
+              <div   v-if="deptUser.length > 0">
+                <el-tag  closable  :disable-transitions="false" class="u-m-r-10" v-for="(item,index) in deptUser"  :key="index" @close="handleClose(item,index)" >{{item.userNickname}}</el-tag>
+              </div>
+<!--							<el-input v-model="ruleForm.leader" placeholder="请输入负责人" clearable></el-input>-->
+              <el-button
+                  style="padding-left: 10px;"
+                  type="primary"
+                  link
+                  @click="handleSelectUser" >请选择</el-button>
 						</el-form-item>
 					</el-col>
-					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
+					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" >
 						<el-form-item label="手机号">
 							<el-input v-model="ruleForm.phone" placeholder="请输入手机号" clearable></el-input>
 						</el-form-item>
 					</el-col>
-					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
+					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" >
 						<el-form-item label="邮箱">
 							<el-input v-model="ruleForm.email" placeholder="请输入" clearable></el-input>
 						</el-form-item>
 					</el-col>
-					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
+					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" >
 						<el-form-item label="排序">
 							<el-input-number v-model="ruleForm.orderNum" :min="0" :max="999" controls-position="right" placeholder="请输入排序" class="w100" />
 						</el-form-item>
 					</el-col>
-					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
+					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" >
 						<el-form-item label="部门状态">
 							<el-switch v-model="ruleForm.status" :active-value="1" :inactive-value="0" inline-prompt active-text="启" inactive-text="禁"></el-switch>
 						</el-form-item>
@@ -60,12 +68,15 @@
 			</template>
 		</el-dialog>
 	</div>
+  <select-user   ref="selectUserRef"    @selectUser="confirmUser" :multiple="true"></select-user>
 </template>
 
 <script lang="ts">
 import {reactive, toRefs, defineComponent, getCurrentInstance,ref,unref} from 'vue';
 import {addDept,editDept, getDeptList} from "/@/api/system/dept";
+import {getUserByIds} from '/@/api/system/user/index';
 import {ElMessage} from "element-plus";
+import selectUser from "/@/components/selectUser/index.vue"
 
 // 定义接口来定义对象的类型
 interface TableDataRow {
@@ -79,7 +90,7 @@ interface RuleFormState {
 	parentId: number;
 	deptName: string;
   orderNum: number;
-  leader: string;
+  leader: any[];
 	phone: string | number;
 	email: string;
 	status: number;
@@ -93,9 +104,15 @@ interface DeptSate {
 
 export default defineComponent({
 	name: 'systemEditDept',
+  components:{
+    selectUser,
+  },
+  emits:['deptList'],
 	setup(prop,{emit}) {
     const {proxy} = getCurrentInstance() as any;
     const formRef = ref<HTMLElement | null>(null);
+    const selectUserRef = ref();
+    const  deptUser = ref([]);
 		const state = reactive<DeptSate>({
 			isShowDialog: false,
 			ruleForm: {
@@ -103,7 +120,7 @@ export default defineComponent({
         parentId: 0, // 上级部门
 				deptName: '', // 部门名称
         orderNum:0,
-        leader: '',
+        leader: [],
         phone: '',
         email: '',
         status: 1,
@@ -123,8 +140,24 @@ export default defineComponent({
       });
       if(row && typeof row === "object"){
         state.ruleForm = row;
+        let  leaders  = row.leader
+        if (leaders.length > 0){
+          //获取部门负责人信息
+          getUserByIds({ids:leaders}).then((res:any)=>{
+                if(res.code === 0){
+                  deptUser.value = res.data.userList;
+                }
+          });
+        }else{
+          //清空 deptUser, 避免缓存影响
+          deptUser.value = [];
+        }
+
       }else if(row && typeof row === 'number'){
         state.ruleForm.parentId = row
+        deptUser.value = [];
+      }else{
+        deptUser.value = [];
       }
 			state.isShowDialog = true;
 		};
@@ -166,20 +199,50 @@ export default defineComponent({
         parentId: 0, // 上级部门
         deptName: '', // 部门名称
         orderNum:0,
-        leader: '',
+        leader: [],
         phone: '',
         email: '',
         status: 1,
       }
+    };
+
+    const handleClose = (data:any,key:number) => {
+         deptUser.value.splice(key, 1);
+         state.ruleForm.leader = deptUser.value.map(item => item.id)
+    };
+    const confirmUser = (data:any[]) => {
+      let leaderArr = state.ruleForm.leader;
+      data.map(function (item) {
+        // 若存在某个用户 则不添加
+        if (!leaderArr.includes(item.id)){
+            deptUser.value.push(item)
+            leaderArr.push(item.id)
+        }
+      });
+      state.ruleForm.leader = leaderArr;
+    };
+    //选择用户
+    const  handleSelectUser = () =>{
+      selectUserRef.value.openDialog()
     };
 		return {
 			openDialog,
 			closeDialog,
 			onCancel,
 			onSubmit,
+      selectUserRef,
       formRef,
+      deptUser,
+      confirmUser,
+      handleClose,
+      handleSelectUser,
 			...toRefs(state),
 		};
 	},
 });
 </script>
+<style>
+.u-m-r-10{
+  margin-right: 8px;
+}
+</style>

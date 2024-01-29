@@ -1,8 +1,27 @@
 import request from '/@/utils/request';
 
+
+// 根据ids 获取用户列表信息
+export function getUserByIds(query:Object) {
+    return request({
+        url: '/api/v1/system/user/getUserByIds',
+        method: 'get',
+        params:query
+    })
+}
+
+
 export function getUserList(query:Object) {
     return request({
         url: '/api/v1/system/user/list',
+        method: 'get',
+        params:query
+    })
+}
+
+export function getUserSelector(query:Object) {
+    return request({
+        url: '/api/v1/system/user/selector',
         method: 'get',
         params:query
     })

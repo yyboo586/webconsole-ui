@@ -3,22 +3,22 @@
 		<el-dialog :title="(ruleForm.userId!==0?'修改':'添加')+'用户'" v-model="isShowDialog" width="769px">
 			<el-form ref="formRef" :model="ruleForm" :rules="rules" size="default" label-width="90px">
 				<el-row :gutter="35">
-					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20" v-if="ruleForm.userId===0">
+					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12"  v-if="ruleForm.userId===0">
 						<el-form-item label="用户名" prop="userName">
 							<el-input v-model="ruleForm.userName" placeholder="请输入账户名称" clearable></el-input>
 						</el-form-item>
 					</el-col>
-          <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20" v-if="ruleForm.userId===0">
+          <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12"  v-if="ruleForm.userId===0">
             <el-form-item label="账户密码" prop="password">
               <el-input v-model="ruleForm.password" placeholder="请输入" type="password" clearable></el-input>
             </el-form-item>
           </el-col>
-					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
+					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" >
 						<el-form-item label="用户昵称" prop="nickName">
 							<el-input v-model="ruleForm.nickName" placeholder="请输入用户昵称" clearable></el-input>
 						</el-form-item>
 					</el-col>
-					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
+					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" >
 						<el-form-item label="关联角色" prop="roleIds">
               <el-cascader
                   :options="roleList"
@@ -35,7 +35,7 @@
               </el-cascader>
 						</el-form-item>
 					</el-col>
-					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
+					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" >
 						<el-form-item label="部门" prop="deptId">
 							<el-cascader
 								:options="deptData"
@@ -52,17 +52,17 @@
 							</el-cascader>
 						</el-form-item>
 					</el-col>
-					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
+					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" >
 						<el-form-item label="手机号" prop="mobile">
 							<el-input v-model="ruleForm.mobile" placeholder="请输入手机号" clearable></el-input>
 						</el-form-item>
 					</el-col>
-					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
+					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" >
 						<el-form-item label="邮箱" prop="email">
 							<el-input v-model="ruleForm.email" placeholder="请输入" clearable></el-input>
 						</el-form-item>
 					</el-col>
-					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
+					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" >
 						<el-form-item label="性别" prop="sex">
 							<el-select v-model="ruleForm.sex" placeholder="请选择" clearable class="w100">
 								<el-option
@@ -73,7 +73,7 @@
 							</el-select>
 						</el-form-item>
 					</el-col>
-					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
+					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" >
 						<el-form-item label="岗位" prop="postIds">
               <el-select v-model="ruleForm.postIds" placeholder="请选择" clearable class="w100" multiple>
                 <el-option
@@ -85,7 +85,7 @@
               </el-select>
 						</el-form-item>
 					</el-col>
-					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
+					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" >
 						<el-form-item label="用户状态">
 							<el-switch v-model="ruleForm.status" inline-prompt :active-value="1" :inactive-value="0" active-text="启" inactive-text="禁"></el-switch>
 						</el-form-item>
@@ -102,7 +102,7 @@
               </el-radio-group>
             </el-form-item>
           </el-col>
-					<el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" class="mb20">
+					<el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" >
 						<el-form-item label="用户描述">
 							<el-input v-model="ruleForm.remark" type="textarea" placeholder="请输入用户描述" maxlength="150"></el-input>
 						</el-form-item>

@@ -28,9 +28,7 @@
             <el-empty :description="$t('message.user.newDesc')" v-else></el-empty>
           </div>
           <div class="foot-box" v-if="noticeList.length > 0">
-            <!--            <el-button @click="hendleClear('公告')" size="80">清空</el-button>-->
-            <!--            <el-button @click="hendleAllread('公告')" size="80">全部已读</el-button>-->
-            <el-button @click="hendleShowMore()" size="80">查看更多</el-button>
+            <el-button @click="hendleShowMore()" size="small">查看更多</el-button>
           </div>
         </div>
 
@@ -65,9 +63,7 @@
             <el-empty :description="$t('message.user.newDesc')" v-else></el-empty>
           </div>
           <div class="foot-box" v-if="noticeList.length > 0">
-            <!--            <el-button @click="hendleClear('通知')" size="80">清空</el-button>-->
-            <!--            <el-button @click="hendleAllread('通知')" size="80">全部已读</el-button>-->
-            <el-button @click="hendleShowMore()" size="80">查看更多</el-button>
+            <el-button @click="hendleShowMore()" size="small">查看更多</el-button>
           </div>
         </div>
       </el-tab-pane>

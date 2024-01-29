@@ -68,6 +68,7 @@ interface TableDataRow {
   deptId:number;
   parentId:number;
   deptName:string;
+  leader:[];
   status:number;
   orderNum:number;
   createdAt:string;
@@ -115,6 +116,7 @@ export default defineComponent({
     };
 		// 打开新增菜单弹窗
 		const onOpenAddDept = (row?: TableDataRow) => {
+
       editDeptRef.value.openDialog(row?.deptId);
 		};
 		// 打开编辑菜单弹窗
@@ -130,7 +132,7 @@ export default defineComponent({
 			})
 				.then(() => {
           deleteDept(row.deptId).then(()=>{
-					  ElMessage.success('删除成功');
+            ElMessage.success('删除成功');
             deptList();
           })
 				})
