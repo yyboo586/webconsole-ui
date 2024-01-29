@@ -140,7 +140,7 @@ export default defineComponent({
       });
       if(row && typeof row === "object"){
         state.ruleForm = row;
-        let  leaders  = row.leader
+        let  leaders  = row.leader??[]
         if (leaders.length > 0){
           //获取部门负责人信息
           getUserByIds({ids:leaders}).then((res:any)=>{
@@ -211,7 +211,7 @@ export default defineComponent({
          state.ruleForm.leader = deptUser.value.map(item => item.id)
     };
     const confirmUser = (data:any[]) => {
-      let leaderArr = state.ruleForm.leader;
+      let leaderArr = state.ruleForm.leader??[];
       data.map(function (item) {
         // 若存在某个用户 则不添加
         if (!leaderArr.includes(item.id)){
