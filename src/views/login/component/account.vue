@@ -40,9 +40,10 @@
             width="100%"
             height="50px"
             @handleConfirm="handleVerifyCodeConfirm"
+            v-if="verifyStatus===2"
         />
       </el-col>
-      <el-col :span="15" v-if="false">
+      <el-col :span="15" v-if="verifyStatus===1">
         <el-input
             type="text"
             maxlength="4"
@@ -57,8 +58,8 @@
           </template>
         </el-input>
       </el-col>
-      <el-col :span="1" v-if="false"></el-col>
-      <el-col :span="8" v-if="false">
+      <el-col :span="1" v-if="verifyStatus===1"></el-col>
+      <el-col :span="8" v-if="verifyStatus===1">
         <div class="login-content-code">
           <img
               class="login-content-code-img"
@@ -66,7 +67,7 @@
               width="130"
               height="38"
               :src="captchaSrc"
-              style="cursor: pointer;display: none"
+              style="cursor: pointer;"
           />
         </div>
       </el-col>
@@ -100,7 +101,7 @@ import { initBackEndControlRoutes } from '/@/router/backEnd';
 import { Session } from '/@/utils/storage';
 import { formatAxis } from '/@/utils/formatTime';
 import { NextLoading } from '/@/utils/loading';
-import {login} from "/@/api/login";
+import {captcha, login} from "/@/api/login";
 import GoCaptchaBtn from "/@/components/goCaptcha/GoCaptchaBtn.vue";
 export default defineComponent({
 	name: 'loginAccount',
@@ -114,6 +115,7 @@ export default defineComponent({
 		const router = useRouter();
     const loginForm = ref(null)
     const checkCaptchaResult = ref('default')
+    const verifyStatus = ref(0)
 		const state = reactive({
 			isShowPassword: false,
 			ruleForm: {
@@ -128,8 +130,7 @@ export default defineComponent({
         ],
         password: [
           { required: true, trigger: "blur", message: "密码不能为空" }
-        ],
-        verifyCode: [{ required: true, trigger: "blur", message: "请先进行人机验证" }]
+        ]
       },
 			loading: {
 				signIn: false,
@@ -141,10 +142,11 @@ export default defineComponent({
     });
     const getCaptcha = () => {
       // 验证码V1版
-      // captcha().then((res:any)=>{
-      //   state.captchaSrc = res.data.img
-      //   state.ruleForm.verifyKey = res.data.key
-      // })
+      captcha().then((res:any)=>{
+        state.captchaSrc = res.data.img
+        state.ruleForm.verifyKey = res.data.key
+        verifyStatus.value = res.data.verifyStatus
+      })
     };
 		// 时间获取
 		const currentTime = computed(() => {
@@ -190,7 +192,7 @@ export default defineComponent({
             state.ruleForm.verifyCode = ''
             checkCaptchaResult.value = 'default'
             // 验证码V1版
-            //getCaptcha();
+            getCaptcha();
           })
         }
       })
@@ -229,6 +231,7 @@ export default defineComponent({
       checkCaptchaResult,
       handleVerifyCodeConfirm,
       loginForm,
+      verifyStatus,
 			...toRefs(state),
 		};
 	},
