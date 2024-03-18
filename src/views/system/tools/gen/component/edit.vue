@@ -82,10 +82,41 @@ export default defineComponent({
 				active.value = args;
 			}
 		};
+    const defaultOverwriteInfo = [
+      {key:"api",value:false},
+      {key:"controller",value:false},
+      {key:"dao",value:false},
+      {key:"dao_internal",value:false},
+      {key:"logic",value:false},
+      {key:"model",value:false},
+      {key:"model_do",value:false},
+      {key:"model_entity",value:false},
+      {key:"router",value:false},
+      {key:"router_func",value:false},
+      {key:"service",value:false},
+      {key:"sql",value:false},
+      {key:"tsApi",value:false},
+      {key:"tsModel",value:false},
+      {key:"vue",value:false},
+      {key:"vueDetail",value:false},
+      {key:"vueEdit",value:false},
+    ]
 		// 表详细信息
-		const info = ref(<TableDataInfo>{});
+		const info = ref(<TableDataInfo>{overwriteInfo:defaultOverwriteInfo});
 		provide('tableData', info);
-		onBeforeMount(() => {
+    const mergeArraysByKey = (arrays:Array<Array<object>>, key:string) :Array<any> => {
+      const merged:any={}
+      // 遍历所有数组，后面的数组会覆盖前面的数组
+      arrays.forEach(array => {
+        array.forEach((obj:any) => {
+          // 使用key的值作为键，将对象存储在merged对象中
+          merged[obj[key]] = obj;
+        });
+      });
+      // 将merged对象转换为数组
+      return Object.values(merged);
+    }
+    onBeforeMount(() => {
 			const tableId = route.query?.tableId;
 			if (tableId) {
 				// 获取表详细信息
@@ -96,6 +127,7 @@ export default defineComponent({
 					});
 					const data: TableDataInfo = res.data.info as TableDataInfo;
 					data.columns = columnsTmp;
+          data.overwriteInfo = data.overwriteInfo?mergeArraysByKey([defaultOverwriteInfo,data.overwriteInfo],'key'):defaultOverwriteInfo
 					info.value = data;
 				});
 			} else {

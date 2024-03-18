@@ -2,7 +2,7 @@ import { defineStore } from 'pinia';
 import Cookies from 'js-cookie';
 import { UserInfosStates } from './interface';
 import { Session } from '/@/utils/storage';
-
+import {getUpFileUrl} from '/@/utils/gfast'
 /**
  * 用户信息
  * @methods setUserInfos 设置用户信息
@@ -48,17 +48,20 @@ export const useUserInfo = defineStore('userInfo', {
 				id:0,
 				userName: userName,
 				userNickname: "",
-				avatar:
-					userName === 'admin'
-						? 'https://ss0.bdstatic.com/70cFvHSh_Q1YnxGkpoWK1HF6hhy/it/u=1813762643,1914315241&fm=26&gp=0.jpg'
-						: 'https://ss1.bdstatic.com/70cFuXSh_Q1YnxGkpoWK1HF6hhy/it/u=317673774,2961727727&fm=26&gp=0.jpg',
+				avatar:'',
 				time: new Date().getTime(),
 				roles: defaultRoles,
 				authBtnList: defaultAuthBtnList,
 			};
-			if (Session.get('userInfo')) {
-				this.userInfos = Session.get('userInfo');
-			} else {
+			const sessUserInfo	= Session.get('userInfo')
+			if(sessUserInfo){
+				if(sessUserInfo.avatar!=''){
+					sessUserInfo.avatar = getUpFileUrl(sessUserInfo.avatar)
+				}else{
+					sessUserInfo.avatar = '/favicon.ico'
+				}
+				this.userInfos=sessUserInfo
+			}else {
 				this.userInfos = userInfos;
 			}
 		},

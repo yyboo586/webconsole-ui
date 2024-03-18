@@ -48,7 +48,7 @@
 					</el-col>
           <el-col class="mb20" :span="4">
             <el-form-item label="是否覆盖原有文件" prop="overwrite">
-              <el-checkbox v-model="info.overwrite" />
+              <el-checkbox v-model="info.overwrite" @change="overwriteChange"/>
             </el-form-item>
           </el-col>
 					<el-col class="mb20" :span="4">
@@ -79,6 +79,15 @@
 							<el-checkbox v-model="info.showDetail" />
 						</el-form-item>
 					</el-col>
+          <el-col class="mb20" :span="24" style="border:solid 1px #e2e3e3;width: 90%;padding: 12px;" v-show="info.overwrite">
+            <el-row :gutter="18">
+              <el-col class="mb20" :span="3" v-for="(item,ind) in overwriteOptions" :key="ind">
+                <el-form-item :label="item.name" :prop="item.key">
+                  <el-checkbox v-model="info.overwriteInfo[ind]['value']" />
+                </el-form-item>
+              </el-col>
+            </el-row>
+          </el-col>
 				</el-row>
 			</el-form>
 			<el-row>
@@ -105,6 +114,25 @@ export default defineComponent({
 	emits: ['goNext','close'],
 	setup(props, { emit }) {
 		const basicInfoFormRef = ref<FormInstance>();
+    const overwriteOptions = ref([
+      {key:"api",name:"覆盖api"},
+      {key:"controller",name:"覆盖controller"},
+      {key:"dao",name:"覆盖dao"},
+      {key:"dao_internal",name:"覆盖dao_internal"},
+      {key:"logic",name:"覆盖logic"},
+      {key:"model",name:"覆盖model"},
+      {key:"model_do",name:"覆盖model_do"},
+      {key:"model_entity",name:"覆盖model_entity"},
+      {key:"router",name:"覆盖router"},
+      {key:"router_func",name:"覆盖router_func"},
+      {key:"service",name:"覆盖service"},
+      {key:"sql",name:"覆盖菜单sql"},
+      {key:"tsApi",name:"覆盖tsApi"},
+      {key:"tsModel",name:"覆盖tsModel"},
+      {key:"vue",name:"覆盖vue-list"},
+      {key:"vueDetail",name:"覆盖vue-detail"},
+      {key:"vueEdit",name:"覆盖vue-edit"},
+    ])
 		const info = inject<TableDataInfo>('tableData') as TableDataInfo;
 		const nextTip = (): boolean => {
 			//表单验证
@@ -124,6 +152,11 @@ export default defineComponent({
     const close = ()=>{
       emit('close')
     }
+    const overwriteChange = (value:boolean)=>{
+      info.value.overwriteInfo.map((item:any)=>{
+        item.value = value
+      })
+    }
 		const rules = reactive<FormRules>({
 			tableName: [{ required: true, message: '请输入表名称', trigger: 'blur' }],
 			tableComment: [{ required: true, message: '请输入表描述', trigger: 'blur' }],
@@ -136,7 +169,9 @@ export default defineComponent({
 			basicInfoFormRef,
 			info,
 			rules,
+      overwriteOptions,
 			nextTip,
+      overwriteChange,
       close
 		};
 	},

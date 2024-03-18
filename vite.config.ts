@@ -17,7 +17,7 @@ const alias: Record<string, string> = {
 const viteConfig = defineConfig((mode: ConfigEnv) => {
 	const env = loadEnv(mode.mode, process.cwd());
 	return {
-		plugins: [vue(), vueSetupExtend(), viteCompression()],
+		plugins: [vue(), vueSetupExtend(), viteCompression({disable:true})],
 		root: process.cwd(),
 		resolve: { alias },
 		base: mode.command === 'serve' ? './' : env.VITE_PUBLIC_PATH,

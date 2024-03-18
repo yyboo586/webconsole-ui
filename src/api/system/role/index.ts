@@ -67,4 +67,13 @@ export function roleDeptTreeSelect(roleId:number) {
     })
 }
 
+// 根据角色ID查询菜单树结构
+export function roleMenuTreeSelect(roleId:number) {
+    return request({
+        url: '/api/v1/system/role/menuTreeSelect',
+        method: 'get',
+        params:{roleId}
+    })
+}
+
 

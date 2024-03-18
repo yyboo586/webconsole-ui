@@ -106,7 +106,8 @@ export async function setAddRoute() {
 export async function getBackEndControlRoutes() {
 	let menuRoute = Session.get('userMenu')
 	let permissions = Session.get('permissions')
-	if (!menuRoute || !permissions) {
+	let userInfo = Session.get('userInfo')
+	if (!menuRoute || !permissions ||!userInfo) {
 		await refreshBackEndControlRoutes()
 	}
 }
@@ -121,7 +122,9 @@ export async function refreshBackEndControlRoutes() {
 	await getUserMenus().then((res:any)=>{
 		Session.set('userMenu',res.data.menuList)
 		Session.set('permissions',res.data.permissions)
+		Session.set('userInfo',res.data.userInfo)
 	})
+	await useUserInfo().setUserInfos()
 	await useUserInfo().setPermissions()
 }
 

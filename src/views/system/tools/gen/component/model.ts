@@ -77,7 +77,8 @@ export interface TableDataInfo extends TableData{
     functionName:string;
     linkTableName:string;
     useVirtual:boolean;
-    columns:TableColumns[]
+    columns:TableColumns[],
+    overwriteInfo:Array<any>
 }
 export interface TableDataState {
     ids:number[];
