@@ -8,7 +8,7 @@
             <div class="personal-user-left">
               <el-upload
                   class=" h100 personal-user-left-upload avatar-uploader"
-                  :action="baseURL+'api/v1/system/upload/singleImg'"
+                  :action="baseURL+'/api/v1/system/upload/singleImg'"
                   :show-file-list="false"
                   :on-success="handleAvatarSuccess"
                   :data="dataParam"
@@ -214,6 +214,7 @@ import {ElMessage} from "element-plus";
 import {ElMessageBox} from 'element-plus'
 import {getToken} from "/@/utils/gfast"
 import { newsInfoList, recommendList } from './mock';
+import {Session} from "/@/utils/storage";
 // 定义接口来定义对象的类型
 interface PersonalState {
   imageUrl:'',
@@ -256,7 +257,14 @@ export default defineComponent({
     // const  handleUpload =
     const handleUpload = () => {
       // console.log(state.personalForm)
-      editPersonal(state.personalForm).then(()=>{
+      editPersonal(state.personalForm).then((res:any)=>{
+          const userInfo = res.data.userInfo
+          userInfo.avatar = proxy.getUpFileUrl(userInfo.avatar)
+          // 存储 token 到浏览器缓存
+          Session.set('token', res.data.token);
+          // 存储用户信息到浏览器缓存
+          Session.set('userInfo', userInfo);
+          useUserInfo().setUserInfos();
            ElMessage.success('已更新');
       });
     };
