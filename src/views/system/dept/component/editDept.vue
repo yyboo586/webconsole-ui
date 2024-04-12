@@ -68,13 +68,13 @@
 			</template>
 		</el-dialog>
 	</div>
-  <select-user   ref="selectUserRef"    @selectUser="confirmUser" :multiple="true"></select-user>
+  <select-user   ref="selectUserRef"    @selectUser="confirmUser" :selectedUsers="deptUser"></select-user>
 </template>
 
 <script lang="ts">
 import {reactive, toRefs, defineComponent, getCurrentInstance,ref,unref} from 'vue';
 import {addDept,editDept, getDeptList} from "/@/api/system/dept";
-import {getUserByIds} from '/@/api/system/user/index';
+import {getUserByIds} from '/@/api/system/user';
 import {ElMessage} from "element-plus";
 import selectUser from "/@/components/selectUser/index.vue"
 
@@ -208,18 +208,23 @@ export default defineComponent({
 
     const handleClose = (data:any,key:number) => {
          deptUser.value.splice(key, 1);
-         state.ruleForm.leader = deptUser.value.map(item => item.id)
+         state.ruleForm.leader = deptUser.value.map((item:any) => item.id)
     };
     const confirmUser = (data:any[]) => {
       let leaderArr = state.ruleForm.leader??[];
-      data.map(function (item) {
-        // 若存在某个用户 则不添加
-        if (!leaderArr.includes(item.id)){
-            deptUser.value.push(item)
+      if(data.length>0){
+        data.map((item:any)=>{
+          // 若存在某个用户 则不添加
+          if (!leaderArr.includes(item.id)){
+            deptUser.value.push(item as never)
             leaderArr.push(item.id)
-        }
-      });
-      state.ruleForm.leader = leaderArr;
+          }
+        })
+        state.ruleForm.leader = leaderArr;
+      }else{
+        deptUser.value = []
+        state.ruleForm.leader = []
+      }
     };
     //选择用户
     const  handleSelectUser = () =>{

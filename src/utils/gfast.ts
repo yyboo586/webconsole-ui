@@ -80,6 +80,33 @@ export function handleTree(data:any[], id:string, parentId:string, children:stri
     return treeData != '' ? treeData : data;
 }
 
+export function flattenTree(treeArray:any[]):any[] {
+    const result:any[] = [];
+
+    function flatten(node:any) {
+        result.push(node);
+        if (node.children && node.children.length > 0) {
+            node.children.forEach((child:any[]) => flatten(child));
+        }
+    }
+    treeArray.forEach(node => flatten(node));
+    return result;
+}
+
+export function findChildrenByPid(pid:any, flattenedArray :any[]):any[] {
+    const result:any[] = [];
+    flattenedArray.forEach(node => {
+        if (node.pid === pid) {
+            result.push(node);
+            const grandchildren = findChildrenByPid(node.id, flattenedArray);
+            if (grandchildren.length > 0) {
+                result.push(...grandchildren);
+            }
+        }
+    });
+    return result;
+}
+
 
 // 回显数据字典
 export function selectDictLabel(data:any[], value:string):string {

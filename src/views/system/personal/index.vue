@@ -8,7 +8,7 @@
             <div class="personal-user-left">
               <el-upload
                   class=" h100 personal-user-left-upload avatar-uploader"
-                  :action="baseURL+'/api/v1/system/upload/singleImg'"
+                  :action="baseURL+'api/v1/system/upload/singleImg'"
                   :show-file-list="false"
                   :on-success="handleAvatarSuccess"
                   :data="dataParam"
@@ -265,7 +265,7 @@ export default defineComponent({
           // 存储用户信息到浏览器缓存
           Session.set('userInfo', userInfo);
           useUserInfo().setUserInfos();
-           ElMessage.success('已更新');
+          ElMessage.success('已更新');
       });
     };
     // 当前时间提示语

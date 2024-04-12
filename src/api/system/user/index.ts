@@ -19,6 +19,15 @@ export function getUserList(query:Object) {
     })
 }
 
+export function getUsersById(roleId:number) {
+    return request({
+        url: '/api/v1/system/user/getByRoleId',
+        method: 'get',
+        params:{roleId}
+    })
+}
+
+
 export function getUserSelector(query:Object) {
     return request({
         url: '/api/v1/system/user/selector',

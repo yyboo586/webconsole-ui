@@ -40,6 +40,53 @@
 							<el-input v-model="formData.remark" type="textarea" placeholder="请输入角色描述" maxlength="150"></el-input>
 						</el-form-item>
 					</el-col>
+          <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" >
+            <el-form-item label="有效时间">
+              <el-radio-group v-model="formData.effectiveType">
+                <el-radio :label="0">不设置</el-radio>
+                <el-radio :label="1">按起止日期</el-radio>
+                <el-radio :label="2">按时间段</el-radio>
+              </el-radio-group>
+            </el-form-item>
+          </el-col>
+          <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" v-show="formData.effectiveType===2">
+            <el-form-item label="每周">
+              <el-checkbox-group v-model="formData.weekDay">
+                <el-checkbox :label="1" >周一</el-checkbox>
+                <el-checkbox :label="2" >周二</el-checkbox>
+                <el-checkbox :label="3" >周三</el-checkbox>
+                <el-checkbox :label="4" >周四</el-checkbox>
+                <el-checkbox :label="5" >周五</el-checkbox>
+                <el-checkbox :label="6" >周六</el-checkbox>
+                <el-checkbox :label="0" >周日</el-checkbox>
+              </el-checkbox-group>
+            </el-form-item>
+          </el-col>
+          <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" v-show="formData.effectiveType===2">
+            <el-form-item label="时间段" style="width: 360px;">
+              <el-time-picker
+                  v-model="formData.dayRange"
+                  is-range
+                  format="HH:mm:ss"
+                  value-format="YYYY-MM-DD HH:mm:ss"
+                  range-separator="至"
+                  start-placeholder="开始时间"
+                  end-placeholder="截止时间"
+              />
+            </el-form-item>
+          </el-col>
+					<el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" v-show="formData.effectiveType===1">
+            <el-form-item label="起止日期" style="width: 450px">
+              <el-date-picker
+                  v-model="formData.dateRange"
+                  value-format="YYYY-MM-DD HH:mm:ss"
+                  type="datetimerange"
+                  range-separator="至"
+                  start-placeholder="开始日期"
+                  end-placeholder="结束日期"
+              ></el-date-picker>
+            </el-form-item>
+          </el-col>
 					<el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" >
 						<el-form-item label="菜单权限">
               <el-row :gutter="35">
@@ -95,6 +142,10 @@ interface DialogRow {
   listOrder: number;
   remark: string;
   menuIds:Array<number>
+  effectiveType:number;
+  weekDay:Array<number>;
+  dayRange:Array<string>;
+  dateRange:Array<string>;
 }
 interface RoleState {
   loading:boolean;
@@ -135,6 +186,13 @@ export default defineComponent({
         listOrder: 0,
         remark: '',
         menuIds:[],
+        effectiveType:0,
+        weekDay:[1,2,3,4,5],
+        dayRange:[
+          '2024-02-01 08:00:00',
+          '2024-02-01 19:00:00',
+        ],
+        dateRange:[],
 			},
       // 表单校验
       rules: {
@@ -160,6 +218,9 @@ export default defineComponent({
         getRole(row.id).then((res:any)=>{
           if(res.data.role){
             state.formData = res.data.role;
+            if(!state.formData.weekDay){
+              state.formData.weekDay = [1,2,3,4,5]
+            }
             state.formData.menuIds = res.data.menuIds??[]
           }
         })
@@ -229,6 +290,13 @@ export default defineComponent({
         listOrder: 0,
         remark: '',
         menuIds:[],
+        effectiveType:0,
+        weekDay:[1,2,3,4,5],
+        dayRange:[
+          '2024-02-01 08:00:00',
+          '2024-02-01 19:00:00',
+        ],
+        dateRange:[]
       }
     };
     /** 树权限（展开/折叠）*/

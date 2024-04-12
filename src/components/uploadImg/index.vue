@@ -20,25 +20,21 @@
       <img w-full :src="dialogImageUrl" alt="Preview Image" />
     </el-dialog>
   </div>
-  <div v-else>
-
-    <div class="up-img">
-      <el-upload
-          v-model:file-list="dataFileList"
-          :limit="limit"
-          class="avatar-uploader"
-          :action="action"
-          :show-file-list="false"
-          :on-success="handleAvatarSuccess"
-          :before-upload="beforeAvatarUpload"
-          :on-preview="handlePictureCardPreview"
-          :on-remove="handleRemove"
-          :data="dataParam"
-      >
-        <img v-if="imageUrl" :src="imageUrl" class="avatar" />
-        <el-icon v-else class="avatar-uploader-icon"><ele-Plus /></el-icon>
-      </el-upload>
-    </div>
+  <div class="up-img" v-else>
+    <el-upload
+        v-model:file-list="dataFileList"
+        class="avatar-uploader"
+        :action="action"
+        :show-file-list="false"
+        :on-success="handleAvatarSuccess"
+        :before-upload="beforeAvatarUpload"
+        :on-preview="handlePictureCardPreview"
+        :on-remove="handleRemove"
+        :data="dataParam"
+    >
+      <img v-if="imageUrl" :src="imageUrl" class="avatar" />
+      <el-icon v-else class="avatar-uploader-icon"><ele-Plus /></el-icon>
+    </el-upload>
   </div>
 
 </template>
@@ -90,6 +86,10 @@ export default defineComponent({
           return item
         })
         uploadedFile = _.cloneDeep(value)
+        if(props.limit == 1){
+          uploadedFile = [];
+          imageUrl.value = (value[0]?value[0].url:'') as string;
+        }
         return value
       },
       set: val => {

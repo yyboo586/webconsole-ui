@@ -12,7 +12,7 @@ import 'element-plus/dist/index.css';
 import '/@/theme/index.scss';
 import mitt from 'mitt';
 import VueGridLayout from 'vue-grid-layout';
-import {getUpFileUrl, handleTree, parseTime, selectDictLabel} from '/@/utils/gfast';
+import {findChildrenByPid, flattenTree, getUpFileUrl, handleTree, parseTime, selectDictLabel} from '/@/utils/gfast';
 import Websocket from '/@/utils/websocket';
 import {useDict} from '/@/api/system/dict/data';
 import {getItems, setItems, getOptionValue, isEmpty} from '/@/api/items'
@@ -53,6 +53,8 @@ app.use(pinia)
 
 app.config.globalProperties.getUpFileUrl=getUpFileUrl
 app.config.globalProperties.handleTree=handleTree
+app.config.globalProperties.flattenTree=flattenTree
+app.config.globalProperties.findChildrenByPid=findChildrenByPid
 app.config.globalProperties.useDict=useDict
 app.config.globalProperties.selectDictLabel=selectDictLabel
 

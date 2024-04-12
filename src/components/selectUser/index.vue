@@ -1,6 +1,6 @@
 <template>
   <div>
-    <el-dialog title="选择用户" v-model="visible" width="60%" top="5vh" append-to-body :close-on-click-modal="false">
+    <el-dialog title="选择用户" v-model="visible" width="80%" top="5vh" append-to-body :close-on-click-modal="false">
       <div class="system-user-container">
         <el-row :gutter="10" style="width: 100%;">
           <el-col :span="6">
@@ -21,7 +21,7 @@
               </el-aside>
             </el-card>
           </el-col>
-          <el-col :span="18">
+          <el-col :span="12">
             <el-card shadow="hover">
               <div class="system-user-search mb15">
                 <el-form :model="param" ref="queryRef" :inline="true" label-width="68px">
@@ -64,6 +64,32 @@
               <UserList ref="userListRef" :dept-data="deptData" :gender-data="sys_user_sex" :param="param" :multiple="multiple" @ok="handleSelectUserOk"/>
             </el-card>
           </el-col>
+          <el-col :span="6">
+            <el-card shadow="hover">
+              <el-row :gutter="10">
+                <el-col :span="10">
+                  <p style="height: 32px;line-height: 32px;">已选择：{{selectedUsers.length}}</p>
+                </el-col>
+                <el-col :span="7">
+                  <el-button type="success" plain @click="goBack">确认返回</el-button>
+                </el-col>
+                <el-col :span="7">
+                  <el-button type="danger" plain @click="removeAll">全部移除</el-button>
+                </el-col>
+                <el-col :span="24">
+                  <el-table :data="selectedUserInfo">
+                    <el-table-column  label="操作"  >
+                      <template #default="scope">
+                        <el-button type="danger" plain @click="remove(scope.$index)">移除</el-button>
+                      </template>
+                    </el-table-column>
+                    <el-table-column prop="userNickname" label="姓名"  />
+                  </el-table>
+                </el-col>
+              </el-row>
+              <el-pagination layout="prev, pager, next" :total="selectedUsers.length" v-model:current-page="selectedUsersPage"/>
+            </el-card>
+          </el-col>
         </el-row>
       </div>
     </el-dialog>
@@ -71,7 +97,7 @@
 </template>
 
 <script lang="ts">
-import {toRefs, reactive, ref, defineComponent, watch, getCurrentInstance, nextTick} from 'vue';
+import {toRefs, reactive, ref, defineComponent, watch, getCurrentInstance, nextTick, computed} from 'vue';
 import {ElTree,FormInstance} from 'element-plus';
 import { Search } from '@element-plus/icons-vue'
 import UserList from './component/userList.vue';
@@ -97,10 +123,15 @@ export default defineComponent({
     multiple:{
       type:Boolean,
       default:false
+    },
+    selectedUsers:{
+      type:Array,
+      default:()=>[]
     }
   },
-  emits:['selectUser'],
+  emits:['selectUser','okBack'],
   setup(prop,{emit}) {
+    const selectedUsersPage = ref(1)
     const visible = ref(false)
     const {proxy} = <any>getCurrentInstance();
     const {sys_user_sex} = proxy.useDict('sys_user_sex')
@@ -124,6 +155,16 @@ export default defineComponent({
         keyWords:'',
         dateRange:[]
       },
+    });
+    const selectedUserInfo = computed({
+      get:()=>{
+        let start = (selectedUsersPage.value-1)*10
+        let end = start+10
+        return prop.selectedUsers.slice(start,end)
+      } ,
+      set:(v)=>{
+        emit("selectUser",v);
+      }
     });
     const getUserList = ()=>{
       userListRef.value.setUserList();
@@ -161,10 +202,24 @@ export default defineComponent({
       })
     }
     const handleSelectUserOk = (row:any)=>{
+      selectedUserInfo.value = [...selectedUserInfo.value,row]
+    }
+    const goBack = ()=>{
       visible.value = false;
-      emit("selectUser",row);
+      emit("okBack");
+    }
+    const removeAll = ()=>{
+      selectedUserInfo.value = []
+    }
+    const remove = (index:number)=>{
+      index = (selectedUsersPage.value-1)*10+index
+      let newSel:any = [...selectedUserInfo.value]
+      selectedUserInfo.value = []
+      newSel.splice(index,1)
+      selectedUserInfo.value = newSel
     }
     return {
+      selectedUsersPage,
       visible,
       queryRef,
       userListRef,
@@ -173,11 +228,15 @@ export default defineComponent({
       treeRef,
       search,
       sys_user_sex,
+      selectedUserInfo,
       openDialog,
       getUserList,
       handleSelectUserOk,
       handleNodeClick,
       resetQuery,
+      goBack,
+      removeAll,
+      remove,
       ...toRefs(state),
     };
   },

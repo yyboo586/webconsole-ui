@@ -51,7 +51,18 @@
 				<el-table-column label="操作" width="220">
 					<template #default="scope">
 						<el-button size="small" text type="primary" @click="onOpenEditRole(scope.row)"><el-icon><ele-EditPen /></el-icon>修改</el-button>
-						<el-button size="small" text type="primary" @click="handleDataScope(scope.row)"><el-icon><ele-Avatar /></el-icon>数据权限</el-button>
+            <el-dropdown class="auth-action" @command="handleCommand">
+              <span class="el-dropdown-link">
+                授权 <el-icon><ele-ArrowDown /></el-icon>
+              </span>
+              <template #dropdown>
+                <el-dropdown-menu class="auth-action-menu">
+                  <el-dropdown-item :command="'resource_'+scope.row.id">资源权限</el-dropdown-item>
+                  <el-dropdown-item :command="'data_'+scope.row.id">数据权限</el-dropdown-item>
+                  <el-dropdown-item :command="'user_'+scope.row.id">用户授权</el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
 						<el-button size="small" text type="primary" @click="onRowDel(scope.row)"><el-icon><ele-DeleteFilled /></el-icon>删除</el-button>
 					</template>
 				</el-table-column>
@@ -59,21 +70,22 @@
 		</el-card>
 		<EditRole ref="editRoleRef" @getRoleList="roleList" :roleData="tableData.data"/>
 		<DataScope ref="dataScopeRef" @getRoleList="roleList"/>
-
 		<el-dialog :title="selectRow.name+'-用户列表'" v-model="isShowDialog" width="70vw">
 			<UserList v-if="isShowDialog" ref="userListRef" :dept-data="deptData" :gender-data="sys_user_sex" :param="userListParam" @getUserList="userList"/>
 		</el-dialog>
+    <select-user   ref="selectUserRef"    @selectUser="confirmUser" @okBack="setRoleUser" :selectedUsers="roleUsers"></select-user>
 	</div>
 </template>
 
 <script lang="ts">
 import {toRefs, reactive, onMounted, ref, defineComponent, toRaw,getCurrentInstance} from 'vue';
-import { ElMessageBox, ElMessage } from 'element-plus';
+import { ElMessageBox, ElMessage,ElLoading } from 'element-plus';
 import EditRole from '/@/views/system/role/component/editRole.vue';
 import DataScope from '/@/views/system/role/component/dataScope.vue';
-import {deleteRole, getRoleList} from "/@/api/system/role";
-import {getDeptTree} from '/@/api/system/user/index';
+import {deleteRole, getRoleList, setRoleUsers} from "/@/api/system/role";
+import {getDeptTree, getUsersById} from '/@/api/system/user';
 import UserList from '/@/views/system/user/component/userList.vue';
+import selectUser from "/@/components/selectUser/index.vue";
 
 // 定义接口来定义对象的类型
 interface TableData {
@@ -89,7 +101,7 @@ interface TableData {
 }
 interface TableDataState {
 	isShowDialog:boolean;
-	selectRow:object;
+	selectRow:any;
 	deptData:any[];
 	userListParam: {
 		roleId:number | undefined;
@@ -109,14 +121,18 @@ interface TableDataState {
 
 export default defineComponent({
 	name: 'apiV1SystemRoleList',
-	components: {EditRole,DataScope,UserList},
+	components: {selectUser, EditRole,DataScope,UserList},
 	setup() {
+    const selectUserRef = ref()
     const {proxy} = getCurrentInstance() as any;
     const {sys_user_sex} = proxy.useDict('sys_user_sex')
 		const addRoleRef = ref();
 		const userListRef = ref();
 		const editRoleRef = ref();
     const dataScopeRef =ref();
+    const roleListData = ref<Array<TableData>>()
+    const roleUsers = ref([])
+    const setRole = ref(0)
 		const state = reactive<TableDataState>({
       isShowDialog: false,
       deptData: [],
@@ -157,6 +173,7 @@ export default defineComponent({
             createdAt: item.createdAt,
           });
         })
+        roleListData.value = data
         state.tableData.data = proxy.handleTree(data??[], "id","pid","children",true);
       })
     };
@@ -178,13 +195,23 @@ export default defineComponent({
       editRoleRef.value.openDialog();
 		};
 		// 打开修改角色弹窗
-		const onOpenEditRole = (row: Object) => {
+		const onOpenEditRole = (row: Object|undefined) => {
 			editRoleRef.value.openDialog(toRaw(row));
 		};
     //数据权限设置弹窗
     const handleDataScope=(row:any)=>{
       dataScopeRef.value.openDialog(toRaw(row))
     }
+    //用户授权
+    const handleUserScope = ((row:any)=>{
+      const ld = ElLoading.service()
+      setRole.value = row.id
+      getUsersById(row.id).then((res:any)=>{
+        ld.close()
+        roleUsers.value=res.data.userList??[]
+        selectUserRef.value.openDialog()
+      })
+    })
 		// 删除角色
 		const onRowDel = (row: any) => {
 			ElMessageBox.confirm(`此操作将永久删除角色：“${row.name}”，是否继续?`, '提示', {
@@ -216,11 +243,54 @@ export default defineComponent({
 		onMounted(() => {
 			initTableData();
 		});
+    const handleCommand = (command: string )=>{
+      let commandArr = command.split('_')
+      let row = roleListData.value?.filter((item:TableData)=>{
+        return item.id==parseInt(commandArr[1])
+      })?.[0]
+      switch (commandArr[0]){
+        case 'resource':
+          onOpenEditRole(row)
+          break
+        case 'data':
+          handleDataScope(row)
+          break
+        case 'user':
+          handleUserScope(row)
+          break
+      }
+    }
+    const confirmUser = (data:any[]) => {
+      if(data.length>0){
+        const ids = roleUsers.value.map((item:any)=>{
+          return item.id
+        })
+        console.log('ids = ',ids)
+        data.map((item:any)=>{
+          // 若存在某个用户 则不添加
+          if (!ids.includes(item.id)){
+            roleUsers.value.push(item as never)
+          }
+        })
+      }else{
+        roleUsers.value = []
+      }
+    };
+    const setRoleUser = ()=>{
+      const ids = roleUsers.value.map((item:any)=>{
+        return item.id
+      })
+      //用户授权提交
+      setRoleUsers({roleId:setRole.value,userIds:ids}).then((res:any)=>{
+        roleList()
+      })
+    }
 		return {
 			addRoleRef,
 			editRoleRef,
       dataScopeRef,
       sys_user_sex,
+      selectUserRef,
 			userList,
 			onOpenUserList,
 			onOpenAddRole,
@@ -230,8 +300,28 @@ export default defineComponent({
 			onHandleCurrentChange,
       roleList,
       handleDataScope,
+      handleUserScope,
+      handleCommand,
+      roleUsers,
+      confirmUser,
+      setRoleUser,
 			...toRefs(state),
 		};
 	},
 });
 </script>
+<style scoped lang="scss">
+.auth-action{
+  margin:6px 8px 0 8px;
+  .el-dropdown-link {
+    cursor: pointer;
+    color: var(--el-color-primary);
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+  }
+  .auth-action-menu{
+    font-size: 12px;
+  }
+}
+</style>

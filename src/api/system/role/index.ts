@@ -57,13 +57,20 @@ export function dataScope(data:any) {
     })
 }
 
+export function setRoleUsers(data:any) {
+    return request({
+        url: '/api/v1/system/role/setRoleUser',
+        method: 'put',
+        data:data
+    })
+}
+
 
 // 根据角色ID查询部门树结构
-export function roleDeptTreeSelect(roleId:number) {
+export function roleDeptTreeSelect() {
     return request({
         url: '/api/v1/system/role/deptTreeSelect',
-        method: 'get',
-        params:{roleId}
+        method: 'get'
     })
 }
 

@@ -71,9 +71,19 @@
 					</template>
           <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" >
             <el-form-item label="权限标识">
-              <el-select v-model="ruleForm.roles" multiple placeholder="选择角色" clearable class="w100">
-                <el-option v-for="role in roles" :key="'role_'+role.id" :label="role.name" :value="role.id"></el-option>
-              </el-select>
+              <el-cascader
+                  :options="roles"
+                  :props="{ checkStrictly: true,emitPath: false, value: 'id', label: 'name',multiple: true }"
+                  placeholder="请选择角色"
+                  clearable
+                  class="w100"
+                  v-model="ruleForm.roles"
+              >
+                <template #default="{ node, data }">
+                  <span>{{ data.name }}</span>
+                  <span v-if="!node.isLeaf"> ({{ data.children.length }}) </span>
+                </template>
+              </el-cascader>
             </el-form-item>
           </el-col>
 					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" >
@@ -213,7 +223,8 @@ export default defineComponent({
       nextTick(()=>{
         //获取角色信息
         getMenuParams().then((res:any)=>{
-          state.roles = res.data.roles;
+          const roles = res.data.roles??[];
+          state.roles = proxy.handleTree(roles??[], "id","pid","children",true);
           const menu = { id: 0, title: '主类目', children: [] };
           menu.children = proxy.handleTree(res.data.menus, "id","pid");
           state.menuData=new Array(menu) as any;
