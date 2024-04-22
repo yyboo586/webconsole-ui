@@ -11,7 +11,7 @@
 						</el-col>
 						<el-col :span="8" class="colBlock">
 							<el-form-item label="任务组名" prop="jobGroup">
-								<el-select v-model="tableData.param.jobGroup" placeholder="请选择任务组名" clearable >
+								<el-select v-model="tableData.param.jobGroup" placeholder="请选择任务组名" clearable style="width: 160px;">
 									<el-option v-for="dict in sys_job_group" :key="dict.value" :label="dict.label" :value="dict.value" />
 								</el-select>
 							</el-form-item>
@@ -33,7 +33,7 @@
 						</el-col>
 						<el-col :span="8" :class="showAll ? 'colBlock' : 'colNone'">
 							<el-form-item label="状态" prop="status">
-								<el-select v-model="tableData.param.status" placeholder="请选择状态" clearable >
+								<el-select v-model="tableData.param.status" placeholder="请选择状态" clearable style="width: 160px;">
 									<el-option v-for="dict in sys_job_status" :key="dict.value" :label="dict.label" :value="dict.value" />
 								</el-select>
 							</el-form-item>

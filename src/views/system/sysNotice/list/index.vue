@@ -16,7 +16,7 @@
             </el-col>
             <el-col :span="5" class="colBlock">
               <el-form-item label="状态" prop="status">
-                <el-select v-model="tableData.param.status" placeholder="请选择状态" clearable>
+                <el-select v-model="tableData.param.status" placeholder="请选择状态" clearable style="width: 160px;">
                   <el-option label="正常" :value="1"/>
                   <el-option label="停用" :value="0"/>
                 </el-select>
@@ -24,7 +24,7 @@
             </el-col>
             <el-col :span="5" class="colBlock">
               <el-form-item label="类型" prop="type">
-                <el-select v-model="tableData.param.type" placeholder="请选择类型" clearable>
+                <el-select v-model="tableData.param.type" placeholder="请选择类型" clearable style="width: 160px;">
                   <el-option label="通知" value="1"/>
                   <el-option label="公告" value="2"/>
                 </el-select>
@@ -32,7 +32,7 @@
             </el-col>
             <el-col :span="5" class="colBlock">
               <el-form-item label="标签" prop="tag">
-                <el-select v-model="tableData.param.tag" placeholder="请选择标签" clearable>
+                <el-select v-model="tableData.param.tag" placeholder="请选择标签" clearable style="width: 160px;">
                   <el-option
                       v-for="dict in notice_tag"
                       :key="dict.value"

@@ -7,7 +7,7 @@
             <el-input v-model="tableData.param.roleName" placeholder="请输入角色名称" class="w-50 m-2" clearable/>
           </el-form-item>
           <el-form-item label="状态">
-            <el-select placeholder="请选择状态" class="w-50 m-2" v-model="tableData.param.roleStatus" clearable>
+            <el-select placeholder="请选择状态" class="w-50 m-2" v-model="tableData.param.roleStatus" clearable style="width:120px;">
               <el-option label="启用"  value="1" />
               <el-option label="禁用"  value="0" />
             </el-select>
