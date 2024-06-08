@@ -1,5 +1,8 @@
-import {getToken} from "/@/utils/gfast"
+import {getToken, getUpFileUrl} from "/@/utils/gfast"
 import {noticeStore} from "/@/stores/noticeStore";
+import {refreshToken} from "/@/api/system/personal";
+import {Session} from "/@/utils/storage";
+import {useUserInfo} from "/@/stores/userInfo";
 const noticeStoreAct = noticeStore()
 const webSocketURL = import.meta.env.VITE_WEBSOCKET_URL
 let socket: WebSocket;
@@ -137,6 +140,19 @@ export default (onMessage: Function) => {
       // 通知私信
       if (message.event === 'notice') {
         noticeStoreAct.setMessages(message.data)
+        return;
+      }
+      //更新token
+      if(message.event == 'tokenUpdated'){
+        refreshToken().then((res:any)=>{
+          const userInfo = res.data.userInfo
+          userInfo.avatar = getUpFileUrl(userInfo.avatar)
+          // 存储 token 到浏览器缓存
+          Session.set('token', res.data.token);
+          // 存储用户信息到浏览器缓存
+          Session.set('userInfo', userInfo);
+          useUserInfo().setUserInfos();
+        })
         return;
       }
       if (onMessage && !isHeart) {

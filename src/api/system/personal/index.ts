@@ -25,4 +25,9 @@ export function resetPwdPersonal(data:object) {
     })
 }
 
-
+export function refreshToken() {
+    return request({
+        url: '/api/v1/system/personal/refreshToken',
+        method: 'get'
+    })
+}

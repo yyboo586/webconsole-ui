@@ -59,6 +59,7 @@
               :disabled="
                 scope.row.isPk == '1' ||
                 scope.row.columnName == 'created_at' ||
+                scope.row.columnName == 'dept_id' ||
                 scope.row.columnName == 'created_by' ||
                 scope.row.columnName == 'updated_by'
               "
@@ -164,7 +165,7 @@
         </el-table-column>
         <el-table-column label="详情起新行" width="50">
           <template #default="scope">
-            <el-checkbox true-label="1" v-model="scope.row.isRowStart"></el-checkbox>
+            <el-checkbox true-value="1" v-model="scope.row.isRowStart"></el-checkbox>
           </template>
         </el-table-column>
         <el-table-column label="字典类型" width="160">

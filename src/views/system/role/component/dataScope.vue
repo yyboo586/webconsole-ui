@@ -33,7 +33,7 @@
           <template #header>
               <el-radio-group v-model="optionsActionValue" @change="setOptionsActionValueHandle">
                 <template v-for="item in dataScopeOptions" :key="item.value">
-                  <el-radio v-if="item.value!='2'" :label="item.value" >{{item.label}}</el-radio>
+                  <el-radio v-if="item.value!='2'" :value="item.value" >{{item.label}}</el-radio>
                 </template>
               </el-radio-group>
           </template>
@@ -41,7 +41,7 @@
             <div class="option-con">
               <el-radio-group v-model="menuAuthData[scope.row.id]">
                 <template v-for="item in dataScopeOptions" :key="item.value">
-                  <el-radio :label="item.value" @change="setOptionsItemHandle(item.value,scope.row.id)">
+                  <el-radio :value="item.value" @change="setOptionsItemHandle(item.value,scope.row.id)">
                     <el-badge v-if="item.value=='2' && menuAuthData[scope.row.id]=='2'" type="success" :value="getDeptLen(scope.row.id)" :max="99" class="item" :show-zero="false">{{item.label}}</el-badge>
                     <span v-else>{{item.label}}</span>
                   </el-radio>
