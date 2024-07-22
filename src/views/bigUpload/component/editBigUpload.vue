@@ -18,74 +18,61 @@
   </el-dialog>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import {ref, reactive, defineComponent} from 'vue';
 import {getBigFile, editBigFile} from "/@/api/system/bigFile";
 
 import {ElMessage} from "element-plus";
-export default defineComponent({
-  name: "editBigUpload",
-  props:{},
-  emits: ["success"],
-  setup(prop, {emit}) {
-    const formRef = ref<HTMLElement | null>(null);
-    const isShowDialog = ref<boolean>(false)
-    const ruleForm = reactive<any>({id:0, name:"", describe:""})
-    const rules = reactive<any>({
-      name: [
-        { required: true, message: "标题不能为空", trigger: "blur" }
-      ],
-    })
-    const openDialog = async (id:number) => {
-      resetForm()
-      const result = await getBigFile(id).then((res:any) => res.code === 0? res.data || {} : {})
-      const {name, describe} = result
-      ruleForm.id = result.id
-      ruleForm.name = name
-      ruleForm.describe = describe
-      isShowDialog.value = true
-    }
-    const closeDialog =  () => {
-      isShowDialog.value = false
-    }
-
-
-    const resetForm = () => {
-      ruleForm.id = 0
-      ruleForm.name = ""
-      ruleForm.describe = ""
-    }
-
-    const  onSubmit = async () => {
-      const formWrap = formRef.value as any
-      if (!formWrap) return;
-
-      formWrap.validate(async (valid: boolean) => {
-        if (valid) {
-          const result:any = await editBigFile(ruleForm)
-          if (result.code === 0) {
-            ElMessage.success('修改成功');
-            closeDialog()
-            emit('success')
-          } else {
-            ElMessage.error("修改失败")
-          }
-        }
-      });
-    }
-
-    return {
-      openDialog,
-      closeDialog,
-      isShowDialog,
-      ruleForm,
-      rules,
-      onSubmit,
-      formRef,
-      resetForm
-    }
-  }
+defineOptions({ name: "editBigUpload"})
+const emit = defineEmits(["success"])
+const formRef = ref<HTMLElement | null>(null);
+const isShowDialog = ref<boolean>(false)
+const ruleForm = reactive<any>({id:0, name:"", describe:""})
+const rules = reactive<any>({
+  name: [
+    { required: true, message: "标题不能为空", trigger: "blur" }
+  ],
 })
+const openDialog = async (id:number) => {
+  resetForm()
+  const result = await getBigFile(id).then((res:any) => res.code === 0? res.data || {} : {})
+  const {name, describe} = result
+  ruleForm.id = result.id
+  ruleForm.name = name
+  ruleForm.describe = describe
+  isShowDialog.value = true
+}
+const closeDialog =  () => {
+  isShowDialog.value = false
+}
+
+defineExpose({
+  openDialog
+})
+
+const resetForm = () => {
+  ruleForm.id = 0
+  ruleForm.name = ""
+  ruleForm.describe = ""
+}
+
+const  onSubmit = async () => {
+  const formWrap = formRef.value as any
+  if (!formWrap) return;
+
+  formWrap.validate(async (valid: boolean) => {
+    if (valid) {
+      const result:any = await editBigFile(ruleForm)
+      if (result.code === 0) {
+        ElMessage.success('修改成功');
+        closeDialog()
+        emit('success')
+      } else {
+        ElMessage.error("修改失败")
+      }
+    }
+  });
+}
 </script>
 
 <style scoped>

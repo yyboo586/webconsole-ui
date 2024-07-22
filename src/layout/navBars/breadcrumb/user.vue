@@ -79,7 +79,7 @@
 	</div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import {ref, getCurrentInstance, computed, reactive, toRefs, onMounted, defineComponent, watch} from 'vue';
 import { useRoute,useRouter } from 'vue-router';
 import {ElMessageBox, ElMessage, ElNotification} from 'element-plus';
@@ -96,213 +96,194 @@ import {logout} from "/@/api/login";
 import {removeCache} from "/@/api/system/cache";
 import {noticeStore} from "/@/stores/noticeStore";
 
-
-export default defineComponent({
-	name: 'layoutBreadcrumbUser',
-	components: { UserNews, Search },
-	setup() {
-		const { t } = useI18n();
-		const { proxy } = <any>getCurrentInstance();
-		const router = useRouter();
-    const route = useRoute();
-		const stores = useUserInfo();
-		const storesThemeConfig = useThemeConfig();
-		const { userInfos } = storeToRefs(stores);
-		const { themeConfig } = storeToRefs(storesThemeConfig);
-		const searchRef = ref();
-    const newPopoverRef=ref();
-		const state = reactive({
-			isScreenfull: false,
-			disabledI18n: 'zh-cn',
-			disabledSize: 'large',
-		});
-		// 设置分割样式
-		const layoutUserFlexNum = computed(() => {
-			let num: string | number = '';
-			const { layout, isClassicSplitMenu } = themeConfig.value;
-			const layoutArr: string[] = ['defaults', 'columns'];
-			if (layoutArr.includes(layout) || (layout === 'classic' && !isClassicSplitMenu)) num = '1';
-			else num = '';
-			return num;
-		});
-		// 全屏点击时
-		const onScreenfullClick = () => {
-			if (!screenfull.isEnabled) {
-				ElMessage.warning('暂不不支持全屏');
-				return false;
-			}
-			screenfull.toggle();
-			screenfull.on('change', () => {
-				if (screenfull.isFullscreen) state.isScreenfull = true;
-				else state.isScreenfull = false;
-			});
-		};
-		// 布局配置 icon 点击时
-		const onLayoutSetingClick = () => {
-			proxy.mittBus.emit('openSetingsDrawer');
-		};
-    //清除缓存
-    const removeCacheClick = ()=>{
-      //清除浏览器缓存
-      Session.remove('userMenu');
-      //清除后端缓存
-      removeCache().then(()=>{
-        ElMessage.success('缓存清除成功');
+defineOptions({ name: "layoutBreadcrumbUser"})
+const { t } = useI18n();
+const { proxy } = <any>getCurrentInstance();
+const router = useRouter();
+const route = useRoute();
+const stores = useUserInfo();
+const storesThemeConfig = useThemeConfig();
+const { userInfos } = storeToRefs(stores);
+const { themeConfig } = storeToRefs(storesThemeConfig);
+const searchRef = ref();
+const newPopoverRef=ref();
+const state = reactive({
+  isScreenfull: false,
+  disabledI18n: 'zh-cn',
+  disabledSize: 'large',
+});
+const {isScreenfull, disabledI18n, disabledSize} = toRefs(state)
+// 设置分割样式
+const layoutUserFlexNum = computed(() => {
+  let num: string | number = '';
+  const { layout, isClassicSplitMenu } = themeConfig.value;
+  const layoutArr: string[] = ['defaults', 'columns'];
+  if (layoutArr.includes(layout) || (layout === 'classic' && !isClassicSplitMenu)) num = '1';
+  else num = '';
+  return num;
+});
+// 全屏点击时
+const onScreenfullClick = () => {
+  if (!screenfull.isEnabled) {
+    ElMessage.warning('暂不不支持全屏');
+    return false;
+  }
+  screenfull.toggle();
+  screenfull.on('change', () => {
+    if (screenfull.isFullscreen) state.isScreenfull = true;
+    else state.isScreenfull = false;
+  });
+};
+// 布局配置 icon 点击时
+const onLayoutSetingClick = () => {
+  proxy.mittBus.emit('openSetingsDrawer');
+};
+//清除缓存
+const removeCacheClick = ()=>{
+  //清除浏览器缓存
+  Session.remove('userMenu');
+  //清除后端缓存
+  removeCache().then(()=>{
+    ElMessage.success('缓存清除成功');
+    window.location.reload();
+  })
+};
+// 下拉菜单点击时
+const onHandleCommandClick = (path: string) => {
+  if (path === 'logOut') {
+    ElMessageBox({
+      closeOnClickModal: false,
+      closeOnPressEscape: false,
+      title: t('message.user.logOutTitle'),
+      message: t('message.user.logOutMessage'),
+      showCancelButton: true,
+      confirmButtonText: t('message.user.logOutConfirm'),
+      cancelButtonText: t('message.user.logOutCancel'),
+      buttonSize: 'default',
+      beforeClose: (action, instance, done) => {
+        if (action === 'confirm') {
+          //后端退出
+          logout().then(()=>{
+            instance.confirmButtonLoading = true;
+            instance.confirmButtonText = t('message.user.logOutExit');
+            setTimeout(() => {
+              done();
+              setTimeout(() => {
+                instance.confirmButtonLoading = false;
+              }, 300);
+            }, 500);
+          })
+        } else {
+          done();
+        }
+      },
+    })
+      .then(async () => {
+        // 清除缓存/token等
+        Session.clear();
+        // 使用 reload 时，不需要调用 resetRoute() 重置路由
         window.location.reload();
       })
-    };
-		// 下拉菜单点击时
-		const onHandleCommandClick = (path: string) => {
-			if (path === 'logOut') {
-				ElMessageBox({
-					closeOnClickModal: false,
-					closeOnPressEscape: false,
-					title: t('message.user.logOutTitle'),
-					message: t('message.user.logOutMessage'),
-					showCancelButton: true,
-					confirmButtonText: t('message.user.logOutConfirm'),
-					cancelButtonText: t('message.user.logOutCancel'),
-					buttonSize: 'default',
-					beforeClose: (action, instance, done) => {
-						if (action === 'confirm') {
-              //后端退出
-              logout().then(()=>{
-                instance.confirmButtonLoading = true;
-                instance.confirmButtonText = t('message.user.logOutExit');
-                setTimeout(() => {
-                  done();
-                  setTimeout(() => {
-                    instance.confirmButtonLoading = false;
-                  }, 300);
-                }, 500);
-              })
-						} else {
-							done();
-						}
-					},
-				})
-					.then(async () => {
-						// 清除缓存/token等
-						Session.clear();
-						// 使用 reload 时，不需要调用 resetRoute() 重置路由
-						window.location.reload();
-					})
-					.catch(() => {});
-			} else if (path === 'wareHouse') {
-				window.open('https://gitee.com/tiger1103/gfast');
-			} else {
-				router.push(path);
-			}
-		};
-		// 菜单搜索点击
-		const onSearchClick = () => {
-			searchRef.value.openSearch();
-		};
-    const  hideNews=()=>{
-      debugger
-      newPopoverRef.value.hide()
-    }
-		// 组件大小改变
-		const onComponentSizeChange = (size: string) => {
-			Local.remove('themeConfig');
-			themeConfig.value.globalComponentSize = size;
-			Local.set('themeConfig', themeConfig.value);
-			initComponentSize();
-			window.location.reload();
-		};
-		// 语言切换
-		const onLanguageChange = (lang: string) => {
-			Local.remove('themeConfig');
-			themeConfig.value.globalI18n = lang;
-			Local.set('themeConfig', themeConfig.value);
-			proxy.$i18n.locale = lang;
-			initI18n();
-			other.useTitle();
-		};
-		// 设置 element plus 组件的国际化
-		const setI18nConfig = (locale: string) => {
-      proxy.mittBus.emit('getI18nConfig',proxy.i18n.global.messages.value[locale]);
-		};
-		// 初始化言语国际化
-		const initI18n = () => {
-			switch (Local.get('themeConfig').globalI18n) {
-				case 'zh-cn':
-					state.disabledI18n = 'zh-cn';
-					setI18nConfig('zh-cn');
-					break;
-				case 'en':
-					state.disabledI18n = 'en';
-					setI18nConfig('en');
-					break;
-				case 'zh-tw':
-					state.disabledI18n = 'zh-tw';
-					setI18nConfig('zh-tw');
-					break;
-			}
-		};
-		// 初始化全局组件大小
-		const initComponentSize = () => {
-			switch (Local.get('themeConfig').globalComponentSize) {
-				case 'large':
-					state.disabledSize = 'large';
-					break;
-				case 'default':
-					state.disabledSize = 'default';
-					break;
-				case 'small':
-					state.disabledSize = 'small';
-					break;
-			}
-		};
-		// 页面加载时
-		onMounted(() => {
-			if (Local.get('themeConfig')) {
-				initI18n();
-				initComponentSize();
-			}
-		});
-    const noticeStoreAct = noticeStore()
-    const getMessages = computed(() => {
-      return noticeStoreAct.message;
-    });
-    watch(getMessages,(nv,ov)=>{
-      if (!nv || !nv.id) {
-        return;
-      }
-      showNotice(nv)
-    },{ immediate: true, deep: true })
-    const showNotice = (data:any) => {
-      const eln = ElNotification({
-        title: '新消息',
-        message: `您有一条新消息：【${data.title}】，请点击查看详情。`,
-        type: 'warning',
-        duration:3600000,
-        onClick(){
-          if(route.fullPath=="/system/sysNotice/show?type="+data.type){
-            router.go(0)
-          }else{
-            router.push("/system/sysNotice/show?type="+data.type)
-          }
-          eln.close()
-        }
-      })
-    }
-		return {
-			userInfos,
-			onLayoutSetingClick,
-			onHandleCommandClick,
-			onScreenfullClick,
-			onSearchClick,
-			onComponentSizeChange,
-			onLanguageChange,
-      removeCacheClick,
-      hideNews,
-			searchRef,
-			layoutUserFlexNum,
-			...toRefs(state),
-		};
-	},
+      .catch(() => {});
+  } else if (path === 'wareHouse') {
+    window.open('https://gitee.com/tiger1103/gfast');
+  } else {
+    router.push(path);
+  }
+};
+// 菜单搜索点击
+const onSearchClick = () => {
+  searchRef.value.openSearch();
+};
+const  hideNews=()=>{
+  debugger
+  newPopoverRef.value.hide()
+}
+// 组件大小改变
+const onComponentSizeChange = (size: string) => {
+  Local.remove('themeConfig');
+  themeConfig.value.globalComponentSize = size;
+  Local.set('themeConfig', themeConfig.value);
+  initComponentSize();
+  window.location.reload();
+};
+// 语言切换
+const onLanguageChange = (lang: string) => {
+  Local.remove('themeConfig');
+  themeConfig.value.globalI18n = lang;
+  Local.set('themeConfig', themeConfig.value);
+  proxy.$i18n.locale = lang;
+  initI18n();
+  other.useTitle();
+};
+// 设置 element plus 组件的国际化
+const setI18nConfig = (locale: string) => {
+  proxy.mittBus.emit('getI18nConfig',proxy.i18n.global.messages.value[locale]);
+};
+// 初始化言语国际化
+const initI18n = () => {
+  switch (Local.get('themeConfig').globalI18n) {
+    case 'zh-cn':
+      state.disabledI18n = 'zh-cn';
+      setI18nConfig('zh-cn');
+      break;
+    case 'en':
+      state.disabledI18n = 'en';
+      setI18nConfig('en');
+      break;
+    case 'zh-tw':
+      state.disabledI18n = 'zh-tw';
+      setI18nConfig('zh-tw');
+      break;
+  }
+};
+// 初始化全局组件大小
+const initComponentSize = () => {
+  switch (Local.get('themeConfig').globalComponentSize) {
+    case 'large':
+      state.disabledSize = 'large';
+      break;
+    case 'default':
+      state.disabledSize = 'default';
+      break;
+    case 'small':
+      state.disabledSize = 'small';
+      break;
+  }
+};
+// 页面加载时
+onMounted(() => {
+  if (Local.get('themeConfig')) {
+    initI18n();
+    initComponentSize();
+  }
 });
+const noticeStoreAct = noticeStore()
+const getMessages = computed(() => {
+  return noticeStoreAct.message;
+});
+watch(getMessages,(nv,ov)=>{
+  if (!nv || !nv.id) {
+    return;
+  }
+  showNotice(nv)
+},{ immediate: true, deep: true })
+const showNotice = (data:any) => {
+  const eln = ElNotification({
+    title: '新消息',
+    message: `您有一条新消息：【${data.title}】，请点击查看详情。`,
+    type: 'warning',
+    duration:3600000,
+    onClick(){
+      if(route.fullPath=="/system/sysNotice/show?type="+data.type){
+        router.go(0)
+      }else{
+        router.push("/system/sysNotice/show?type="+data.type)
+      }
+      eln.close()
+    }
+  })
+}
 </script>
 
 <style scoped lang="scss">

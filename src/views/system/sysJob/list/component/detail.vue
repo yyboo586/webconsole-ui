@@ -76,180 +76,162 @@
     </el-drawer>
   </div>
 </template>
-<script lang="ts">
-  import { reactive, toRefs, defineComponent,ref,unref,getCurrentInstance,computed } from 'vue';
-  import {ElMessageBox, ElMessage, FormInstance,UploadProps} from 'element-plus';
-  import {
-    listSysJob,
-    getSysJob,
-    delSysJob,
-    addSysJob,
-    updateSysJob,
-    getUserList, getJobLogs, delSysJobLog,
-  } from "/@/api/system/tools/job/sysJob";
-  import {
-    SysJobTableColumns,
-    SysJobInfoData,
-    SysJobTableDataState,
-    SysJobEditState, SysJobLog, SysJobLogData,
-  } from "/@/views/system/sysJob/list/component/model"
-  export default defineComponent({
-    name:"apiV1SystemSysJobDetail",
-    components:{
-    },
-    props:{
-      jobGroupOptions:{
-        type:Array,
-        default:()=>[]
-      },
-      misfirePolicyOptions:{
-        type:Array,
-        default:()=>[]
-      },
-      statusOptions:{
-        type:Array,
-        default:()=>[]
-      },
-    },
-    setup(props,{emit}) {
-      const {proxy} = <any>getCurrentInstance()
-      const formRef = ref<HTMLElement | null>(null);
-      const menuRef = ref();
-      // 非多个禁用
-      const multiple =ref(true)
-      const logList = reactive<SysJobLog>({
-        logIds:[],
-        data: [],
-        loading: false,
-        param: {
-          pageNum: 1,
-          pageSize: 10,
-          targetName: undefined
-        },
-        total: 0
-      })
-      const state = reactive<SysJobEditState>({
-        loading:false,
-        isShowDialog: false,
-        formData: {
-          jobId: undefined,
-          jobName: undefined,
-          jobParams: undefined,
-          jobGroup: undefined,
-          invokeTarget: undefined,
-          cronExpression: undefined,
-          misfirePolicy: false ,
-          concurrent: undefined,
-          status: false ,
-          createdBy: undefined,
-          updatedBy: undefined,
-          remark: undefined,
-          createdAt: undefined,
-          updatedAt: undefined,
-          createdUser:{userNickname:''},
-          updatedUser:{userNickname:''}
-        },
-        // 表单校验
-        rules: {}
-      });
-        // 打开弹窗
-        const openDialog = (row?: SysJobInfoData) => {
-          resetForm();
-          if(row) {
-            getSysJob(row.jobId!).then((res:any)=>{
-              state.formData = res.data;
-            })
-            logList.loading=true
-            getLogList(row.invokeTarget!);
-          }
-          state.isShowDialog = true;
-        };
-        const getLogList = (invokeTarget:string)=>{
-          logList.param.targetName=invokeTarget
-          getJobLogs(logList.param).then((res:any)=>{
-            logList.data = res.data.list||[];
-            logList.total=res.data.total;
-            logList.loading=false;
-          })
-        };
-        // 关闭弹窗
-        const closeDialog = () => {
-          state.isShowDialog = false;
-        };
-        // 取消
-        const onCancel = () => {
-          closeDialog();
-        };
-        const resetForm = ()=>{
-          state.formData = {
-            jobId: undefined,
-            jobName: undefined,
-            jobParams: undefined,
-            jobGroup: undefined,
-            invokeTarget: undefined,
-            cronExpression: undefined,
-            misfirePolicy: false ,
-            concurrent: undefined,
-            status: false ,
-            createdBy: undefined,
-            updatedBy: undefined,
-            remark: undefined,
-            createdAt: undefined,
-            updatedAt: undefined,
-            createdUser:{userNickname:''},
-            updatedUser:{userNickname:''}
-          }
-        };
-        // 多选框选中数据
-        const handleSelectionChange = (selection:Array<SysJobLogData>) => {
-          logList.logIds = selection.map(item => item.id)
-          multiple.value = !selection.length
-        };
-        const handleDelete = (row: SysJobLogData) => {
-          let msg = '你确定要删除所选数据？';
-          let logId:number[] = [] ;
-          let targetName:string='';
-          if(row){
-            msg = `此操作将永久删除数据，是否继续?`
-            logId = [row.id]
-            targetName = row.targetName
-          }else{
-            logId = logList.logIds
-            targetName=state.formData.invokeTarget!
-          }
-          if(logId.length===0){
-            ElMessage.error('请选择要删除的数据。');
-            return
-          }
-          ElMessageBox.confirm(msg, '提示', {
-            confirmButtonText: '确认',
-            cancelButtonText: '取消',
-            type: 'warning',
-          })
-              .then(() => {
-                delSysJobLog(logId).then(()=>{
-                  ElMessage.success('删除成功');
-                  getLogList(targetName);
-                })
-              })
-              .catch(() => {});
-        }
-        return {
-          proxy,
-          openDialog,
-          closeDialog,
-          onCancel,
-          menuRef,
-          formRef,
-          logList,
-          getLogList,
-          handleSelectionChange,
-          multiple,
-          handleDelete,
-          ...toRefs(state),
-        };
-      }
+<script setup lang="ts">
+import { reactive, toRefs, defineComponent,ref,unref,getCurrentInstance,computed } from 'vue';
+import {ElMessageBox, ElMessage, FormInstance,UploadProps} from 'element-plus';
+import {
+  listSysJob,
+  getSysJob,
+  delSysJob,
+  addSysJob,
+  updateSysJob,
+  getUserList, getJobLogs, delSysJobLog,
+} from "/@/api/system/tools/job/sysJob";
+import {
+  SysJobTableColumns,
+  SysJobInfoData,
+  SysJobTableDataState,
+  SysJobEditState, SysJobLog, SysJobLogData,
+} from "/@/views/system/sysJob/list/component/model"
+defineOptions({ name: "apiV1SystemSysJobDetail"})
+const props = defineProps({
+  jobGroupOptions:{
+    type:Array,
+    default:()=>[]
+  },
+  misfirePolicyOptions:{
+    type:Array,
+    default:()=>[]
+  },
+  statusOptions:{
+    type:Array,
+    default:()=>[]
+  },
+})
+const {proxy} = <any>getCurrentInstance()
+const formRef = ref<HTMLElement | null>(null);
+const menuRef = ref();
+// 非多个禁用
+const multiple =ref(true)
+const logList = reactive<SysJobLog>({
+  logIds:[],
+  data: [],
+  loading: false,
+  param: {
+    pageNum: 1,
+    pageSize: 10,
+    targetName: undefined
+  },
+  total: 0
+})
+const state = reactive<SysJobEditState>({
+  loading:false,
+  isShowDialog: false,
+  formData: {
+    jobId: undefined,
+    jobName: undefined,
+    jobParams: undefined,
+    jobGroup: undefined,
+    invokeTarget: undefined,
+    cronExpression: undefined,
+    misfirePolicy: false ,
+    concurrent: undefined,
+    status: false ,
+    createdBy: undefined,
+    updatedBy: undefined,
+    remark: undefined,
+    createdAt: undefined,
+    updatedAt: undefined,
+    createdUser:{userNickname:''},
+    updatedUser:{userNickname:''}
+  },
+  // 表单校验
+  rules: {}
+});
+const { isShowDialog,formData} = toRefs(state)
+// 打开弹窗
+const openDialog = (row?: SysJobInfoData) => {
+resetForm();
+if(row) {
+getSysJob(row.jobId!).then((res:any)=>{
+  state.formData = res.data;
+})
+logList.loading=true
+getLogList(row.invokeTarget!);
+}
+state.isShowDialog = true;
+};
+defineExpose({openDialog})
+const getLogList = (invokeTarget:string)=>{
+  logList.param.targetName=invokeTarget
+  getJobLogs(logList.param).then((res:any)=>{
+    logList.data = res.data.list||[];
+    logList.total=res.data.total;
+    logList.loading=false;
   })
+};
+// 关闭弹窗
+const closeDialog = () => {
+  state.isShowDialog = false;
+};
+// 取消
+const onCancel = () => {
+  closeDialog();
+};
+const resetForm = ()=>{
+  state.formData = {
+    jobId: undefined,
+    jobName: undefined,
+    jobParams: undefined,
+    jobGroup: undefined,
+    invokeTarget: undefined,
+    cronExpression: undefined,
+    misfirePolicy: false ,
+    concurrent: undefined,
+    status: false ,
+    createdBy: undefined,
+    updatedBy: undefined,
+    remark: undefined,
+    createdAt: undefined,
+    updatedAt: undefined,
+    createdUser:{userNickname:''},
+    updatedUser:{userNickname:''}
+  }
+};
+// 多选框选中数据
+const handleSelectionChange = (selection:Array<SysJobLogData>) => {
+  logList.logIds = selection.map(item => item.id)
+  multiple.value = !selection.length
+};
+const handleDelete = (row: SysJobLogData) => {
+  let msg = '你确定要删除所选数据？';
+  let logId:number[] = [] ;
+  let targetName:string='';
+  if(row){
+    msg = `此操作将永久删除数据，是否继续?`
+    logId = [row.id]
+    targetName = row.targetName
+  }else{
+    logId = logList.logIds
+    targetName=state.formData.invokeTarget!
+  }
+  if(logId.length===0){
+    ElMessage.error('请选择要删除的数据。');
+    return
+  }
+  ElMessageBox.confirm(msg, '提示', {
+    confirmButtonText: '确认',
+    cancelButtonText: '取消',
+    type: 'warning',
+  })
+      .then(() => {
+        delSysJobLog(logId).then(()=>{
+          ElMessage.success('删除成功');
+          getLogList(targetName);
+        })
+      })
+      .catch(() => {});
+}
 </script>
 <style scoped>
   .system-sysJob-detail :deep(.el-form-item--large .el-form-item__label){

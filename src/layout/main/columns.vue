@@ -15,7 +15,7 @@
 	</el-container>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import { computed, defineComponent } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useThemeConfig } from '/@/stores/themeConfig';
@@ -23,19 +23,11 @@ import Aside from '/@/layout/component/aside.vue';
 import Header from '/@/layout/component/header.vue';
 import Main from '/@/layout/component/main.vue';
 import ColumnsAside from '/@/layout/component/columnsAside.vue';
-
-export default defineComponent({
-	name: 'layoutColumns',
-	components: { Aside, Header, Main, ColumnsAside },
-	setup() {
-		const storesThemeConfig = useThemeConfig();
-		const { themeConfig } = storeToRefs(storesThemeConfig);
-		const isFixedHeader = computed(() => {
-			return themeConfig.value.isFixedHeader;
-		});
-		return {
-			isFixedHeader,
-		};
-	},
+defineOptions({ name: "layoutColumns"})
+const storesThemeConfig = useThemeConfig();
+const { themeConfig } = storeToRefs(storesThemeConfig);
+const isFixedHeader = computed(() => {
+  return themeConfig.value.isFixedHeader;
 });
+
 </script>

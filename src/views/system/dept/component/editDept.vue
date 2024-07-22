@@ -71,7 +71,7 @@
   <select-user   ref="selectUserRef"    @selectUser="confirmUser" :selectedUsers="deptUser"></select-user>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import {reactive, toRefs, defineComponent, getCurrentInstance,ref,unref} from 'vue';
 import {addDept,editDept, getDeptList} from "/@/api/system/dept";
 import {getUserByIds} from '/@/api/system/user';
@@ -101,150 +101,131 @@ interface DeptSate {
 	deptData: Array<TableDataRow>;
   rules: object;
 }
-
-export default defineComponent({
-	name: 'systemEditDept',
-  components:{
-    selectUser,
+defineOptions({ name: "systemEditDept"})
+const emit = defineEmits(['deptList'])
+const {proxy} = getCurrentInstance() as any;
+const formRef = ref<HTMLElement | null>(null);
+const selectUserRef = ref();
+const  deptUser = ref([]);
+const state = reactive<DeptSate>({
+  isShowDialog: false,
+  ruleForm: {
+    deptId:0,
+    parentId: 0, // 上级部门
+    deptName: '', // 部门名称
+    orderNum:0,
+    leader: [],
+    phone: '',
+    email: '',
+    status: 1,
   },
-  emits:['deptList'],
-	setup(prop,{emit}) {
-    const {proxy} = getCurrentInstance() as any;
-    const formRef = ref<HTMLElement | null>(null);
-    const selectUserRef = ref();
-    const  deptUser = ref([]);
-		const state = reactive<DeptSate>({
-			isShowDialog: false,
-			ruleForm: {
-        deptId:0,
-        parentId: 0, // 上级部门
-				deptName: '', // 部门名称
-        orderNum:0,
-        leader: [],
-        phone: '',
-        email: '',
-        status: 1,
-			},
-			deptData: [], // 部门数据
-      rules: {
-        deptName:[
-          {required: true, message: "部门名称不能为空", trigger: "blur"},
-        ]
-      }
-		});
-		// 打开弹窗
-		const openDialog = (row?: RuleFormState|number) => {
-      resetForm()
-      getDeptList().then((res:any)=>{
-        state.deptData =  proxy.handleTree(res.data.deptList??[], "deptId","parentId");
-      });
-      if(row && typeof row === "object"){
-        state.ruleForm = row;
-        let  leaders  = row.leader??[]
-        if (leaders.length > 0){
-          //获取部门负责人信息
-          getUserByIds({ids:leaders}).then((res:any)=>{
-                if(res.code === 0){
-                  deptUser.value = res.data.userList;
-                }
-          });
-        }else{
-          //清空 deptUser, 避免缓存影响
-          deptUser.value = [];
-        }
-
-      }else if(row && typeof row === 'number'){
-        state.ruleForm.parentId = row
-        deptUser.value = [];
-      }else{
-        deptUser.value = [];
-      }
-			state.isShowDialog = true;
-		};
-		// 关闭弹窗
-		const closeDialog = () => {
-			state.isShowDialog = false;
-		};
-		// 取消
-		const onCancel = () => {
-			closeDialog();
-		};
-		// 新增
-		const onSubmit = () => {
-      const formWrap = unref(formRef) as any;
-      if (!formWrap) return;
-      formWrap.validate((valid: boolean) => {
-        if (valid) {
-          if(state.ruleForm.deptId===0){
-            //添加
-            addDept(state.ruleForm).then(()=>{
-              ElMessage.success('角色添加成功');
-              closeDialog(); // 关闭弹窗
-              emit('deptList')
-            });
-          }else{
-            //修改
-            editDept(state.ruleForm).then(()=>{
-              ElMessage.success('角色修改成功');
-              closeDialog(); // 关闭弹窗
-              emit('deptList')
-            });
-          }
-        }
-      });
-		};
-    const resetForm = ()=>{
-      state.ruleForm = {
-        deptId:0,
-        parentId: 0, // 上级部门
-        deptName: '', // 部门名称
-        orderNum:0,
-        leader: [],
-        phone: '',
-        email: '',
-        status: 1,
-      }
-    };
-
-    const handleClose = (data:any,key:number) => {
-         deptUser.value.splice(key, 1);
-         state.ruleForm.leader = deptUser.value.map((item:any) => item.id)
-    };
-    const confirmUser = (data:any[]) => {
-      let leaderArr = state.ruleForm.leader??[];
-      if(data.length>0){
-        data.map((item:any)=>{
-          // 若存在某个用户 则不添加
-          if (!leaderArr.includes(item.id)){
-            deptUser.value.push(item as never)
-            leaderArr.push(item.id)
-          }
-        })
-        state.ruleForm.leader = leaderArr;
-      }else{
-        deptUser.value = []
-        state.ruleForm.leader = []
-      }
-    };
-    //选择用户
-    const  handleSelectUser = () =>{
-      selectUserRef.value.openDialog()
-    };
-		return {
-			openDialog,
-			closeDialog,
-			onCancel,
-			onSubmit,
-      selectUserRef,
-      formRef,
-      deptUser,
-      confirmUser,
-      handleClose,
-      handleSelectUser,
-			...toRefs(state),
-		};
-	},
+  deptData: [], // 部门数据
+  rules: {
+    deptName:[
+      {required: true, message: "部门名称不能为空", trigger: "blur"},
+    ]
+  }
 });
+const { isShowDialog, ruleForm, deptData,rules } = toRefs(state);
+// 打开弹窗
+const openDialog = (row?: RuleFormState|number) => {
+  resetForm()
+  getDeptList().then((res:any)=>{
+    state.deptData =  proxy.handleTree(res.data.deptList??[], "deptId","parentId");
+  });
+  if(row && typeof row === "object"){
+    state.ruleForm = row;
+    let  leaders  = row.leader??[]
+    if (leaders.length > 0){
+      //获取部门负责人信息
+      getUserByIds({ids:leaders}).then((res:any)=>{
+            if(res.code === 0){
+              deptUser.value = res.data.userList;
+            }
+      });
+    }else{
+      //清空 deptUser, 避免缓存影响
+      deptUser.value = [];
+    }
+
+  }else if(row && typeof row === 'number'){
+    state.ruleForm.parentId = row
+    deptUser.value = [];
+  }else{
+    deptUser.value = [];
+  }
+  state.isShowDialog = true;
+};
+defineExpose({openDialog})
+// 关闭弹窗
+const closeDialog = () => {
+  state.isShowDialog = false;
+};
+// 取消
+const onCancel = () => {
+  closeDialog();
+};
+// 新增
+const onSubmit = () => {
+  const formWrap = unref(formRef) as any;
+  if (!formWrap) return;
+  formWrap.validate((valid: boolean) => {
+    if (valid) {
+      if(state.ruleForm.deptId===0){
+        //添加
+        addDept(state.ruleForm).then(()=>{
+          ElMessage.success('角色添加成功');
+          closeDialog(); // 关闭弹窗
+          emit('deptList')
+        });
+      }else{
+        //修改
+        editDept(state.ruleForm).then(()=>{
+          ElMessage.success('角色修改成功');
+          closeDialog(); // 关闭弹窗
+          emit('deptList')
+        });
+      }
+    }
+  });
+};
+const resetForm = ()=>{
+  state.ruleForm = {
+    deptId:0,
+    parentId: 0, // 上级部门
+    deptName: '', // 部门名称
+    orderNum:0,
+    leader: [],
+    phone: '',
+    email: '',
+    status: 1,
+  }
+};
+
+const handleClose = (data:any,key:number) => {
+     deptUser.value.splice(key, 1);
+     state.ruleForm.leader = deptUser.value.map((item:any) => item.id)
+};
+const confirmUser = (data:any[]) => {
+  let leaderArr = state.ruleForm.leader??[];
+  if(data.length>0){
+    data.map((item:any)=>{
+      // 若存在某个用户 则不添加
+      if (!leaderArr.includes(item.id)){
+        deptUser.value.push(item as never)
+        leaderArr.push(item.id)
+      }
+    })
+    state.ruleForm.leader = leaderArr;
+  }else{
+    deptUser.value = []
+    state.ruleForm.leader = []
+  }
+};
+//选择用户
+const  handleSelectUser = () =>{
+  selectUserRef.value.openDialog()
+};
 </script>
 <style>
 .u-m-r-10{

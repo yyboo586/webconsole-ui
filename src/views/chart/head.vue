@@ -80,15 +80,6 @@ export default defineComponent({
 		animation: masked-animation-data-v-b02d8052 4s linear infinite;
 		-webkit-box-reflect: below -2px -webkit-gradient(linear, left top, left bottom, from(transparent), to(hsla(0, 0%, 100%, 0.1)));
 		position: relative;
-		@keyframes masked-animation {
-			0% {
-				background-position: 0 0;
-			}
-			100% {
-				background-position: -100% 0;
-			}
-		}
-		position: relative;
 		&::after {
 			content: '';
 			width: 250px;
@@ -103,5 +94,13 @@ export default defineComponent({
 			cursor: pointer;
 		}
 	}
+}
+@keyframes masked-animation {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
 }
 </style>

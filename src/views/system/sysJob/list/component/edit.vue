@@ -56,7 +56,7 @@
             <el-radio
               v-for="dict in misfirePolicyOptions"
               :key="dict.value"
-              :label="dict.value"
+              :value="dict.value"
             >{{dict.label }}</el-radio>
           </el-radio-group>
         </el-form-item>
@@ -65,7 +65,7 @@
             <el-radio
               v-for="dict in statusOptions"
               :key="dict.value"
-              :label="dict.value"
+              :value="dict.value"
             >{{dict.label }}</el-radio>
           </el-radio-group>
         </el-form-item>
@@ -82,7 +82,7 @@
     </el-dialog>
   </div>
 </template>
-<script lang="ts">
+<script setup lang="ts">
 import { reactive, toRefs, defineComponent,ref,unref,getCurrentInstance } from 'vue';
 import {ElMessageBox, ElMessage, FormInstance,UploadProps} from 'element-plus';
 import {
@@ -99,144 +99,135 @@ import {
   SysJobTableDataState,
   SysJobEditState,
 } from "/@/views/system/sysJob/list/component/model"
-export default defineComponent({
-  name:"apiV1SystemSysJobEdit",
-  components:{
+defineOptions({ name: "apiV1SystemSysJobEdit"})
+const props = defineProps({
+  jobGroupOptions:{
+    type:Array,
+    default:()=>[]
   },
-  props:{
-    jobGroupOptions:{
-      type:Array,
-      default:()=>[]
-    },
-    misfirePolicyOptions:{
-      type:Array,
-      default:()=>[]
-    },
-    statusOptions:{
-      type:Array,
-      default:()=>[]
-    },
+  misfirePolicyOptions:{
+    type:Array,
+    default:()=>[]
   },
-  setup(props,{emit}) {
-    const {proxy} = <any>getCurrentInstance()
-    const formRef = ref<HTMLElement | null>(null);
-    const menuRef = ref();
-    const state = reactive<SysJobEditState>({
-      loading:false,
-      isShowDialog: false,
-      formData: {
-        jobId: undefined,
-        jobName: undefined,
-        jobParams: undefined,
-        jobGroup: undefined,
-        invokeTarget: undefined,
-        cronExpression: undefined,
-        misfirePolicy: false ,
-        concurrent: undefined,
-        status: false ,
-        createdBy: undefined,
-        updatedBy: undefined,
-        remark: undefined,
-        createdAt: undefined,
-        updatedAt: undefined,
-      },
-      // 表单校验
-      rules: {
-        cronExpression: [
-          { required: true, message: "cron执行表达式不能为空", trigger: "blur" }
-        ],
-        jobName : [
-            { required: true, message: "任务名称不能为空", trigger: "blur" }
-        ],
-        invokeTarget : [
-            { required: true, message: "任务方法不能为空", trigger: "blur" }
-        ],
-        status : [
-            { required: true, message: "状态不能为空", trigger: "blur" }
-        ],
-      }
-    });
-    // 打开弹窗
-    const openDialog = (row?: SysJobInfoData) => {
-      resetForm();
-      if(row) {
-        getSysJob(row.jobId!).then((res:any)=>{
-          const data = res.data;
-          data.jobGroup = ''+data.jobGroup
-          data.misfirePolicy = ''+data.misfirePolicy
-          data.status = ''+data.status
-          state.formData = data;
-      })
-    }
-      state.isShowDialog = true;
-    };
-    // 关闭弹窗
-    const closeDialog = () => {
-      state.isShowDialog = false;
-    };
-    // 取消
-    const onCancel = () => {
-      closeDialog();
-    };
-    // 提交
-    const onSubmit = () => {
-      const formWrap = unref(formRef) as any;
-      if (!formWrap) return;
-      formWrap.validate((valid: boolean) => {
-        if (valid) {
-          state.loading = true;
-          if(!state.formData.jobId || state.formData.jobId===0){
-            //添加
-          addSysJob(state.formData).then(()=>{
-              ElMessage.success('添加成功');
-              closeDialog(); // 关闭弹窗
-              emit('sysJobList')
-            }).finally(()=>{
-              state.loading = false;
-            })
-          }else{
-            //修改
-          updateSysJob(state.formData).then(()=>{
-              ElMessage.success('修改成功');
-              closeDialog(); // 关闭弹窗
-              emit('sysJobList')
-            }).finally(()=>{
-              state.loading = false;
-            })
-          }
-        }
-      });
-    };
-    const resetForm = ()=>{
-      state.formData = {
-        jobId: undefined,
-        jobName: undefined,
-        jobParams: undefined,
-        jobGroup: undefined,
-        invokeTarget: undefined,
-        cronExpression: undefined,
-        misfirePolicy: false ,
-        concurrent: undefined,
-        status: false ,
-        createdBy: undefined,
-        updatedBy: undefined,
-        remark: undefined,
-        createdAt: undefined,
-        updatedAt: undefined,
-      }
-    };
-    return {
-      proxy,
-      openDialog,
-      closeDialog,
-      onCancel,
-      onSubmit,
-      menuRef,
-      formRef,
-      ...toRefs(state),
-    };
-  }
+  statusOptions:{
+    type:Array,
+    default:()=>[]
+  },
 })
+const emit = defineEmits(['sysJobList'])
+const {proxy} = <any>getCurrentInstance()
+const formRef = ref<HTMLElement | null>(null);
+const menuRef = ref();
+const state = reactive<SysJobEditState>({
+  loading:false,
+  isShowDialog: false,
+  formData: {
+    jobId: undefined,
+    jobName: undefined,
+    jobParams: undefined,
+    jobGroup: undefined,
+    invokeTarget: undefined,
+    cronExpression: undefined,
+    misfirePolicy: false ,
+    concurrent: undefined,
+    status: false ,
+    createdBy: undefined,
+    updatedBy: undefined,
+    remark: undefined,
+    createdAt: undefined,
+    updatedAt: undefined,
+    createdUser:{userNickname:''},
+    updatedUser:{userNickname:''}
+  },
+  // 表单校验
+  rules: {
+    cronExpression: [
+      { required: true, message: "cron执行表达式不能为空", trigger: "blur" }
+    ],
+    jobName : [
+        { required: true, message: "任务名称不能为空", trigger: "blur" }
+    ],
+    invokeTarget : [
+        { required: true, message: "任务方法不能为空", trigger: "blur" }
+    ],
+    status : [
+        { required: true, message: "状态不能为空", trigger: "blur" }
+    ],
+  }
+});
+const {isShowDialog,formData,rules} = toRefs(state);
+// 打开弹窗
+const openDialog = (row?: SysJobInfoData) => {
+  resetForm();
+  if(row) {
+    getSysJob(row.jobId!).then((res:any)=>{
+      const data = res.data;
+      data.jobGroup = ''+data.jobGroup
+      data.misfirePolicy = ''+data.misfirePolicy
+      data.status = ''+data.status
+      state.formData = data;
+  })
+}
+  state.isShowDialog = true;
+};
+defineExpose({openDialog})
+// 关闭弹窗
+const closeDialog = () => {
+  state.isShowDialog = false;
+};
+// 取消
+const onCancel = () => {
+  closeDialog();
+};
+// 提交
+const onSubmit = () => {
+  const formWrap = unref(formRef) as any;
+  if (!formWrap) return;
+  formWrap.validate((valid: boolean) => {
+    if (valid) {
+      state.loading = true;
+      if(!state.formData.jobId || state.formData.jobId===0){
+        //添加
+      addSysJob(state.formData).then(()=>{
+          ElMessage.success('添加成功');
+          closeDialog(); // 关闭弹窗
+          emit('sysJobList')
+        }).finally(()=>{
+          state.loading = false;
+        })
+      }else{
+        //修改
+      updateSysJob(state.formData).then(()=>{
+          ElMessage.success('修改成功');
+          closeDialog(); // 关闭弹窗
+          emit('sysJobList')
+        }).finally(()=>{
+          state.loading = false;
+        })
+      }
+    }
+  });
+};
+const resetForm = ()=>{
+  state.formData = {
+    jobId: undefined,
+    jobName: undefined,
+    jobParams: undefined,
+    jobGroup: undefined,
+    invokeTarget: undefined,
+    cronExpression: undefined,
+    misfirePolicy: false ,
+    concurrent: undefined,
+    status: false ,
+    createdBy: undefined,
+    updatedBy: undefined,
+    remark: undefined,
+    createdAt: undefined,
+    updatedAt: undefined,
+    createdUser:{userNickname:''},
+    updatedUser:{userNickname:''}
+  }
+};
 </script>
 <style scoped lang="scss">
 .cronExpression-rule{

@@ -127,7 +127,7 @@
 		></apiV1SystemSysJobDetail>
 	</div>
 </template>
-<script lang="ts">
+<script setup lang="ts">
 import { ItemOptions } from '/@/api/items';
 import { toRefs, reactive, onMounted, ref, defineComponent, computed, getCurrentInstance, toRaw } from 'vue';
 import { ElMessageBox, ElMessage, FormInstance } from 'element-plus';
@@ -135,202 +135,167 @@ import { listSysJob, getSysJob, delSysJob, addSysJob, updateSysJob, getUserList,
 import { SysJobTableColumns, SysJobInfoData, SysJobTableDataState } from '/@/views/system/sysJob/list/component/model';
 import apiV1SystemSysJobEdit from '/@/views/system/sysJob/list/component/edit.vue';
 import apiV1SystemSysJobDetail from '/@/views/system/sysJob/list/component/detail.vue';
-export default defineComponent({
-	name: 'apiV1SystemSysJobList',
-	components: {
-		apiV1SystemSysJobEdit,
-		apiV1SystemSysJobDetail,
-	},
-	setup() {
-		const { proxy } = <any>getCurrentInstance();
-		const loading = ref(false);
-		const queryRef = ref();
-		const editRef = ref();
-		const detailRef = ref();
-		// 是否显示所有搜索选项
-		const showAll = ref(false);
-		// 非单个禁用
-		const single = ref(true);
-		// 非多个禁用
-		const multiple = ref(true);
-		const word = computed(() => {
-			if (showAll.value === false) {
-				//对文字进行处理
-				return '展开搜索';
-			} else {
-				return '收起搜索';
-			}
-		});
-		// 字典选项数据
-		const { sys_job_group, sys_job_policy, sys_job_status } = proxy.useDict('sys_job_group', 'sys_job_policy', 'sys_job_status');
-		const state = reactive<SysJobTableDataState>({
-			jobIds: [],
-			tableData: {
-				data: [],
-				total: 0,
-				loading: false,
-				param: {
-					pageNum: 1,
-					pageSize: 10,
-					jobName: undefined,
-					jobGroup: undefined,
-					status: undefined,
-				},
-			},
-		});
-		// 页面加载时
-		onMounted(() => {
-			initTableData();
-		});
-		// 初始化表格数据
-		const initTableData = () => {
-			sysJobList();
-		};
-		/** 重置按钮操作 */
-		const resetQuery = (formEl: FormInstance | undefined) => {
-			if (!formEl) return;
-			formEl.resetFields();
-			sysJobList();
-		};
-		// 获取列表数据
-		const sysJobList = () => {
-			loading.value = true;
-			listSysJob(state.tableData.param).then((res: any) => {
-				let list = res.data.list ?? [];
-				state.tableData.data = list;
-				state.tableData.total = res.data.total;
-				loading.value = false;
-			});
-		};
-		const toggleSearch = () => {
-			showAll.value = !showAll.value;
-		};
-		// 任务组名字典翻译
-		const jobGroupFormat = (row: SysJobTableColumns) => {
-			return proxy.selectDictLabel(sys_job_group.value, row.jobGroup);
-		};
-		// 计划执行策略字典翻译
-		const misfirePolicyFormat = (row: SysJobTableColumns) => {
-			return proxy.selectDictLabel(sys_job_policy.value, row.misfirePolicy);
-		};
-		// 状态字典翻译
-		const statusFormat = (row: SysJobTableColumns) => {
-			return proxy.selectDictLabel(sys_job_status.value, row.status);
-		};
-		// 多选框选中数据
-		const handleSelectionChange = (selection: Array<SysJobInfoData>) => {
-			state.jobIds = selection.map((item) => item.jobId);
-			single.value = selection.length != 1;
-			multiple.value = !selection.length;
-		};
-		const handleAdd = () => {
-			editRef.value.openDialog();
-		};
-		const handleUpdate = (row: SysJobTableColumns) => {
-			if (!row) {
-				row = state.tableData.data.find((item: SysJobTableColumns) => {
-					return item.jobId === state.jobIds[0];
-				}) as SysJobTableColumns;
-			}
-			editRef.value.openDialog(toRaw(row));
-		};
-		/** 执行按钮操作 */
-		const handleJobRun = (row: SysJobTableColumns) => {
-			const jobId = row.jobId || 0;
-			ElMessageBox.confirm('是否确认立即执行一次该任务?', '警告', {
-				confirmButtonText: '确定',
-				cancelButtonText: '取消',
-				type: 'warning',
-			})
-				.then(function () {
-					return runJob(jobId);
-				})
-				.then(() => {
-					ElMessage.success('执行成功');
-				})
-				.catch(function () {});
-		};
-		const handleDelete = (row: SysJobTableColumns) => {
-			let msg = '你确定要删除所选数据？';
-			let jobId: number[] = [];
-			if (row) {
-				msg = `此操作将永久删除数据，是否继续?`;
-				jobId = [row.jobId];
-			} else {
-				jobId = state.jobIds;
-			}
-			if (jobId.length === 0) {
-				ElMessage.error('请选择要删除的数据。');
-				return;
-			}
-			ElMessageBox.confirm(msg, '提示', {
-				confirmButtonText: '确认',
-				cancelButtonText: '取消',
-				type: 'warning',
-			})
-				.then(() => {
-					delSysJob(jobId).then(() => {
-						ElMessage.success('删除成功');
-						sysJobList();
-					});
-				})
-				.catch(() => {});
-		};
-		const handleView = (row: SysJobTableColumns) => {
-			detailRef.value.openDialog(toRaw(row));
-		};
-		// 任务状态修改
-		const handleStatusChange = (row: SysJobTableColumns) => {
-			let text = row.status === 0 ? '启用' : '停用';
-			ElMessageBox.confirm('确认要"' + text + '""' + row.jobName + '"任务吗?', '警告', {
-				confirmButtonText: '确定',
-				cancelButtonText: '取消',
-				type: 'warning',
-			})
-				.then(function () {
-					if (row.status === 0) {
-						return startJob(row.jobId);
-					} else {
-						return stopJob(row.jobId);
-					}
-				})
-				.then(() => {
-					ElMessage.success(text + '成功');
-				})
-				.catch(function () {
-					row.status = row.status === 0 ? 1 : 0;
-				});
-		};
-		return {
-			proxy,
-			editRef,
-			detailRef,
-			showAll,
-			loading,
-			single,
-			multiple,
-			word,
-			queryRef,
-			resetQuery,
-			sysJobList,
-			toggleSearch,
-			jobGroupFormat,
-			sys_job_group,
-			misfirePolicyFormat,
-			sys_job_policy,
-			statusFormat,
-			sys_job_status,
-			handleSelectionChange,
-			handleAdd,
-			handleUpdate,
-			handleDelete,
-			handleView,
-			handleJobRun,
-			handleStatusChange,
-			...toRefs(state),
-		};
-	},
+defineOptions({ name: "apiV1SystemSysJobList"})
+const { proxy } = <any>getCurrentInstance();
+const loading = ref(false);
+const queryRef = ref();
+const editRef = ref();
+const detailRef = ref();
+// 是否显示所有搜索选项
+const showAll = ref(false);
+// 非单个禁用
+const single = ref(true);
+// 非多个禁用
+const multiple = ref(true);
+const word = computed(() => {
+  if (showAll.value === false) {
+    //对文字进行处理
+    return '展开搜索';
+  } else {
+    return '收起搜索';
+  }
 });
+// 字典选项数据
+const { sys_job_group, sys_job_policy, sys_job_status } = proxy.useDict('sys_job_group', 'sys_job_policy', 'sys_job_status');
+const state = reactive<SysJobTableDataState>({
+  jobIds: [],
+  tableData: {
+    data: [],
+    total: 0,
+    loading: false,
+    param: {
+      pageNum: 1,
+      pageSize: 10,
+      jobName: undefined,
+      jobGroup: undefined,
+      status: undefined,
+    },
+  },
+});
+const { tableData } = toRefs(state);
+// 页面加载时
+onMounted(() => {
+  initTableData();
+});
+// 初始化表格数据
+const initTableData = () => {
+  sysJobList();
+};
+/** 重置按钮操作 */
+const resetQuery = (formEl: FormInstance | undefined) => {
+  if (!formEl) return;
+  formEl.resetFields();
+  sysJobList();
+};
+// 获取列表数据
+const sysJobList = () => {
+  loading.value = true;
+  listSysJob(state.tableData.param).then((res: any) => {
+    let list = res.data.list ?? [];
+    state.tableData.data = list;
+    state.tableData.total = res.data.total;
+    loading.value = false;
+  });
+};
+const toggleSearch = () => {
+  showAll.value = !showAll.value;
+};
+// 任务组名字典翻译
+const jobGroupFormat = (row: SysJobTableColumns) => {
+  return proxy.selectDictLabel(sys_job_group.value, row.jobGroup);
+};
+// 计划执行策略字典翻译
+const misfirePolicyFormat = (row: SysJobTableColumns) => {
+  return proxy.selectDictLabel(sys_job_policy.value, row.misfirePolicy);
+};
+// 状态字典翻译
+const statusFormat = (row: SysJobTableColumns) => {
+  return proxy.selectDictLabel(sys_job_status.value, row.status);
+};
+// 多选框选中数据
+const handleSelectionChange = (selection: Array<SysJobInfoData>) => {
+  state.jobIds = selection.map((item) => item.jobId);
+  single.value = selection.length != 1;
+  multiple.value = !selection.length;
+};
+const handleAdd = () => {
+  editRef.value.openDialog();
+};
+const handleUpdate = (row: SysJobTableColumns|null) => {
+  if (!row) {
+    row = state.tableData.data.find((item: SysJobTableColumns) => {
+      return item.jobId === state.jobIds[0];
+    }) as SysJobTableColumns;
+  }
+  editRef.value.openDialog(toRaw(row));
+};
+/** 执行按钮操作 */
+const handleJobRun = (row: SysJobTableColumns) => {
+  const jobId = row.jobId || 0;
+  ElMessageBox.confirm('是否确认立即执行一次该任务?', '警告', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning',
+  })
+    .then(function () {
+      return runJob(jobId);
+    })
+    .then(() => {
+      ElMessage.success('执行成功');
+    })
+    .catch(function () {});
+};
+const handleDelete = (row: SysJobTableColumns|null) => {
+  let msg = '你确定要删除所选数据？';
+  let jobId: number[] = [];
+  if (row) {
+    msg = `此操作将永久删除数据，是否继续?`;
+    jobId = [row.jobId];
+  } else {
+    jobId = state.jobIds;
+  }
+  if (jobId.length === 0) {
+    ElMessage.error('请选择要删除的数据。');
+    return;
+  }
+  ElMessageBox.confirm(msg, '提示', {
+    confirmButtonText: '确认',
+    cancelButtonText: '取消',
+    type: 'warning',
+  })
+    .then(() => {
+      delSysJob(jobId).then(() => {
+        ElMessage.success('删除成功');
+        sysJobList();
+      });
+    })
+    .catch(() => {});
+};
+const handleView = (row: SysJobTableColumns) => {
+  detailRef.value.openDialog(toRaw(row));
+};
+// 任务状态修改
+const handleStatusChange = (row: SysJobTableColumns) => {
+  let text = row.status === 0 ? '启用' : '停用';
+  ElMessageBox.confirm('确认要"' + text + '""' + row.jobName + '"任务吗?', '警告', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning',
+  })
+    .then(function () {
+      if (row.status === 0) {
+        return startJob(row.jobId);
+      } else {
+        return stopJob(row.jobId);
+      }
+    })
+    .then(() => {
+      ElMessage.success(text + '成功');
+    })
+    .catch(function () {
+      row.status = row.status === 0 ? 1 : 0;
+    });
+};
 </script>
 <style lang="scss" scoped>
 .colBlock {

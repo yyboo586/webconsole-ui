@@ -70,7 +70,7 @@
 	</div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import {toRefs, reactive, onMounted, ref, defineComponent, toRaw} from 'vue';
 import { ElMessageBox, ElMessage } from 'element-plus';
 import EditPost from '/@/views/system/post/component/editPost.vue';
@@ -100,101 +100,84 @@ interface TableDataState {
 		};
 	};
 }
-
-export default defineComponent({
-	name: 'apiV1SystemPostList',
-	components: {EditPost},
-	setup() {
-		const addPostRef = ref();
-		const editPostRef = ref();
-		const state = reactive<TableDataState>({
-      ids:[],
-			tableData: {
-				data: [],
-				total: 0,
-				loading: false,
-				param: {
-          postName:'',
-          status:'',
-          postCode:'',
-					pageNum: 1,
-					pageSize: 10,
-				},
-			},
-		});
-		// 初始化表格数据
-		const initTableData = () => {
-			postList()
-		};
-    const postList = ()=>{
-      getPostList(state.tableData.param).then(res=>{
-        state.tableData.data = res.data.postList??[];
-        state.tableData.total = res.data.total;
-      })
-    };
-		// 打开新增岗位弹窗
-		const onOpenAddPost = () => {
-      editPostRef.value.openDialog();
-		};
-		// 打开修改岗位弹窗
-		const onOpenEditPost = (row: Object) => {
-			editPostRef.value.openDialog(toRaw(row));
-		};
-		// 删除岗位
-		const onRowDel = (row: any) => {
-      let msg = '你确定要删除所选岗位？';
-      let ids:number[] = [] ;
-      if(row){
-        msg = `此操作将永久删除岗位：“${row.postName}”，是否继续?`
-        ids = [row.postId]
-      }else{
-        ids = state.ids
-      }
-      if(ids.length===0){
-        ElMessage.error('请选择要删除的数据。');
-        return
-      }
-			ElMessageBox.confirm(msg, '提示', {
-				confirmButtonText: '确认',
-				cancelButtonText: '取消',
-				type: 'warning',
-			})
-				.then(() => {
-          deletePost(ids).then(()=>{
-            ElMessage.success('删除成功');
-            postList();
-          })
-				})
-				.catch(() => {});
-		};
-		// 分页改变
-		const onHandleSizeChange = (val: number) => {
-			state.tableData.param.pageSize = val;
-		};
-		// 分页改变
-		const onHandleCurrentChange = (val: number) => {
-			state.tableData.param.pageNum = val;
-		};
-		// 页面加载时
-		onMounted(() => {
-			initTableData();
-		});
-    // 多选框选中数据
-    const handleSelectionChange = (selection:Array<TableData>)=> {
-      state.ids = selection.map(item => item.postId)
-    };
-		return {
-			addPostRef,
-			editPostRef,
-			onOpenAddPost,
-			onOpenEditPost,
-			onRowDel,
-			onHandleSizeChange,
-			onHandleCurrentChange,
-      postList,
-      handleSelectionChange,
-			...toRefs(state),
-		};
-	},
+defineOptions({ name: "apiV1SystemPostList"})
+const addPostRef = ref();
+const editPostRef = ref();
+const state = reactive<TableDataState>({
+  ids:[],
+  tableData: {
+    data: [],
+    total: 0,
+    loading: false,
+    param: {
+      postName:'',
+      status:'',
+      postCode:'',
+      pageNum: 1,
+      pageSize: 10,
+    },
+  },
 });
+const { tableData } = toRefs(state);
+// 初始化表格数据
+const initTableData = () => {
+  postList()
+};
+const postList = ()=>{
+  getPostList(state.tableData.param).then(res=>{
+    state.tableData.data = res.data.postList??[];
+    state.tableData.total = res.data.total;
+  })
+};
+// 打开新增岗位弹窗
+const onOpenAddPost = () => {
+  editPostRef.value.openDialog();
+};
+// 打开修改岗位弹窗
+const onOpenEditPost = (row: Object) => {
+  editPostRef.value.openDialog(toRaw(row));
+};
+// 删除岗位
+const onRowDel = (row: any) => {
+  let msg = '你确定要删除所选岗位？';
+  let ids:number[] = [] ;
+  if(row){
+    msg = `此操作将永久删除岗位：“${row.postName}”，是否继续?`
+    ids = [row.postId]
+  }else{
+    ids = state.ids
+  }
+  if(ids.length===0){
+    ElMessage.error('请选择要删除的数据。');
+    return
+  }
+  ElMessageBox.confirm(msg, '提示', {
+    confirmButtonText: '确认',
+    cancelButtonText: '取消',
+    type: 'warning',
+  })
+    .then(() => {
+      deletePost(ids).then(()=>{
+        ElMessage.success('删除成功');
+        postList();
+      })
+    })
+    .catch(() => {});
+};
+// 分页改变
+const onHandleSizeChange = (val: number) => {
+  state.tableData.param.pageSize = val;
+};
+// 分页改变
+const onHandleCurrentChange = (val: number) => {
+  state.tableData.param.pageNum = val;
+};
+// 页面加载时
+onMounted(() => {
+  initTableData();
+});
+// 多选框选中数据
+const handleSelectionChange = (selection:Array<TableData>)=> {
+  state.ids = selection.map(item => item.postId)
+};
 </script>

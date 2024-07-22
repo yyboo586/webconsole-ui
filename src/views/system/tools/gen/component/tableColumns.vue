@@ -158,14 +158,9 @@
             <textarea class="el-textarea__inner" v-model.lazy="scope.row.minWidth" ></textarea>
           </template>
         </el-table-column>
-        <el-table-column label="详情占列" width="70">
+        <el-table-column label="详情占列" width="100">
           <template #default="scope">
             <textarea class="el-textarea__inner" v-model.lazy="scope.row.colSpan" ></textarea>
-          </template>
-        </el-table-column>
-        <el-table-column label="详情起新行" width="50">
-          <template #default="scope">
-            <el-checkbox true-value="1" v-model="scope.row.isRowStart"></el-checkbox>
           </template>
         </el-table-column>
         <el-table-column label="字典类型" width="160">
@@ -202,67 +197,51 @@
   </div>
 </template>
 
-<script lang="ts">
-import {defineComponent, inject, nextTick, onBeforeMount, ref} from 'vue';
+<script setup lang="ts">
+import { inject, onBeforeMount, ref} from 'vue';
 import type { FormInstance } from 'element-plus';
 import {DictOpt, TableColumns, TableDataInfo} from '/@/views/system/tools/gen/component/model';
 import {optionselect} from "/@/api/system/dict/type";
 import RelationTable from "/@/views/system/tools/gen/component/relationTable.vue";
-import importTable from "/@/views/system/tools/gen/component/importTable.vue";
 import _ from "lodash";
-export default defineComponent({
-	name: 'genTableColumns',
-  components: {importTable, RelationTable},
-	setup() {
-    const relationTableRef = ref();
-		const tableColumnsRef = ref<FormInstance>();
-		const info = inject<TableDataInfo>('tableData') as TableDataInfo;
-		// 表格的高度
-		const tableHeight = ref(document.documentElement.scrollHeight - 300 + 'px');
-    const dictOptions = ref(<DictOpt[]>[])
-    onBeforeMount(()=>{
-      //获取字典选项
-      optionselect().then((res:any)=>{
-        dictOptions.value = res.data.dictType??[]
-      })
-    })
-    const handleChangeConfig = (row:TableColumns)=>{
-      relationTableRef.value.openDialog(row.columnId)
+defineOptions({ name: "genTableColumns"})
+const relationTableRef = ref();
+const tableColumnsRef = ref<FormInstance>();
+const info = inject<any>('tableData');
+// 表格的高度
+const tableHeight = ref(document.documentElement.scrollHeight - 300 + 'px');
+const dictOptions = ref(<DictOpt[]>[])
+onBeforeMount(()=>{
+  //获取字典选项
+  optionselect().then((res:any)=>{
+    dictOptions.value = res.data.dictType??[]
+  })
+})
+const handleChangeConfig = (row:TableColumns)=>{
+  relationTableRef.value.openDialog(row.columnId)
+}
+const setRelationTable = (cid:number,data:any)=>{
+  info.value.columns.map((item:TableColumns,index :number)=>{
+    if(item.columnId===cid){
+      let d = _.cloneDeep(item)
+      d.linkTableName = data.linkTableName
+      d.linkLabelId = data.linkLabelId
+      d.linkLabelName = data.linkLabelName
+      info.value.columns[index] = d
     }
-    const setRelationTable = (cid:number,data:any)=>{
-      info.value.columns.map((item:TableColumns,index :number)=>{
-        if(item.columnId===cid){
-          let d = _.cloneDeep(item)
-          d.linkTableName = data.linkTableName
-          d.linkLabelId = data.linkLabelId
-          d.linkLabelName = data.linkLabelName
-          info.value.columns[index] = d
-        }
-      })
+  })
+}
+const handleRemoveRelation = (row:TableColumns)=>{
+  info.value.columns.map((item:TableColumns,index :number)=>{
+    if(item.columnId===row.columnId){
+      let d = _.cloneDeep(item)
+      d.linkTableName = ""
+      d.linkLabelId = ""
+      d.linkLabelName = ""
+      info.value.columns[index] = d
     }
-    const handleRemoveRelation = (row:TableColumns)=>{
-      info.value.columns.map((item:TableColumns,index :number)=>{
-        if(item.columnId===row.columnId){
-          let d = _.cloneDeep(item)
-          d.linkTableName = ""
-          d.linkLabelId = ""
-          d.linkLabelName = ""
-          info.value.columns[index] = d
-        }
-      })
-    }
-		return {
-      relationTableRef,
-			tableColumnsRef,
-      info,
-			tableHeight,
-      dictOptions,
-      handleChangeConfig,
-      setRelationTable,
-      handleRemoveRelation
-		};
-	},
-});
+  })
+}
 </script>
 
 <style scoped>

@@ -57,7 +57,7 @@
 	</div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import { ref, toRefs, reactive, onMounted, defineComponent,getCurrentInstance } from 'vue';
 import { ElMessageBox, ElMessage } from 'element-plus';
 import EditDept from '/@/views/system/dept/component/editDept.vue';
@@ -86,70 +86,57 @@ interface TableDataState {
 		};
 	};
 }
+defineOptions({ name: "systemDept"})
+const {proxy} = getCurrentInstance() as any;
+const editDeptRef = ref();
+const state = reactive<TableDataState>({
+  tableData: {
+    data: [],
+    loading: false,
+    param: {
+      pageNum: 1,
+      pageSize: 10,
+      deptName:'',
+      status:''
+    },
+  },
+});
+const { tableData } = toRefs(state);
+// 初始化表格数据
+const initTableData = () => {
+  deptList();
+};
+const deptList = ()=>{
+  getDeptList(state.tableData.param).then((res:any)=>{
+    state.tableData.data = proxy.handleTree(res.data.deptList??[], "deptId","parentId");
+  });
+};
+// 打开新增菜单弹窗
+const onOpenAddDept = (row?: TableDataRow) => {
 
-export default defineComponent({
-	name: 'systemDept',
-	components: { EditDept },
-	setup() {
-    const {proxy} = getCurrentInstance() as any;
-		const editDeptRef = ref();
-		const state = reactive<TableDataState>({
-			tableData: {
-				data: [],
-				loading: false,
-				param: {
-					pageNum: 1,
-					pageSize: 10,
-          deptName:'',
-          status:''
-				},
-			},
-		});
-		// 初始化表格数据
-		const initTableData = () => {
-      deptList();
-		};
-    const deptList = ()=>{
-      getDeptList(state.tableData.param).then((res:any)=>{
-        state.tableData.data = proxy.handleTree(res.data.deptList??[], "deptId","parentId");
-      });
-    };
-		// 打开新增菜单弹窗
-		const onOpenAddDept = (row?: TableDataRow) => {
-
-      editDeptRef.value.openDialog(row?.deptId);
-		};
-		// 打开编辑菜单弹窗
-		const onOpenEditDept = (row: TableDataRow) => {
-			editDeptRef.value.openDialog(row);
-		};
-		// 删除当前行
-		const onTabelRowDel = (row: TableDataRow) => {
-			ElMessageBox.confirm(`此操作将永久删除部门：${row.deptName}, 是否继续?`, '提示', {
-				confirmButtonText: '删除',
-				cancelButtonText: '取消',
-				type: 'warning',
-			})
-				.then(() => {
-          deleteDept(row.deptId).then(()=>{
-            ElMessage.success('删除成功');
-            deptList();
-          })
-				})
-				.catch(() => {});
-		};
-		// 页面加载时
-		onMounted(() => {
-			initTableData();
-		});
-		return {
-			editDeptRef,
-      deptList,
-			onOpenAddDept,
-			onOpenEditDept,
-			onTabelRowDel,
-			...toRefs(state),
-		};
-	},
+  editDeptRef.value.openDialog(row?.deptId);
+};
+// 打开编辑菜单弹窗
+const onOpenEditDept = (row: TableDataRow) => {
+  editDeptRef.value.openDialog(row);
+};
+// 删除当前行
+const onTabelRowDel = (row: TableDataRow) => {
+  ElMessageBox.confirm(`此操作将永久删除部门：${row.deptName}, 是否继续?`, '提示', {
+    confirmButtonText: '删除',
+    cancelButtonText: '取消',
+    type: 'warning',
+  })
+    .then(() => {
+      deleteDept(row.deptId).then(()=>{
+        ElMessage.success('删除成功');
+        deptList();
+      })
+    })
+    .catch(() => {});
+};
+// 页面加载时
+onMounted(() => {
+  initTableData();
 });
 </script>

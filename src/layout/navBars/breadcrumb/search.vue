@@ -25,7 +25,7 @@
 	</div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import { reactive, toRefs, defineComponent, ref, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
@@ -44,80 +44,68 @@ interface Restaurant {
 		title: string;
 	};
 }
-
-export default defineComponent({
-	name: 'layoutBreadcrumbSearch',
-	setup() {
-		const storesTagsViewRoutes = useTagsViewRoutes();
-		const { tagsViewRoutes } = storeToRefs(storesTagsViewRoutes);
-		const layoutMenuAutocompleteRef = ref();
-		const { t } = useI18n();
-		const router = useRouter();
-		const state = reactive<SearchState>({
-			isShowSearch: false,
-			menuQuery: '',
-			tagsViewList: [],
-		});
-		// 搜索弹窗打开
-		const openSearch = () => {
-			state.menuQuery = '';
-			state.isShowSearch = true;
-			initTageView();
-			nextTick(() => {
-				setTimeout(() => {
-					layoutMenuAutocompleteRef.value.focus();
-				});
-			});
-		};
-		// 搜索弹窗关闭
-		const closeSearch = () => {
-			state.isShowSearch = false;
-		};
-		// 菜单搜索数据过滤
-		const menuSearch = (queryString: string, cb: Function) => {
-			let results = queryString ? state.tagsViewList.filter(createFilter(queryString)) : state.tagsViewList;
-			cb(results);
-		};
-		// 菜单搜索过滤
-		const createFilter: any = (queryString: string) => {
-			return (restaurant: Restaurant) => {
-				return (
-					restaurant.path.toLowerCase().indexOf(queryString.toLowerCase()) > -1 ||
-					restaurant.meta.title.toLowerCase().indexOf(queryString.toLowerCase()) > -1 ||
-					t(restaurant.meta.title).indexOf(queryString.toLowerCase()) > -1
-				);
-			};
-		};
-		// 初始化菜单数据
-		const initTageView = () => {
-			if (state.tagsViewList.length > 0) return false;
-			tagsViewRoutes.value.map((v: any) => {
-				if (!v.meta.isHide) state.tagsViewList.push({ ...v });
-			});
-		};
-		// 当前菜单选中时
-		const onHandleSelect = (item: any) => {
-			let { path, redirect } = item;
-			if (item.meta.isLink && !item.meta.isIframe) window.open(item.meta.isLink);
-			else if (redirect) router.push(redirect);
-			else router.push(path);
-			closeSearch();
-		};
-		// input 失去焦点时
-		const onSearchBlur = () => {
-			closeSearch();
-		};
-		return {
-			layoutMenuAutocompleteRef,
-			openSearch,
-			closeSearch,
-			menuSearch,
-			onHandleSelect,
-			onSearchBlur,
-			...toRefs(state),
-		};
-	},
+defineOptions({ name: "layoutBreadcrumbSearch"})
+const storesTagsViewRoutes = useTagsViewRoutes();
+const { tagsViewRoutes } = storeToRefs(storesTagsViewRoutes);
+const layoutMenuAutocompleteRef = ref();
+const { t } = useI18n();
+const router = useRouter();
+const state = reactive<SearchState>({
+  isShowSearch: false,
+  menuQuery: '',
+  tagsViewList: [],
 });
+const { isShowSearch, menuQuery} =toRefs(state)
+// 搜索弹窗打开
+const openSearch = () => {
+  state.menuQuery = '';
+  state.isShowSearch = true;
+  initTageView();
+  nextTick(() => {
+    setTimeout(() => {
+      layoutMenuAutocompleteRef.value.focus();
+    });
+  });
+};
+// 搜索弹窗关闭
+const closeSearch = () => {
+  state.isShowSearch = false;
+};
+// 菜单搜索数据过滤
+const menuSearch = (queryString: string, cb: Function) => {
+  let results = queryString ? state.tagsViewList.filter(createFilter(queryString)) : state.tagsViewList;
+  cb(results);
+};
+// 菜单搜索过滤
+const createFilter: any = (queryString: string) => {
+  return (restaurant: Restaurant) => {
+    return (
+      restaurant.path.toLowerCase().indexOf(queryString.toLowerCase()) > -1 ||
+      restaurant.meta.title.toLowerCase().indexOf(queryString.toLowerCase()) > -1 ||
+      t(restaurant.meta.title).indexOf(queryString.toLowerCase()) > -1
+    );
+  };
+};
+// 初始化菜单数据
+const initTageView = () => {
+  if (state.tagsViewList.length > 0) return false;
+  tagsViewRoutes.value.map((v: any) => {
+    if (!v.meta.isHide) state.tagsViewList.push({ ...v });
+  });
+};
+// 当前菜单选中时
+const onHandleSelect = (item: any) => {
+  let { path, redirect } = item;
+  if (item.meta.isLink && !item.meta.isIframe) window.open(item.meta.isLink);
+  else if (redirect) router.push(redirect);
+  else router.push(path);
+  closeSearch();
+};
+// input 失去焦点时
+const onSearchBlur = () => {
+  closeSearch();
+};
+
 </script>
 
 <style scoped lang="scss">

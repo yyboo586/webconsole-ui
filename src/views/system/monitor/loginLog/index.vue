@@ -9,7 +9,6 @@
                 placeholder="请输入登录地址"
                 clearable
                 style="width: 180px;"
-                size="default"
                 @keyup.enter.native="dataList"
             />
           </el-form-item>
@@ -20,7 +19,6 @@
                 placeholder="请输入登录地点"
                 clearable
                 style="width: 180px;"
-                size="default"
                 @keyup.enter.native="dataList"
             />
           </el-form-item>
@@ -31,7 +29,6 @@
                 placeholder="请输入用户名称"
                 clearable
                 style="width: 180px;"
-                size="default"
                 @keyup.enter.native="dataList"
             />
           </el-form-item>
@@ -41,7 +38,6 @@
                 v-model="tableData.param.status"
                 placeholder="登录状态"
                 clearable
-                size="default"
                 style="width: 180px"
             >
               <el-option
@@ -56,7 +52,6 @@
           <el-form-item label="登录时间" prop="dateRange">
             <el-date-picker
                 v-model="tableData.param.dateRange"
-                size="default"
                 style="width: 240px"
                 value-format="YYYY-MM-DD"
                 type="daterange"
@@ -117,7 +112,7 @@
   </div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import { toRefs, reactive, onMounted, ref, defineComponent,getCurrentInstance,unref } from 'vue';
 import { ElMessageBox, ElMessage,FormInstance} from 'element-plus';
 import { logList,deleteLog,clearLog } from '/@/api/system/monitor/loginLog';
@@ -152,111 +147,96 @@ interface TableDataState {
     };
   };
 }
-
-export default defineComponent({
-  name: 'apiV1SystemLoginLogList',
-  setup() {
-    const {proxy} = getCurrentInstance() as any;
-    const queryRef = ref();
-    const {admin_login_status} = proxy.useDict('admin_login_status')
-    const state = reactive<TableDataState>({
-      ids:[],
-      tableData: {
-        data: [],
-        total: 0,
-        loading: false,
-        param: {
-          pageNum: 1,
-          pageSize: 10,
-          dateRange: [],
-          status: '',
-          ipaddr:'',
-          loginLocation:'',
-          userName:''
-        },
-      },
-    });
-    // 初始化表格数据
-    const initTableData = () => {
-      dataList()
-    };
-    const dataList=()=>{
-      logList(state.tableData.param).then((res:any)=>{
-        state.tableData.data = res.data.list;
-        state.tableData.total = res.data.total;
-      });
-    };
-    // 删除日志
-    const onRowDel = (row: TableDataRow) => {
-      let msg = '你确定要删除所选数据？';
-      let ids:number[] = [] ;
-      if(row){
-        msg = `此操作将永久删除：“${row.loginName}”，是否继续?`
-        ids = [row.infoId]
-      }else{
-        ids = state.ids
-      }
-      if(ids.length===0){
-        ElMessage.error('请选择要删除的数据。');
-        return
-      }
-      ElMessageBox.confirm(msg, '提示', {
-        confirmButtonText: '确认',
-        cancelButtonText: '取消',
-        type: 'warning',
-      })
-          .then(() => {
-            deleteLog(ids).then(()=>{
-              ElMessage.success('删除成功');
-              dataList();
-            })
-          })
-          .catch(() => {});
-    };
-    // 清空日志
-    const onRowClear = () => {
-      ElMessageBox.confirm('你确定要删除所选数据？', '提示', {
-        confirmButtonText: '确认',
-        cancelButtonText: '取消',
-        type: 'warning',
-      })
-          .then(() => {
-            clearLog().then(()=>{
-              ElMessage.success('清除成功');
-              dataList();
-            })
-          })
-          .catch(() => {});
-    };
-    // 页面加载时
-    onMounted(() => {
-      initTableData();
-    });
-    /** 重置按钮操作 */
-    const resetQuery = (formEl: FormInstance | undefined) => {
-      if (!formEl) return
-      formEl.resetFields()
-      dataList()
-    };
-    // 多选框选中数据
-    const handleSelectionChange = (selection:TableDataRow[])=> {
-      state.ids = selection.map(item => item.infoId)
-    };
-    // 登录状态字典翻译
-    const statusFormat = (row:TableDataRow) => {
-      return proxy.selectDictLabel(unref(admin_login_status), row.status);
-    };
-    return {
-      queryRef,
-      onRowDel,
-      dataList,
-      resetQuery,
-      handleSelectionChange,
-      statusFormat,
-      onRowClear,
-      admin_login_status,
-      ...toRefs(state),
-    };
+defineOptions({ name: "apiV1SystemLoginLogList"})
+const {proxy} = getCurrentInstance() as any;
+const queryRef = ref();
+const {admin_login_status} = proxy.useDict('admin_login_status')
+const state = reactive<TableDataState>({
+  ids:[],
+  tableData: {
+    data: [],
+    total: 0,
+    loading: false,
+    param: {
+      pageNum: 1,
+      pageSize: 10,
+      dateRange: [],
+      status: '',
+      ipaddr:'',
+      loginLocation:'',
+      userName:''
+    },
   },
 });
+const { tableData } = toRefs(state);
+// 初始化表格数据
+const initTableData = () => {
+  dataList()
+};
+const dataList=()=>{
+  logList(state.tableData.param).then((res:any)=>{
+    state.tableData.data = res.data.list;
+    state.tableData.total = res.data.total;
+  });
+};
+// 删除日志
+const onRowDel = (row: TableDataRow|null) => {
+  let msg = '你确定要删除所选数据？';
+  let ids:number[] = [] ;
+  if(row){
+    msg = `此操作将永久删除：“${row.loginName}”，是否继续?`
+    ids = [row.infoId]
+  }else{
+    ids = state.ids
+  }
+  if(ids.length===0){
+    ElMessage.error('请选择要删除的数据。');
+    return
+  }
+  ElMessageBox.confirm(msg, '提示', {
+    confirmButtonText: '确认',
+    cancelButtonText: '取消',
+    type: 'warning',
+  })
+      .then(() => {
+        deleteLog(ids).then(()=>{
+          ElMessage.success('删除成功');
+          dataList();
+        })
+      })
+      .catch(() => {});
+};
+// 清空日志
+const onRowClear = () => {
+  ElMessageBox.confirm('你确定要删除所选数据？', '提示', {
+    confirmButtonText: '确认',
+    cancelButtonText: '取消',
+    type: 'warning',
+  })
+      .then(() => {
+        clearLog().then(()=>{
+          ElMessage.success('清除成功');
+          dataList();
+        })
+      })
+      .catch(() => {});
+};
+// 页面加载时
+onMounted(() => {
+  initTableData();
+});
+/** 重置按钮操作 */
+const resetQuery = (formEl: FormInstance | undefined) => {
+  if (!formEl) return
+  formEl.resetFields()
+  dataList()
+};
+// 多选框选中数据
+const handleSelectionChange = (selection:TableDataRow[])=> {
+  state.ids = selection.map(item => item.infoId)
+};
+// 登录状态字典翻译
+const statusFormat = (row:TableDataRow) => {
+  return proxy.selectDictLabel(unref(admin_login_status), row.status);
+};
 </script>

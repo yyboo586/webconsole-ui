@@ -10,8 +10,8 @@
         </el-form-item>
         <el-form-item label="状态" prop="status">
           <el-radio-group v-model="ruleForm.status">
-            <el-radio :label="1" >启用</el-radio>
-            <el-radio :label="0" >禁用</el-radio>
+            <el-radio :value="1" >启用</el-radio>
+            <el-radio :value="0" >禁用</el-radio>
           </el-radio-group>
         </el-form-item>
         <el-form-item label="备注" prop="remark">
@@ -28,7 +28,7 @@
 	</div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import { reactive, toRefs, defineComponent,ref, unref } from 'vue';
 import { getType,addType,editType } from '/@/api/system/dict/type';
 import {ElMessage} from "element-plus";
@@ -44,91 +44,80 @@ interface DicState {
 	ruleForm: RuleFormState;
   rules:{}
 }
-
-export default defineComponent({
-	name: 'systemEditDic',
-	setup(prop,{emit}) {
-    const formRef = ref<HTMLElement | null>(null);
-		const state = reactive<DicState>({
-			isShowDialog: false,
-			ruleForm: {
-        dictId:0,
-        dictName:'',
-        dictType:'',
-        status:1,
-        remark:''
-			},
-      rules: {
-        dictName: [
-          { required: true, message: "字典名称不能为空", trigger: "blur" }
-        ],
-        dictType: [
-          { required: true, message: "字典类型不能为空", trigger: "blur" }
-        ]
-      }
-		});
-		// 打开弹窗
-		const openDialog = (row: RuleFormState|null) => {
-      resetForm();
-      if (row){
-        getType(row.dictId).then((res:any)=>{
-          state.ruleForm = res.data.dictType
-        })
-        state.ruleForm = row;
-      }
-			state.isShowDialog = true;
-		};
-    const resetForm = ()=>{
-      state.ruleForm = {
-        dictId:0,
-        dictName:'',
-        dictType:'',
-        status:1,
-        remark:''
-      }
-    };
-		// 关闭弹窗
-		const closeDialog = () => {
-			state.isShowDialog = false;
-		};
-		// 取消
-		const onCancel = () => {
-			closeDialog();
-		};
-		// 新增
-		const onSubmit = () => {
-      const formWrap = unref(formRef) as any;
-      if (!formWrap) return;
-      formWrap.validate((valid: boolean) => {
-        if (valid) {
-          if(state.ruleForm.dictId!==0){
-            //修改
-            editType(state.ruleForm).then(()=>{
-              ElMessage.success('字典类型修改成功');
-              closeDialog(); // 关闭弹窗
-              emit('typeList')
-            })
-          }else{
-            //添加
-            addType(state.ruleForm).then(()=>{
-              ElMessage.success('字典类型添加成功');
-              closeDialog(); // 关闭弹窗
-              emit('typeList')
-            })
-          }
-        }
-      });
-		};
-
-
-		return {
-			openDialog,
-			closeDialog,
-			onCancel,
-			onSubmit,
-      formRef,
-			...toRefs(state),
-		};
-	},
+defineOptions({ name: "systemEditDic"})
+const emit = defineEmits(['typeList']);
+const formRef = ref<HTMLElement | null>(null);
+const state = reactive<DicState>({
+  isShowDialog: false,
+  ruleForm: {
+    dictId:0,
+    dictName:'',
+    dictType:'',
+    status:1,
+    remark:''
+  },
+  rules: {
+    dictName: [
+      { required: true, message: "字典名称不能为空", trigger: "blur" }
+    ],
+    dictType: [
+      { required: true, message: "字典类型不能为空", trigger: "blur" }
+    ]
+  }
 });
+const { isShowDialog,ruleForm,rules } = toRefs(state);
+// 打开弹窗
+const openDialog = (row: RuleFormState|null) => {
+  resetForm();
+  if (row){
+    getType(row.dictId).then((res:any)=>{
+      state.ruleForm = res.data.dictType
+    })
+    state.ruleForm = row;
+  }
+  state.isShowDialog = true;
+};
+defineExpose({ openDialog})
+const resetForm = ()=>{
+  state.ruleForm = {
+    dictId:0,
+    dictName:'',
+    dictType:'',
+    status:1,
+    remark:''
+  }
+};
+// 关闭弹窗
+const closeDialog = () => {
+  state.isShowDialog = false;
+};
+// 取消
+const onCancel = () => {
+  closeDialog();
+};
+// 新增
+const onSubmit = () => {
+  const formWrap = unref(formRef) as any;
+  if (!formWrap) return;
+  formWrap.validate((valid: boolean) => {
+    if (valid) {
+      if(state.ruleForm.dictId!==0){
+        //修改
+        editType(state.ruleForm).then(()=>{
+          ElMessage.success('字典类型修改成功');
+          closeDialog(); // 关闭弹窗
+          emit('typeList')
+        })
+      }else{
+        //添加
+        addType(state.ruleForm).then(()=>{
+          ElMessage.success('字典类型添加成功');
+          closeDialog(); // 关闭弹窗
+          emit('typeList')
+        })
+      }
+    }
+  });
+};
+
 </script>

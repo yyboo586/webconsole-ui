@@ -12,7 +12,7 @@
 	</el-container>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import { defineComponent } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useThemeConfig } from '/@/stores/themeConfig';
@@ -20,16 +20,7 @@ import Aside from '/@/layout/component/aside.vue';
 import Header from '/@/layout/component/header.vue';
 import Main from '/@/layout/component/main.vue';
 import TagsView from '/@/layout/navBars/tagsView/tagsView.vue';
-
-export default defineComponent({
-	name: 'layoutClassic',
-	components: { Aside, Header, Main, TagsView },
-	setup() {
-		const storesThemeConfig = useThemeConfig();
-		const { themeConfig } = storeToRefs(storesThemeConfig);
-		return {
-			themeConfig,
-		};
-	},
-});
+defineOptions({ name: "layoutClassic"})
+const storesThemeConfig = useThemeConfig();
+const { themeConfig } = storeToRefs(storesThemeConfig);
 </script>

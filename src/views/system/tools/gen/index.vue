@@ -100,7 +100,7 @@
 	</div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import {toRefs, reactive, onMounted, ref, defineComponent} from 'vue';
 import {ElMessageBox, ElMessage, FormInstance} from 'element-plus';
 import {getTableList, deleteTables, batchGenCode, syncTable} from "/@/api/system/tools/gen";
@@ -109,169 +109,146 @@ import importTable from "/@/views/system/tools/gen/component/importTable.vue";
 import { useRouter } from 'vue-router';
 import genCodePreview from '/@/views/system/tools/gen/component/preview.vue'
 import {refreshBackEndControlRoutes} from "/@/router/backEnd";
-export default defineComponent({
-	name: 'apiV1SystemToolsGenTableList',
-	components: {importTable,genCodePreview},
-	setup() {
-    const router =  useRouter()
-		const addPostRef = ref()
-		const editPostRef = ref()
-    const queryRef = ref()
-    const importRef = ref()
-    const genCodePreviewRef = ref()
-		const state = reactive<TableDataState>({
-      ids:[],
-      // 非单个禁用
-      single: true,
-      // 非多个禁用
-      multiple: true,
-      tableNames:[],
-			tableData: {
-				data: [],
-				total: 0,
-				loading: false,
-				param: {
-          tableName:'',
-          tableComment:'',
-					pageNum: 1,
-					pageSize: 10,
-          dateRange: []
-				},
-			},
-		});
-		// 初始化表格数据
-		const initTableData = () => {
-			tableList()
-		};
-    const tableList = ()=>{
-      getTableList(state.tableData.param).then(res=>{
-        state.tableData.data = res.data.list??[];
-        state.tableData.total = res.data.total;
-      })
-    };
-    /** 重置按钮操作 */
-    const resetQuery = (formEl: FormInstance | undefined) => {
-      if (!formEl) return
-      formEl.resetFields()
-      tableList()
-    };
-		// 删除导入的表
-		const onRowDel = (row: TableData) => {
-      let msg = '你确定要删除所选数据？';
-      let ids:number[] = [] ;
-      if(row){
-        msg = `此操作将永久删除：“${row.tableName}”，是否继续?`
-        ids = [row.tableId]
-      }else{
-        msg = `此操作将永久删除：“${state.tableNames.join(',')}”，是否继续?`
-        ids = state.ids
-      }
-      if(ids.length===0){
-        ElMessage.error('请选择要删除的数据。');
-        return
-      }
-			ElMessageBox.confirm(msg, '提示', {
-				confirmButtonText: '确认',
-				cancelButtonText: '取消',
-				type: 'warning',
-			})
-				.then(() => {
-          deleteTables(ids).then(()=>{
-            ElMessage.success('删除成功');
-            tableList();
-          })
-				})
-				.catch(() => {});
-		};
-		// 分页改变
-		const onHandleSizeChange = (val: number) => {
-			state.tableData.param.pageSize = val;
-		};
-		// 分页改变
-		const onHandleCurrentChange = (val: number) => {
-			state.tableData.param.pageNum = val;
-		};
-		// 页面加载时
-		onMounted(() => {
-			initTableData();
-		});
-    // 多选框选中数据
-    const handleSelectionChange = (selection:Array<TableData>)=> {
-      state.ids = selection.map(item => item.tableId)
-      state.multiple = !selection.length
-      state.single = selection.length != 1
-      state.tableNames = selection.map(item=>item.tableName)
-    };
-    const handleGenTable=(row: TableData)=>{
-      let msg = '你确定要生成？';
-      let ids:number[] = [] ;
-      if(row){
-        msg = `此操作将生成业务表：“${row.tableName}”相关代码，是否继续?`
-        ids = [row.tableId]
-      }else{
-        msg = `此操作将生成业务表：“${state.tableNames.join(',')}”相关代码，是否继续?`
-        ids = state.ids
-      }
-      if(ids.length===0){
-        ElMessage.error('请选择要生成的业务表数据。');
-        return
-      }
-      ElMessageBox.confirm(msg, '提示', {
-        confirmButtonText: '确认',
-        cancelButtonText: '取消',
-        type: 'warning',
-      })
-          .then(() => {
-            batchGenCode(ids).then(()=>{
-              ElMessage.success('生成成功');
-              resetMenuSession()
-              tableList();
-            })
-          })
-          .catch(() => {});
-    }
-    // 重置菜单session
-    const resetMenuSession = () => {
-      refreshBackEndControlRoutes();
-    };
-    //打开导入页面
-    const openImportTable=()=>{
-      importRef.value.openDialog()
-    }
-    const handlePreview = (row:TableData)=>{
-      genCodePreviewRef.value.showView(row.tableId);
-    }
-    const handleEditTable=(row:TableData)=>{
-      const tableId = row?.tableId || state.ids[0];
-      router.push({ path: "/system/tools/gen/edit", query: { tableId: tableId } });
-    }
-    const handleSyncTable=((row:TableData)=>{
-        const tableId = row?.tableId || state.ids[0];
-        syncTable(tableId).then((res:any)=>{
-            if (res.code === 0) {
-                ElMessage.success('同步成功');
-            }
-        })
-    })
-		return {
-			addPostRef,
-			editPostRef,
-      queryRef,
-      importRef,
-      genCodePreviewRef,
-			onRowDel,
-			onHandleSizeChange,
-			onHandleCurrentChange,
-      tableList,
-      resetQuery,
-      handleSelectionChange,
-      handleGenTable,
-      openImportTable,
-      handleEditTable,
-      handlePreview,
-      handleSyncTable,
-			...toRefs(state),
-		};
-	},
+defineOptions({ name: "apiV1SystemToolsGenTableList"})
+const router =  useRouter()
+const addPostRef = ref()
+const editPostRef = ref()
+const queryRef = ref()
+const importRef = ref()
+const genCodePreviewRef = ref()
+const state = reactive<TableDataState>({
+  ids:[],
+  // 非单个禁用
+  single: true,
+  // 非多个禁用
+  multiple: true,
+  tableNames:[],
+  tableData: {
+    data: [],
+    total: 0,
+    loading: false,
+    param: {
+      tableName:'',
+      tableComment:'',
+      pageNum: 1,
+      pageSize: 10,
+      dateRange: []
+    },
+  },
 });
+const {single,multiple, tableData}=toRefs(state)
+// 初始化表格数据
+const initTableData = () => {
+  tableList()
+};
+const tableList = ()=>{
+  getTableList(state.tableData.param).then(res=>{
+    state.tableData.data = res.data.list??[];
+    state.tableData.total = res.data.total;
+  })
+};
+/** 重置按钮操作 */
+const resetQuery = (formEl: FormInstance | undefined) => {
+  if (!formEl) return
+  formEl.resetFields()
+  tableList()
+};
+// 删除导入的表
+const onRowDel = (row: TableData|null) => {
+  let msg = '你确定要删除所选数据？';
+  let ids:number[] = [] ;
+  if(row){
+    msg = `此操作将永久删除：“${row.tableName}”，是否继续?`
+    ids = [row.tableId]
+  }else{
+    msg = `此操作将永久删除：“${state.tableNames.join(',')}”，是否继续?`
+    ids = state.ids
+  }
+  if(ids.length===0){
+    ElMessage.error('请选择要删除的数据。');
+    return
+  }
+  ElMessageBox.confirm(msg, '提示', {
+    confirmButtonText: '确认',
+    cancelButtonText: '取消',
+    type: 'warning',
+  })
+    .then(() => {
+      deleteTables(ids).then(()=>{
+        ElMessage.success('删除成功');
+        tableList();
+      })
+    })
+    .catch(() => {});
+};
+// 分页改变
+const onHandleSizeChange = (val: number) => {
+  state.tableData.param.pageSize = val;
+};
+// 分页改变
+const onHandleCurrentChange = (val: number) => {
+  state.tableData.param.pageNum = val;
+};
+// 页面加载时
+onMounted(() => {
+  initTableData();
+});
+// 多选框选中数据
+const handleSelectionChange = (selection:Array<TableData>)=> {
+  state.ids = selection.map(item => item.tableId)
+  state.multiple = !selection.length
+  state.single = selection.length != 1
+  state.tableNames = selection.map(item=>item.tableName)
+};
+const handleGenTable=(row: TableData|null)=>{
+  let msg = '你确定要生成？';
+  let ids:number[] = [] ;
+  if(row){
+    msg = `此操作将生成业务表：“${row.tableName}”相关代码，是否继续?`
+    ids = [row.tableId]
+  }else{
+    msg = `此操作将生成业务表：“${state.tableNames.join(',')}”相关代码，是否继续?`
+    ids = state.ids
+  }
+  if(ids.length===0){
+    ElMessage.error('请选择要生成的业务表数据。');
+    return
+  }
+  ElMessageBox.confirm(msg, '提示', {
+    confirmButtonText: '确认',
+    cancelButtonText: '取消',
+    type: 'warning',
+  })
+      .then(() => {
+        batchGenCode(ids).then(()=>{
+          ElMessage.success('生成成功');
+          resetMenuSession()
+          tableList();
+        })
+      })
+      .catch(() => {});
+}
+// 重置菜单session
+const resetMenuSession = () => {
+  refreshBackEndControlRoutes();
+};
+//打开导入页面
+const openImportTable=()=>{
+  importRef.value.openDialog()
+}
+const handlePreview = (row:TableData)=>{
+  genCodePreviewRef.value.showView(row.tableId);
+}
+const handleEditTable=(row:TableData|null)=>{
+  const tableId = row?.tableId || state.ids[0];
+  router.push({ path: "/system/tools/gen/edit", query: { tableId: tableId } });
+}
+const handleSyncTable=((row:TableData)=>{
+    const tableId = row?.tableId || state.ids[0];
+    syncTable(tableId).then((res:any)=>{
+        if (res.code === 0) {
+            ElMessage.success('同步成功');
+        }
+    })
+})
 </script>

@@ -66,86 +66,72 @@
   </el-dialog>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import {defineComponent, reactive, ref, toRefs} from "vue";
 import {ImportTableDataState, TableColumns, TableData} from "/@/views/system/tools/gen/component/model"
 import {getRelationTable, importTable} from "/@/api/system/tools/gen";
 import {ElMessage} from "element-plus/es";
-export default defineComponent({
-  name: "relationTable",
-  emits:['ok'],
-  setup(prop,{emit}) {
-    const queryFormRef = ref()
-    const tableRef = ref()
-    const visible = ref(false)
-    const columnId = ref<number>()
-    const state = reactive<ImportTableDataState>({
-      tableData:{
-        data:[],
-        total:0,
-        loading:true,
-        param:{
-          pageNum: 1,
-          pageSize: 10,
-          tableName: '',
-          tableComment: ''
-        },
-      }
-    })
-    const getList = ()=>{
-      getRelationTable(state.tableData.param).then((res:any)=>{
-        state.tableData.data = res.data.data??[]
-        state.tableData.total = res.data.total
-
-      })
-    }
-    const handleQuery = ()=>{
-      state.tableData.param.pageNum = 1
-      getList()
-    }
-    const resetQuery=()=>{
-      queryFormRef.value.resetFields()
-      getList()
-    }
-    const clickRow=(row:TableColumns)=>{
-      tableRef.value.toggleRowSelection(row);
-    }
-
-    const handleImportTable=(row:TableColumns)=>{
-      if(!row.linkLabelId){
-        ElMessage.error("请选择关联表key")
-        return
-      }
-      if(!row.linkLabelName){
-        ElMessage.error("请选择关联表value")
-        return
-      }
-      emit("ok",columnId.value,{
-        linkTableName:row.tableName,
-        linkLabelId:row.linkLabelId,
-        linkLabelName:row.linkLabelName
-      });
-      visible.value = false;
-    }
-    const openDialog = (cid:number)=>{
-      columnId.value = cid
-      getList()
-      visible.value = true
-    }
-    return {
-      queryFormRef,
-      tableRef,
-      visible,
-      getList,
-      handleQuery,
-      resetQuery,
-      clickRow,
-      handleImportTable,
-      openDialog,
-      ...toRefs(state),
-    };
+defineOptions({ name: "relationTable"})
+const emit = defineEmits(['ok'])
+const queryFormRef = ref()
+const tableRef = ref()
+const visible = ref(false)
+const columnId = ref<number>()
+const state = reactive<ImportTableDataState>({
+  tableData:{
+    data:[],
+    total:0,
+    loading:true,
+    param:{
+      pageNum: 1,
+      pageSize: 10,
+      tableName: '',
+      tableComment: ''
+    },
   }
 })
+const { tableData} = toRefs(state)
+const getList = ()=>{
+  getRelationTable(state.tableData.param).then((res:any)=>{
+    state.tableData.data = res.data.data??[]
+    state.tableData.total = res.data.total
+
+  })
+}
+const handleQuery = ()=>{
+  state.tableData.param.pageNum = 1
+  getList()
+}
+const resetQuery=()=>{
+  queryFormRef.value.resetFields()
+  getList()
+}
+const clickRow=(row:TableColumns)=>{
+  tableRef.value.toggleRowSelection(row);
+}
+
+const handleImportTable=(row:TableColumns)=>{
+  if(!row.linkLabelId){
+    ElMessage.error("请选择关联表key")
+    return
+  }
+  if(!row.linkLabelName){
+    ElMessage.error("请选择关联表value")
+    return
+  }
+  emit("ok",columnId.value,{
+    linkTableName:row.tableName,
+    linkLabelId:row.linkLabelId,
+    linkLabelName:row.linkLabelName
+  });
+  visible.value = false;
+}
+const openDialog = (cid:number)=>{
+  columnId.value = cid
+  getList()
+  visible.value = true
+}
+defineExpose({openDialog})
 </script>
 
 <style scoped lang="scss">

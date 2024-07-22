@@ -5,7 +5,7 @@
         <el-card shadow="hover">
           <el-aside>
             <el-scrollbar>
-              <el-input :prefix-icon="search" v-model="filterText" placeholder="请输入部门名称" clearable size="default" style="width: 80%;"/>
+              <el-input :prefix-icon="search" v-model="filterText" placeholder="请输入部门名称" clearable style="width: 80%;"/>
               <el-tree
                   ref="treeRef"
                   class="filter-tree"
@@ -82,7 +82,7 @@
                   </el-icon>
                   新增用户
                 </el-button>
-                <el-button size="default" type="danger" class="ml10" @click="onRowDel(null)">
+                <el-button size="default" type="danger" class="ml10" @click="onRowDel()">
                   <el-icon>
                     <ele-Delete />
                   </el-icon>
@@ -99,7 +99,7 @@
 	</div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import {toRefs, reactive, onMounted, ref, defineComponent, watch, getCurrentInstance} from 'vue';
 import {ElTree,FormInstance} from 'element-plus';
 import { Search } from '@element-plus/icons-vue'
@@ -118,108 +118,88 @@ interface QueryParam {
     dateRange: string[];
   };
 }
-
-export default defineComponent({
-	name: 'systemUser',
-	components: { UserList },
-	setup() {
-    const {proxy} = <any>getCurrentInstance();
-    const {sys_user_sex} = proxy.useDict('sys_user_sex')
-		const userListRef = ref();
-		const queryRef = ref();
-    const filterText = ref('');
-    const treeRef = ref<InstanceType<typeof ElTree>>();
-    const search = Search
-		const state = reactive<QueryParam>({
-      ids:[],
-      deptProps:{
-        id:"deptId",
-        children: "children",
-        label: "deptName"
-      },
-      deptData:[
+defineOptions({ name: "systemUser"})
+const {proxy} = <any>getCurrentInstance();
+const {sys_user_sex} = proxy.useDict('sys_user_sex')
+const userListRef = ref();
+const queryRef = ref();
+const filterText = ref('');
+const treeRef = ref<InstanceType<typeof ElTree>>();
+const search = Search
+const state = reactive<QueryParam>({
+  ids:[],
+  deptProps:{
+    id:"deptId",
+    children: "children",
+    label: "deptName"
+  },
+  deptData:[
+    {
+      label: '集团总部',
+      children: [
         {
-          label: '集团总部',
+          label: '曲靖分部',
           children: [
             {
-              label: '曲靖分部',
-              children: [
-                {
-                  label: '总经办',
-                },
-                {
-                  label: '市场部',
-                },
-                {
-                  label: '研发部',
-                },
-              ],
+              label: '总经办',
+            },
+            {
+              label: '市场部',
+            },
+            {
+              label: '研发部',
             },
           ],
         },
       ],
-      param: {
-        deptId:'',
-        mobile:'',
-        status:'',
-        keyWords:'',
-        dateRange:[]
-      },
-		});
-		// 初始化表格数据
-		const initTableData = () => {
-      getDeptTree().then((res:any)=>{
-        state.deptData = res.data.deps
-      })
-		};
-    const userList = ()=>{
-      userListRef.value.userList();
-    };
-		// 打开新增用户弹窗
-		const onOpenAddUser = () => {
-      userListRef.value.onOpenAddUser();
-		};
-		// 删除用户
-		const onRowDel = () => {
-      userListRef.value.onRowDel(null);
-		};
-		// 页面加载时
-		onMounted(() => {
-			initTableData();
-		});
-    watch(filterText, (val) => {
-      treeRef.value!.filter(val)
-    });
-    const deptFilterNode = (value: string, data:any) => {
-      if (!value) return true;
-      return data.deptName.includes(value)
-    };
-    // 节点单击事件
-    const handleNodeClick = (data:any) => {
-      state.param.deptId = data.deptId;
-      userList();
-    };
-    /** 重置按钮操作 */
-    const resetQuery = (formEl: FormInstance | undefined) => {
-      if (!formEl) return
-      formEl.resetFields()
-      userList()
-    };
-		return {
-      queryRef,
-			userListRef,
-			onOpenAddUser,
-			onRowDel,
-      deptFilterNode,
-      filterText,
-      treeRef,
-      search,
-      sys_user_sex,
-      userList,
-      handleNodeClick,
-      resetQuery,
-			...toRefs(state),
-		};
-	},
+    },
+  ],
+  param: {
+    deptId:'',
+    mobile:'',
+    status:'',
+    keyWords:'',
+    dateRange:[]
+  },
 });
+const { deptData,deptProps,param}=toRefs(state)
+// 初始化表格数据
+const initTableData = () => {
+  getDeptTree().then((res:any)=>{
+    state.deptData = res.data.deps
+  })
+};
+const userList = ()=>{
+  userListRef.value.userList();
+};
+// 打开新增用户弹窗
+const onOpenAddUser = () => {
+  userListRef.value.onOpenAddUser();
+};
+// 删除用户
+const onRowDel = () => {
+  userListRef.value.onRowDel(null);
+};
+// 页面加载时
+onMounted(() => {
+  initTableData();
+});
+watch(filterText, (val) => {
+  treeRef.value!.filter(val)
+});
+const deptFilterNode = (value: string, data:any) => {
+  if (!value) return true;
+  return data.deptName.includes(value)
+};
+// 节点单击事件
+const handleNodeClick = (data:any) => {
+  state.param.deptId = data.deptId;
+  userList();
+};
+/** 重置按钮操作 */
+const resetQuery = (formEl: FormInstance | undefined) => {
+  if (!formEl) return
+  formEl.resetFields()
+  userList()
+};
 </script>

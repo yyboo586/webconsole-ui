@@ -16,7 +16,7 @@
             </el-col>
             <el-col :span="5" class="colBlock">
               <el-form-item label="状态" prop="status">
-                <el-select v-model="tableData.param.status" placeholder="请选择状态" clearable style="width: 160px;">
+                <el-select v-model="tableData.param.status" placeholder="请选择状态" clearable style="width: 160px">
                   <el-option label="正常" :value="1"/>
                   <el-option label="停用" :value="0"/>
                 </el-select>
@@ -24,7 +24,7 @@
             </el-col>
             <el-col :span="5" class="colBlock">
               <el-form-item label="类型" prop="type">
-                <el-select v-model="tableData.param.type" placeholder="请选择类型" clearable style="width: 160px;">
+                <el-select v-model="tableData.param.type" placeholder="请选择类型" clearable style="width: 160px">
                   <el-option label="通知" value="1"/>
                   <el-option label="公告" value="2"/>
                 </el-select>
@@ -32,7 +32,7 @@
             </el-col>
             <el-col :span="5" class="colBlock">
               <el-form-item label="标签" prop="tag">
-                <el-select v-model="tableData.param.tag" placeholder="请选择标签" clearable style="width: 160px;">
+                <el-select v-model="tableData.param.tag" placeholder="请选择标签" clearable style="width: 160px">
                   <el-option
                       v-for="dict in notice_tag"
                       :key="dict.value"
@@ -193,172 +193,146 @@
 
   </div>
 </template>
-<script lang="ts">
+<script setup lang="ts">
 
 import {toRefs, reactive, onMounted, ref, defineComponent, computed, getCurrentInstance, toRaw} from 'vue';
 import {ElMessageBox, ElMessage, FormInstance} from 'element-plus';
 import {
   listSysNotice,
   delSysNotice,
-} from "/src/api/system/notice/sysNotice";
+} from "/@/api/system/notice/sysNotice";
 import {
   SysNoticeTableColumns,
   SysNoticeInfoData,
   SysNoticeTableDataState,
 } from "/@/views/system/sysNotice/list/component/model"
 import NoticeMessageEdit from "/@/views/system/sysNotice/list/component/NoticeMessageEdit.vue"
-export default defineComponent({
-  name: "apiV1SystemSysNoticeList",
-  components: {
-    NoticeMessageEdit
-  },
-  setup() {
-    const {proxy} = <any>getCurrentInstance()
-    const loading = ref(false)
-    const queryRef = ref()
-    const editRef = ref();
+defineOptions({ name: "apiV1SystemSysNoticeList"})
+const {proxy} = <any>getCurrentInstance()
+const loading = ref(false)
+const queryRef = ref()
+const editRef = ref();
 
-    // 是否显示所有搜索选项
-    const showAll = ref(false)
-    // 非单个禁用
-    const single = ref(true)
-    // 非多个禁用
-    const multiple = ref(true)
-    const word = computed(() => {
-      if (showAll.value === false) {
-        //对文字进行处理
-        return "展开搜索";
-      } else {
-        return "收起搜索";
-      }
-    })
-    // 字典选项数据
-    const {
-      notice_tag,
-    } = proxy.useDict(
-        'notice_tag',
-    )
-    const state = reactive<SysNoticeTableDataState>({
-      ids: [],
-      tableData: {
-        data: [],
-        total: 0,
-        loading: false,
-        param: {
-          pageNum: 1,
-          pageSize: 10,
-          id: undefined,
-          title: undefined,
-          type: undefined,
-          tag: undefined,
-          status: undefined,
-          createdAt: undefined,
-          dateRange: []
-        },
-      },
-    });
-    // 页面加载时
-    onMounted(() => {
-      initTableData();
-    });
-    // 初始化表格数据
-    const initTableData = () => {
-      sysNoticeList()
-    };
-    /** 重置按钮操作 */
-    const resetQuery = (formEl: FormInstance | undefined) => {
-      if (!formEl) return
-      formEl.resetFields()
-      sysNoticeList()
-    };
-    // 获取列表数据
-    const sysNoticeList = () => {
-      loading.value = true
-      listSysNotice(state.tableData.param).then((res: any) => {
-        let list = res.data.list ?? [];
-        list.map((item: any) => {
-          item.createdBy = item.createdUser?.userNickname
-        })
-        state.tableData.data = list;
-        state.tableData.total = res.data.total;
-        loading.value = false
-      })
-    };
-    const toggleSearch = () => {
-      showAll.value = !showAll.value;
-    }
-    // 标签字典翻译
-    const tagFormat = (row: SysNoticeTableColumns) => {
-      return proxy.selectDictLabel(notice_tag.value, row.tag);
-    }
-    // 多选框选中数据
-    const handleSelectionChange = (selection: Array<SysNoticeInfoData>) => {
-      state.ids = selection.map(item => item.id)
-      single.value = selection.length != 1
-      multiple.value = !selection.length
-    }
-
-    const handleAdd = (type: number) => {
-      editRef.value.openDialog()
-      editRef.value.setType(type)
-    }
-    const handleUpdate = (row: SysNoticeTableColumns) => {
-      if (!row) {
-        row = state.tableData.data.find((item: SysNoticeTableColumns) => {
-          return item.id === state.ids[0]
-        }) as SysNoticeTableColumns
-      }
-      editRef.value.openDialog(toRaw(row));
-    };
-    const handleDelete = (row: SysNoticeTableColumns) => {
-      let msg = '你确定要删除所选数据？';
-      let id: number[] = [];
-      if (row) {
-        msg = `此操作将永久删除数据，是否继续?`
-        id = [row.id]
-      } else {
-        id = state.ids
-      }
-      if (id.length === 0) {
-        ElMessage.error('请选择要删除的数据。');
-        return
-      }
-      ElMessageBox.confirm(msg, '提示', {
-        confirmButtonText: '确认',
-        cancelButtonText: '取消',
-        type: 'warning',
-      })
-          .then(() => {
-            delSysNotice(id).then(() => {
-              ElMessage.success('删除成功');
-              sysNoticeList();
-            })
-          })
-          .catch(() => {
-          });
-    }
-    return {
-      proxy,
-      editRef,
-      showAll,
-      loading,
-      single,
-      multiple,
-      word,
-      queryRef,
-      resetQuery,
-      sysNoticeList,
-      toggleSearch,
-      tagFormat,
-      notice_tag,
-      handleSelectionChange,
-      handleAdd,
-      handleUpdate,
-      handleDelete,
-      ...toRefs(state),
-    }
+// 是否显示所有搜索选项
+const showAll = ref(false)
+// 非单个禁用
+const single = ref(true)
+// 非多个禁用
+const multiple = ref(true)
+const word = computed(() => {
+  if (showAll.value === false) {
+    //对文字进行处理
+    return "展开搜索";
+  } else {
+    return "收起搜索";
   }
 })
+// 字典选项数据
+const {
+  notice_tag,
+} = proxy.useDict(
+    'notice_tag',
+)
+const state = reactive<SysNoticeTableDataState>({
+  ids: [],
+  tableData: {
+    data: [],
+    total: 0,
+    loading: false,
+    param: {
+      pageNum: 1,
+      pageSize: 10,
+      id: undefined,
+      title: undefined,
+      type: undefined,
+      tag: undefined,
+      status: undefined,
+      createdAt: undefined,
+      dateRange: []
+    },
+  },
+});
+const { tableData} = toRefs(state)
+// 页面加载时
+onMounted(() => {
+  initTableData();
+});
+// 初始化表格数据
+const initTableData = () => {
+  sysNoticeList()
+};
+/** 重置按钮操作 */
+const resetQuery = (formEl: FormInstance | undefined) => {
+  if (!formEl) return
+  formEl.resetFields()
+  sysNoticeList()
+};
+// 获取列表数据
+const sysNoticeList = () => {
+  loading.value = true
+  listSysNotice(state.tableData.param).then((res: any) => {
+    let list = res.data.list ?? [];
+    list.map((item: any) => {
+      item.createdBy = item.createdUser?.userNickname
+    })
+    state.tableData.data = list;
+    state.tableData.total = res.data.total;
+    loading.value = false
+  })
+};
+const toggleSearch = () => {
+  showAll.value = !showAll.value;
+}
+// 标签字典翻译
+const tagFormat = (row: SysNoticeTableColumns) => {
+  return proxy.selectDictLabel(notice_tag.value, row.tag);
+}
+// 多选框选中数据
+const handleSelectionChange = (selection: Array<SysNoticeInfoData>) => {
+  state.ids = selection.map(item => item.id)
+  single.value = selection.length != 1
+  multiple.value = !selection.length
+}
+
+const handleAdd = (type: number) => {
+  editRef.value.openDialog()
+  editRef.value.setType(type)
+}
+const handleUpdate = (row: SysNoticeTableColumns|null) => {
+  if (!row) {
+    row = state.tableData.data.find((item: SysNoticeTableColumns) => {
+      return item.id === state.ids[0]
+    }) as SysNoticeTableColumns
+  }
+  editRef.value.openDialog(toRaw(row));
+};
+const handleDelete = (row: SysNoticeTableColumns|null) => {
+  let msg = '你确定要删除所选数据？';
+  let id: number[] = [];
+  if (row) {
+    msg = `此操作将永久删除数据，是否继续?`
+    id = [row.id]
+  } else {
+    id = state.ids
+  }
+  if (id.length === 0) {
+    ElMessage.error('请选择要删除的数据。');
+    return
+  }
+  ElMessageBox.confirm(msg, '提示', {
+    confirmButtonText: '确认',
+    cancelButtonText: '取消',
+    type: 'warning',
+  })
+      .then(() => {
+        delSysNotice(id).then(() => {
+          ElMessage.success('删除成功');
+          sysNoticeList();
+        })
+      })
+      .catch(() => {
+      });
+}
 </script>
 <style lang="scss" scoped>
 .colBlock {

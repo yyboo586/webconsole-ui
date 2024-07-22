@@ -25,56 +25,48 @@
   </div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import {defineComponent, reactive, toRefs, ref, onBeforeMount, onMounted} from "vue";
 import {previewState} from "/@/views/system/tools/gen/component/model";
 import {showPreview} from "/@/api/system/tools/gen";
 import MyCodeMirror from "/@/components/myCodeMirror/index.vue";
 import { ElLoading } from 'element-plus'
-export default defineComponent({
-  name: "genCodePreview",
-  components: {MyCodeMirror},
-  setup(){
-    const height = ref(400)
-    // 预览参数
-    const preview:previewState = reactive({
-      flush: true,
-      fullscreen: false,
-      open: false,
-      title: "代码预览",
-      data: {},
-      activeName: "api"
-    })
-    const getWindowInfo = () => {
-      height.value = document.getElementsByTagName('body')[0].clientHeight-130;
-    };
-    const showView = (tableId:number)=>{
-      const loading = ElLoading.service({
-        lock: true,
-        text: 'Loading',
-        background: 'rgba(0, 0, 0, 0.7)',
-      })
-      showPreview(tableId).then((res:any)=>{
-        preview.data = res.data.data??{}
-        preview.open = true
-        loading.close()
-      }).catch(()=>{
-        loading.close()
-      })
-    }
-    onMounted(()=>{
-      height.value = document.getElementsByTagName('body')[0].clientHeight-130;
-    })
-    onBeforeMount(()=>{
-      window.addEventListener('resize', getWindowInfo);
-    })
-    return {
-      showView,
-      height,
-      ...toRefs(preview)
-    }
-  },
+defineOptions({ name: "genCodePreview"})
+const height = ref(400)
+// 预览参数
+const preview:previewState = reactive({
+  flush: true,
+  fullscreen: false,
+  open: false,
+  title: "代码预览",
+  data: {},
+  activeName: "api"
 })
+const { data, activeName, fullscreen, open, title}=toRefs(preview)
+const getWindowInfo = () => {
+  height.value = document.getElementsByTagName('body')[0].clientHeight-130;
+};
+const showView = (tableId:number)=>{
+  const loading = ElLoading.service({
+    lock: true,
+    text: 'Loading',
+    background: 'rgba(0, 0, 0, 0.7)',
+  })
+  showPreview(tableId).then((res:any)=>{
+    preview.data = res.data.data??{}
+    preview.open = true
+    loading.close()
+  }).catch(()=>{
+    loading.close()
+  })
+}
+onMounted(()=>{
+  height.value = document.getElementsByTagName('body')[0].clientHeight-130;
+})
+onBeforeMount(()=>{
+  window.addEventListener('resize', getWindowInfo);
+})
+defineExpose({showView})
 </script>
 
 <style lang="scss" scoped>

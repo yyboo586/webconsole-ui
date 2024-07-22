@@ -12,7 +12,7 @@
   </el-container>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import {computed, getCurrentInstance, watch, defineComponent, ref} from 'vue';
 import { useRoute } from 'vue-router';
 import { storeToRefs } from 'pinia';
@@ -20,29 +20,19 @@ import { useThemeConfig } from '/@/stores/themeConfig';
 import layoutAside from '/@/layout/component/aside.vue';
 import layoutHeader from '/@/layout/component/header.vue';
 import layoutMain from '/@/layout/component/main.vue';
-
-export default defineComponent({
-  name: 'layoutDefaults',
-  components: { layoutAside, layoutHeader, layoutMain },
-  setup() {
-    const route = useRoute();
-    const layoutDefaultsScrollbarRef = ref()
-    const storesThemeConfig = useThemeConfig();
-    const { themeConfig } = storeToRefs(storesThemeConfig);
-    const isFixedHeader = computed(() => {
-      return themeConfig.value.isFixedHeader;
-    });
-    // 监听路由的变化
-    watch(
-        () => route.path,
-        () => {
-          layoutDefaultsScrollbarRef.value.wrapRef.scrollTop = 0;
-        }
-    );
-    return {
-      isFixedHeader,
-      layoutDefaultsScrollbarRef,
-    };
-  },
+defineOptions({ name: "layoutDefaults"})
+const route = useRoute();
+const layoutDefaultsScrollbarRef = ref()
+const storesThemeConfig = useThemeConfig();
+const { themeConfig } = storeToRefs(storesThemeConfig);
+const isFixedHeader = computed(() => {
+  return themeConfig.value.isFixedHeader;
 });
+// 监听路由的变化
+watch(
+    () => route.path,
+    () => {
+      layoutDefaultsScrollbarRef.value.wrapRef.scrollTop = 0;
+    }
+);
 </script>

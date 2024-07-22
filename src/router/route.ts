@@ -65,7 +65,6 @@ export const dynamicRoutes: Array<RouteRecordRaw> = [
 				path: '/bigUpload',
 				name: 'bigUpload',
 				component: () => import('/@/layout/routerView/parent.vue'),
-				redirect: '/bigUpload',
 				meta:{
 					title: '大文件上传',
 					isLink: '',
@@ -78,8 +77,8 @@ export const dynamicRoutes: Array<RouteRecordRaw> = [
 				},
 				children:[
 					{
-						path: '/bigUpload',
-						name: 'bigUpload',
+						path: '/bigUpload/list',
+						name: 'bigUploadList',
 						component: () => import('/@/views/bigUpload/index.vue'),
 						meta: {
 							title: '大文件上传',
@@ -574,6 +573,7 @@ export const demoRoutes:Array<RouteRecordRaw> = [
 							icon: 'ele-Sunny',
 						},
 					},
+
 					{
 						path: '/demo/pages/iocnfont',
 						name: 'pagesIocnfont',
@@ -589,6 +589,7 @@ export const demoRoutes:Array<RouteRecordRaw> = [
 							icon: 'ele-Present',
 						},
 					},
+
 					{
 						path: '/demo/pages/element',
 						name: 'pagesElement',
@@ -813,22 +814,7 @@ export const demoRoutes:Array<RouteRecordRaw> = [
 							roles: ['admin'],
 							icon: 'iconfont icon-diannao',
 						},
-					},
-					{
-						path: '/demo/pages/workflow',
-						name: 'pagesWorkflow',
-						component: () => import('/@/views/pages/workflow/index.vue'),
-						meta: {
-							title: 'message.router.pagesWorkflow',
-							isLink: '',
-							isHide: false,
-							isKeepAlive: true,
-							isAffix: false,
-							isIframe: false,
-							roles: ['admin'],
-							icon: 'ele-Connection',
-						},
-					},
+					}
 				],
 			},
 			{

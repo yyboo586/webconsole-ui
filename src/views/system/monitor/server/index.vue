@@ -318,10 +318,8 @@
 							detail: {
 								valueAnimation: true,
 								formatter: '{value}%',
-								textStyle: {
-									fontSize: 36,
-									color: 'red',
-								},
+                fontSize: 36,
+                color: 'red',
 								offsetCenter: ['0', '80%'],    //表盘数据(30%)位置
 							},
 							// data: [
@@ -369,10 +367,8 @@
 							detail: {
 								valueAnimation: true,
 								formatter: '{value}%',
-								textStyle: {
-									fontSize: 36,
-									color: 'red',
-								},
+                fontSize: 36,
+                color: 'red',
 								offsetCenter: ['0', '80%'],    //表盘数据(30%)位置
 							},
 							// data: [

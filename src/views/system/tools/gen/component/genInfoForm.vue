@@ -150,64 +150,53 @@
 	</el-card>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import {defineComponent, inject, reactive, ref, unref} from 'vue';
 import type { FormInstance, FormRules } from 'element-plus';
 import { TableDataInfo } from '/@/views/system/tools/gen/component/model';
 import {ElMessage} from "element-plus";
 import {Ref, UnwrapRef} from "@vue/reactivity";
-export default defineComponent({
-	name: 'genInfoForm',
-  emits:['goNext','close'],
-	setup(props,{emit}) {
-		const genInfoFormRef = ref<FormInstance>();
-		const info = inject<Ref<UnwrapRef<TableDataInfo>>>('tableData') as Ref<UnwrapRef<TableDataInfo>>;
-		const rules = reactive<FormRules>({
-			tplCategory: [{ required: true, message: '请选择生成模板', trigger: 'blur' }],
-			packageName: [{ required: true, message: '请输入生成包路径', trigger: 'blur' }],
-			moduleName: [{ required: true, message: '请输入生成模块名', trigger: 'blur' }],
-			businessName: [{ required: true, message: '请输入生成业务名', trigger: 'blur' }],
-			functionName: [{ required: true, message: '请输入生成功能名', trigger: 'blur' }],
-		});
-    const nextTip = ()=>{
-      //表单验证
-      let tag = false;
-      const formWrap = unref(genInfoFormRef) as any;
-      if (!formWrap) return false;
-      formWrap.validate((valid: boolean) => {
-        if (valid) {
-          emit('goNext');
-          tag = true;
-        } else {
-          ElMessage.error('请将表单填写完整');
-        }
-      });
-      return tag;
-    }
-    const close = ()=>{
-      emit('close')
-    }
-    const getLastSubstring = (str:string):string => {
-      let lastIndex = str.lastIndexOf('/');
-      if (lastIndex !== -1) {
-        return str.substring(lastIndex + 1);
-      } else {
-        return str;
-      }
-    }
-    const setModuleName = (value:string)=>{
-      info.value.moduleName = getLastSubstring(value)
-    }
-		return {
-      genInfoFormRef,
-			info,
-			rules,
-      setModuleName,
-      nextTip,
-      close
-		};
-	},
+defineOptions({ name: "genInfoForm"})
+const emit = defineEmits(['goNext','close']);
+const genInfoFormRef = ref<FormInstance>();
+const info = inject<Ref<UnwrapRef<TableDataInfo>>>('tableData') as Ref<UnwrapRef<TableDataInfo>>;
+const rules = reactive<FormRules>({
+  tplCategory: [{ required: true, message: '请选择生成模板', trigger: 'blur' }],
+  packageName: [{ required: true, message: '请输入生成包路径', trigger: 'blur' }],
+  moduleName: [{ required: true, message: '请输入生成模块名', trigger: 'blur' }],
+  businessName: [{ required: true, message: '请输入生成业务名', trigger: 'blur' }],
+  functionName: [{ required: true, message: '请输入生成功能名', trigger: 'blur' }],
 });
+const nextTip = ()=>{
+  //表单验证
+  let tag = false;
+  const formWrap = unref(genInfoFormRef) as any;
+  if (!formWrap) return false;
+  formWrap.validate((valid: boolean) => {
+    if (valid) {
+      emit('goNext');
+      tag = true;
+    } else {
+      ElMessage.error('请将表单填写完整');
+    }
+  });
+  return tag;
+}
+const close = ()=>{
+  emit('close')
+}
+const getLastSubstring = (str:string):string => {
+  let lastIndex = str.lastIndexOf('/');
+  if (lastIndex !== -1) {
+    return str.substring(lastIndex + 1);
+  } else {
+    return str;
+  }
+}
+const setModuleName = (value:string)=>{
+  info.value.moduleName = getLastSubstring(value)
+}
+defineExpose({nextTip})
 </script>
 
 <style scoped>

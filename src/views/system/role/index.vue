@@ -7,7 +7,7 @@
             <el-input v-model="tableData.param.roleName" placeholder="请输入角色名称" class="w-50 m-2" clearable/>
           </el-form-item>
           <el-form-item label="状态">
-            <el-select placeholder="请选择状态" class="w-50 m-2" v-model="tableData.param.roleStatus" clearable style="width:120px;">
+            <el-select placeholder="请选择状态" class="w-50 m-2" v-model="tableData.param.roleStatus" clearable style="width: 120px;">
               <el-option label="启用"  value="1" />
               <el-option label="禁用"  value="0" />
             </el-select>
@@ -77,7 +77,7 @@
 	</div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import {toRefs, reactive, onMounted, ref, defineComponent, toRaw,getCurrentInstance} from 'vue';
 import { ElMessageBox, ElMessage,ElLoading } from 'element-plus';
 import EditRole from '/@/views/system/role/component/editRole.vue';
@@ -118,197 +118,170 @@ interface TableDataState {
 		};
 	};
 }
-
-export default defineComponent({
-	name: 'apiV1SystemRoleList',
-	components: {selectUser, EditRole,DataScope,UserList},
-	setup() {
-    const selectUserRef = ref()
-    const {proxy} = getCurrentInstance() as any;
-    const {sys_user_sex} = proxy.useDict('sys_user_sex')
-		const addRoleRef = ref();
-		const userListRef = ref();
-		const editRoleRef = ref();
-    const dataScopeRef =ref();
-    const roleListData = ref<Array<TableData>>()
-    const roleUsers = ref([])
-    const setRole = ref(0)
-		const state = reactive<TableDataState>({
-      isShowDialog: false,
-      deptData: [],
-      userListParam: {
-        roleId: undefined,
-      },
-			selectRow:{},
-      tableData: {
-        data: [],
-        total: 0,
-        loading: false,
-        param: {
-          roleName: '',
-          roleStatus: '',
-          pageNum: 1,
-          pageSize: 10,
-        },
-      },
-    });
-		// 初始化表格数据
-		const initTableData = () => {
-			roleList()
-		};
-    const roleList = ()=>{
-      const data: Array<TableData> = [];
-      getRoleList(state.tableData.param).then(res=>{
-        const list = res.data.list??[]
-        list.map((item:TableData)=>{
-          data.push({
-            id:item.id,
-            pid:item.pid,
-            status: item.status,
-            listOrder: item.listOrder,
-            name: item.name,
-            remark: item.remark,
-            dataScope:item.dataScope,
-            userCnt:item.userCnt,
-            createdAt: item.createdAt,
-          });
-        })
-        roleListData.value = data
-        state.tableData.data = proxy.handleTree(data??[], "id","pid","children",true);
-      })
-    };
-		// 打开角色用户列表
-		const onOpenUserList = (row: TableData) => {
-			state.selectRow = row
-			state.userListParam.roleId = row.id
-			if (state.deptData.length == 0){
-				getDeptTree().then((res:any)=>{
-					state.deptData = res.data.deps
-					state.isShowDialog = true
-				})
-			}else{
-				state.isShowDialog = true
-			}
-		};
-		// 打开新增角色弹窗
-		const onOpenAddRole = () => {
-      editRoleRef.value.openDialog();
-		};
-		// 打开修改角色弹窗
-		const onOpenEditRole = (row: Object|undefined) => {
-			editRoleRef.value.openDialog(toRaw(row));
-		};
-    //数据权限设置弹窗
-    const handleDataScope=(row:any)=>{
-      dataScopeRef.value.openDialog(toRaw(row))
-    }
-    //用户授权
-    const handleUserScope = ((row:any)=>{
-      const ld = ElLoading.service()
-      setRole.value = row.id
-      getUsersById(row.id).then((res:any)=>{
-        ld.close()
-        roleUsers.value=res.data.userList??[]
-        selectUserRef.value.openDialog()
+defineOptions({ name: "apiV1SystemRoleList"})
+const selectUserRef = ref()
+const {proxy} = getCurrentInstance() as any;
+const {sys_user_sex} = proxy.useDict('sys_user_sex')
+const addRoleRef = ref();
+const userListRef = ref();
+const editRoleRef = ref();
+const dataScopeRef =ref();
+const roleListData = ref<Array<TableData>>()
+const roleUsers = ref([])
+const setRole = ref(0)
+const state = reactive<TableDataState>({
+  isShowDialog: false,
+  deptData: [],
+  userListParam: {
+    roleId: undefined,
+  },
+  selectRow:{},
+  tableData: {
+    data: [],
+    total: 0,
+    loading: false,
+    param: {
+      roleName: '',
+      roleStatus: '',
+      pageNum: 1,
+      pageSize: 10,
+    },
+  },
+});
+const { tableData,selectRow,deptData,userListParam,isShowDialog} = toRefs(state);
+// 初始化表格数据
+const initTableData = () => {
+  roleList()
+};
+const roleList = ()=>{
+  const data: Array<TableData> = [];
+  getRoleList(state.tableData.param).then(res=>{
+    const list = res.data.list??[]
+    list.map((item:TableData)=>{
+      data.push({
+        id:item.id,
+        pid:item.pid,
+        status: item.status,
+        listOrder: item.listOrder,
+        name: item.name,
+        remark: item.remark,
+        dataScope:item.dataScope,
+        userCnt:item.userCnt,
+        createdAt: item.createdAt,
+      });
+    })
+    roleListData.value = data
+    state.tableData.data = proxy.handleTree(data??[], "id","pid","children",true);
+  })
+};
+// 打开角色用户列表
+const onOpenUserList = (row: TableData) => {
+  state.selectRow = row
+  state.userListParam.roleId = row.id
+  if (state.deptData.length == 0){
+    getDeptTree().then((res:any)=>{
+      state.deptData = res.data.deps
+      state.isShowDialog = true
+    })
+  }else{
+    state.isShowDialog = true
+  }
+};
+// 打开新增角色弹窗
+const onOpenAddRole = () => {
+  editRoleRef.value.openDialog();
+};
+// 打开修改角色弹窗
+const onOpenEditRole = (row: Object|undefined) => {
+  editRoleRef.value.openDialog(toRaw(row));
+};
+//数据权限设置弹窗
+const handleDataScope=(row:any)=>{
+  dataScopeRef.value.openDialog(toRaw(row))
+}
+//用户授权
+const handleUserScope = ((row:any)=>{
+  const ld = ElLoading.service()
+  setRole.value = row.id
+  getUsersById(row.id).then((res:any)=>{
+    ld.close()
+    roleUsers.value=res.data.userList??[]
+    selectUserRef.value.openDialog()
+  })
+})
+// 删除角色
+const onRowDel = (row: any) => {
+  ElMessageBox.confirm(`此操作将永久删除角色：“${row.name}”，是否继续?`, '提示', {
+    confirmButtonText: '确认',
+    cancelButtonText: '取消',
+    type: 'warning',
+  })
+    .then(() => {
+      deleteRole(row.id).then(()=>{
+        ElMessage.success('删除成功');
+        proxy.$refs['editRoleRef'].resetMenuSession();
+        roleList();
       })
     })
-		// 删除角色
-		const onRowDel = (row: any) => {
-			ElMessageBox.confirm(`此操作将永久删除角色：“${row.name}”，是否继续?`, '提示', {
-				confirmButtonText: '确认',
-				cancelButtonText: '取消',
-				type: 'warning',
-			})
-				.then(() => {
-          deleteRole(row.id).then(()=>{
-            ElMessage.success('删除成功');
-            proxy.$refs['editRoleRef'].resetMenuSession();
-            roleList();
-          })
-				})
-				.catch(() => {});
-		};
-		// 分页改变
-		const onHandleSizeChange = (val: number) => {
-			state.tableData.param.pageSize = val;
-		};
-		// 分页改变
-		const onHandleCurrentChange = (val: number) => {
-			state.tableData.param.pageNum = val;
-		};
-    const userList = ()=>{
-      userListRef.value.userList();
-    };
-		// 页面加载时
-		onMounted(() => {
-			initTableData();
-		});
-    const handleCommand = (command: string )=>{
-      let commandArr = command.split('_')
-      let row = roleListData.value?.filter((item:TableData)=>{
-        return item.id==parseInt(commandArr[1])
-      })?.[0]
-      switch (commandArr[0]){
-        case 'resource':
-          onOpenEditRole(row)
-          break
-        case 'data':
-          handleDataScope(row)
-          break
-        case 'user':
-          handleUserScope(row)
-          break
-      }
-    }
-    const confirmUser = (data:any[]) => {
-      if(data.length>0){
-        const ids = roleUsers.value.map((item:any)=>{
-          return item.id
-        })
-        console.log('ids = ',ids)
-        data.map((item:any)=>{
-          // 若存在某个用户 则不添加
-          if (!ids.includes(item.id)){
-            roleUsers.value.push(item as never)
-          }
-        })
-      }else{
-        roleUsers.value = []
-      }
-    };
-    const setRoleUser = ()=>{
-      const ids = roleUsers.value.map((item:any)=>{
-        return item.id
-      })
-      //用户授权提交
-      setRoleUsers({roleId:setRole.value,userIds:ids}).then((res:any)=>{
-        roleList()
-      })
-    }
-		return {
-			addRoleRef,
-			editRoleRef,
-      dataScopeRef,
-      sys_user_sex,
-      selectUserRef,
-			userList,
-			onOpenUserList,
-			onOpenAddRole,
-			onOpenEditRole,
-			onRowDel,
-			onHandleSizeChange,
-			onHandleCurrentChange,
-      roleList,
-      handleDataScope,
-      handleUserScope,
-      handleCommand,
-      roleUsers,
-      confirmUser,
-      setRoleUser,
-			...toRefs(state),
-		};
-	},
+    .catch(() => {});
+};
+// 分页改变
+const onHandleSizeChange = (val: number) => {
+  state.tableData.param.pageSize = val;
+};
+// 分页改变
+const onHandleCurrentChange = (val: number) => {
+  state.tableData.param.pageNum = val;
+};
+const userList = ()=>{
+  userListRef.value.userList();
+};
+// 页面加载时
+onMounted(() => {
+  initTableData();
 });
+const handleCommand = (command: string )=>{
+  let commandArr = command.split('_')
+  let row = roleListData.value?.filter((item:TableData)=>{
+    return item.id==parseInt(commandArr[1])
+  })?.[0]
+  switch (commandArr[0]){
+    case 'resource':
+      onOpenEditRole(row)
+      break
+    case 'data':
+      handleDataScope(row)
+      break
+    case 'user':
+      handleUserScope(row)
+      break
+  }
+}
+const confirmUser = (data:any[]) => {
+  if(data.length>0){
+    const ids = roleUsers.value.map((item:any)=>{
+      return item.id
+    })
+    console.log('ids = ',ids)
+    data.map((item:any)=>{
+      // 若存在某个用户 则不添加
+      if (!ids.includes(item.id)){
+        roleUsers.value.push(item as never)
+      }
+    })
+  }else{
+    roleUsers.value = []
+  }
+};
+const setRoleUser = ()=>{
+  const ids = roleUsers.value.map((item:any)=>{
+    return item.id
+  })
+  //用户授权提交
+  setRoleUsers({roleId:setRole.value,userIds:ids}).then((res:any)=>{
+    roleList()
+  })
+}
 </script>
 <style scoped lang="scss">
 .auth-action{

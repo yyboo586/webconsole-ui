@@ -94,10 +94,10 @@
             <el-form-item label="用户类型">
               <el-radio-group v-model="ruleForm.isAdmin">
                 <el-radio
-                    :label="1"
+                    :value="1"
                 >后台管理员</el-radio>
                 <el-radio
-                    :label="0"
+                    :value="0"
                 >前台用户</el-radio>
               </el-radio-group>
             </el-form-item>
@@ -119,180 +119,168 @@
 	</div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import {reactive, toRefs, onMounted, defineComponent, ref, unref, getCurrentInstance} from 'vue';
 import {getParams, addUser, editUser, getEditUser} from "/@/api/system/user";
 import {ElMessage} from "element-plus";
 
-
-export default defineComponent({
-	name: 'systemEditUser',
-  props:{
-    deptData:{
-      type:Array,
-      default:()=>[]
-    },
-    genderData:{
-      type:Array,
-      default:()=>[]
-    }
+defineOptions({ name: "systemEditUser"})
+const props = defineProps({
+  deptData:{
+    type:Array,
+    default:()=>[]
   },
-	setup(prop,{emit}) {
-    const {proxy} = getCurrentInstance() as any;
-    const roleList = ref([]);
-    const postList = ref([]);
-    const formRef = ref<HTMLElement | null>(null);
-		const state = reactive({
-			isShowDialog: false,
-			ruleForm: {
-        userId: 0,
-        deptId: 0,
-        userName: '',
-        nickName: '',
-        password: '',
-        mobile:'',
-        email: '',
-        sex: '',
-        status: 1,
-        remark: '',
-        postIds: [],
-        roleIds: [],
-        isAdmin:0,
-			},
-      //表单校验
-      rules: {
-        userName: [
-          { required: true, message: "用户名称不能为空", trigger: "blur" }
-        ],
-        nickName: [
-          { required: true, message: "用户昵称不能为空", trigger: "blur" }
-        ],
-        deptId: [
-          { required: true, message: "归属部门不能为空", trigger: "blur" }
-        ],
-        password: [
-          { required: true, message: "用户密码不能为空", trigger: "blur" }
-        ],
-        email: [
-          {
-            type: "email",
-            message: "'请输入正确的邮箱地址",
-            trigger: ["blur", "change"]
-          }
-        ],
-        mobile: [
-          { required: true, message: "手机号码不能为空", trigger: "blur" },
-          {
-            pattern: /^1[3|4|5|6|7|8|9][0-9]\d{8}$/,
-            message: "请输入正确的手机号码",
-            trigger: "blur"
-          }
-        ]
+  genderData:{
+    type:Array,
+    default:()=>[]
+  }
+})
+const emit = defineEmits(['getUserList']);
+const {proxy} = getCurrentInstance() as any;
+const roleList = ref([]);
+const postList = ref([]);
+const formRef = ref<HTMLElement | null>(null);
+const state = reactive({
+  isShowDialog: false,
+  ruleForm: {
+    userId: 0,
+    deptId: 0,
+    userName: '',
+    nickName: '',
+    password: '',
+    mobile:'',
+    email: '',
+    sex: '',
+    status: 1,
+    remark: '',
+    postIds: [],
+    roleIds: [],
+    isAdmin:0,
+  },
+  //表单校验
+  rules: {
+    userName: [
+      { required: true, message: "用户名称不能为空", trigger: "blur" }
+    ],
+    nickName: [
+      { required: true, message: "用户昵称不能为空", trigger: "blur" }
+    ],
+    deptId: [
+      { required: true, message: "归属部门不能为空", trigger: "blur" }
+    ],
+    password: [
+      { required: true, message: "用户密码不能为空", trigger: "blur" }
+    ],
+    email: [
+      {
+        type: "email",
+        message: "'请输入正确的邮箱地址",
+        trigger: ["blur", "change"]
       }
-		});
-		// 打开弹窗
-		const openDialog = (row?:any) => {
-      resetForm()
-      if(row) {
-        getEditUser(row.id).then((res:any)=>{
-          const user = res.data.user;
-          state.ruleForm = {
-            userId: user.id,
-            deptId: user.deptId,
-            userName: user.userName,
-            nickName: user.userNickname,
-            password: '-',
-            mobile:user.mobile,
-            email: user.userEmail,
-            sex: String(user.sex),
-            status: user.userStatus,
-            remark: user.remark,
-            postIds: res.data.checkedPosts??[],
-            roleIds: res.data.checkedRoleIds??[],
-            isAdmin:user.isAdmin,
-          };
-        })
+    ],
+    mobile: [
+      { required: true, message: "手机号码不能为空", trigger: "blur" },
+      {
+        pattern: /^1[3|4|5|6|7|8|9][0-9]\d{8}$/,
+        message: "请输入正确的手机号码",
+        trigger: "blur"
       }
-			state.isShowDialog = true;
-		};
-		// 关闭弹窗
-		const closeDialog = () => {
-			state.isShowDialog = false;
-		};
-		// 取消
-		const onCancel = () => {
-			closeDialog();
-		};
-		// 新增
-		const onSubmit = () => {
-      const formWrap = unref(formRef) as any;
-      if (!formWrap) return;
-      formWrap.validate((valid: boolean) => {
-        if (valid) {
-          if(state.ruleForm.userId===0){
-            //添加
-            addUser(state.ruleForm).then(()=>{
-              ElMessage.success('用户添加成功');
-              closeDialog(); // 关闭弹窗
-              emit('getUserList')
-            });
-          }else{
-            //修改
-            editUser(state.ruleForm).then(()=>{
-              ElMessage.success('用户修改成功');
-              closeDialog(); // 关闭弹窗
-              emit('getUserList')
-            });
-          }
-        }
-      });
-		};
-		// 初始化部门数据
-		const initTableData = () => {
-      //获取角色岗位选项
-      getParams().then((res:any)=>{
-        const roles = res.data.roleList??[];
-				const roleAccess = res.data.roleAccess??[];
-				roles.map((item:any)=>{
-					if(!roleAccess.includes(item.id)){
-						item.disabled = true
-					}
-				})
-				roleList.value = proxy.handleTree(roles??[], "id","pid","children",true);
-        postList.value = res.data.posts??[];
-      });
-		};
-		// 页面加载时
-		onMounted(() => {
-			initTableData();
-		});
-    const resetForm = ()=>{
-      state.ruleForm = {
-        userId: 0,
-        deptId: 0,
-        userName: '',
-        nickName: '',
-        password: '',
-        mobile:'',
-        email: '',
-        sex: '',
-        status: 1,
-        remark: '',
-        postIds: [],
-        roleIds: [],
-        isAdmin:0,
-      }
-    };
-		return {
-			openDialog,
-			closeDialog,
-			onCancel,
-			onSubmit,
-      roleList,
-      postList,
-      formRef,
-			...toRefs(state),
-		};
-	},
+    ]
+  }
 });
+const { ruleForm, isShowDialog, rules}=toRefs(state)
+// 打开弹窗
+const openDialog = (row?:any) => {
+  resetForm()
+  if(row) {
+    getEditUser(row.id).then((res:any)=>{
+      const user = res.data.user;
+      state.ruleForm = {
+        userId: user.id,
+        deptId: user.deptId,
+        userName: user.userName,
+        nickName: user.userNickname,
+        password: '-',
+        mobile:user.mobile,
+        email: user.userEmail,
+        sex: String(user.sex),
+        status: user.userStatus,
+        remark: user.remark,
+        postIds: res.data.checkedPosts??[],
+        roleIds: res.data.checkedRoleIds??[],
+        isAdmin:user.isAdmin,
+      };
+    })
+  }
+  state.isShowDialog = true;
+};
+// 关闭弹窗
+const closeDialog = () => {
+  state.isShowDialog = false;
+};
+// 取消
+const onCancel = () => {
+  closeDialog();
+};
+// 新增
+const onSubmit = () => {
+  const formWrap = unref(formRef) as any;
+  if (!formWrap) return;
+  formWrap.validate((valid: boolean) => {
+    if (valid) {
+      if(state.ruleForm.userId===0){
+        //添加
+        addUser(state.ruleForm).then(()=>{
+          ElMessage.success('用户添加成功');
+          closeDialog(); // 关闭弹窗
+          emit('getUserList')
+        });
+      }else{
+        //修改
+        editUser(state.ruleForm).then(()=>{
+          ElMessage.success('用户修改成功');
+          closeDialog(); // 关闭弹窗
+          emit('getUserList')
+        });
+      }
+    }
+  });
+};
+// 初始化部门数据
+const initTableData = () => {
+  //获取角色岗位选项
+  getParams().then((res:any)=>{
+    const roles = res.data.roleList??[];
+    const roleAccess = res.data.roleAccess??[];
+    roles.map((item:any)=>{
+      if(!roleAccess.includes(item.id)){
+        item.disabled = true
+      }
+    })
+    roleList.value = proxy.handleTree(roles??[], "id","pid","children",true);
+    postList.value = res.data.posts??[];
+  });
+};
+// 页面加载时
+onMounted(() => {
+  initTableData();
+});
+const resetForm = ()=>{
+  state.ruleForm = {
+    userId: 0,
+    deptId: 0,
+    userName: '',
+    nickName: '',
+    password: '',
+    mobile:'',
+    email: '',
+    sex: '',
+    status: 1,
+    remark: '',
+    postIds: [],
+    roleIds: [],
+    isAdmin:0,
+  }
+};
+defineExpose({openDialog})
 </script>

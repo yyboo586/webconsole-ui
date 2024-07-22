@@ -82,7 +82,7 @@
     </el-dialog>
   </div>
 </template>
-<script lang="ts">
+<script setup lang="ts">
 import {reactive, onMounted, toRefs, defineComponent, ref, unref, getCurrentInstance} from 'vue';
 import { ElMessage} from 'element-plus';
 import {
@@ -95,194 +95,174 @@ import {
   SysNoticeInfoData,
   SysNoticeEditState
 } from "/@/views/system/sysNotice/list/component/model"
-
-export default defineComponent({
-  name: "NoticeMessageEdit",
-  components: {
-    GfUeditor,
+defineOptions({ name: "NoticeMessageEdit"})
+const props = defineProps({
+  tagOptions: {
+    type: Array,
+    default: () => []
   },
-  props: {
-    tagOptions: {
-      type: Array,
-      default: () => []
-    },
+})
+const emit = defineEmits(["sysNoticeList"]);
+const {proxy} = <any>getCurrentInstance()
+const formRef = ref<HTMLElement | null>(null);
+const menuRef = ref();
+const state = reactive<SysNoticeEditState>({
+  loading: false,
+  isShowDialog: false,
+  title: "",
+  userListOptions: [],
+  formData: {
+    id: undefined,
+    receiver: undefined,
+    title: undefined,
+    type: undefined,
+    tag: undefined,
+    content: undefined,
+    remark: undefined,
+    sort: undefined,
+    status: 0,
+    createdBy: undefined,
+    updatedBy: undefined,
+    createdAt: undefined,
+    updatedAt: undefined,
+    deletedAt: undefined,
   },
-  setup(props, {emit}) {
-    const {proxy} = <any>getCurrentInstance()
-    const formRef = ref<HTMLElement | null>(null);
-    const menuRef = ref();
-    const state = reactive<SysNoticeEditState>({
-      loading: false,
-      isShowDialog: false,
-      title: "",
-      userListOptions: [],
-      formData: {
-        id: undefined,
-        receiver: undefined,
-        title: undefined,
-        type: undefined,
-        tag: undefined,
-        content: undefined,
-        remark: undefined,
-        sort: undefined,
-        status: 0,
-        createdBy: undefined,
-        updatedBy: undefined,
-        createdAt: undefined,
-        updatedAt: undefined,
-        deletedAt: undefined,
-      },
 
-      // 表单校验
-      rules: {
-        id: [
-          {required: true, message: "ID不能为空", trigger: "blur"}
-        ],
-        title: [
-          {required: true, message: "标题不能为空", trigger: "blur"}
-        ],
-        type: [
-          {required: true, message: "类型不能为空", trigger: "blur"}
-        ],
-        content: [
-          {required: true, message: "内容不能为空", trigger: "blur"}
-        ],
-        status: [
-          {required: true, message: "状态不能为空", trigger: "blur"}
-        ],
+  // 表单校验
+  rules: {
+    id: [
+      {required: true, message: "ID不能为空", trigger: "blur"}
+    ],
+    title: [
+      {required: true, message: "标题不能为空", trigger: "blur"}
+    ],
+    type: [
+      {required: true, message: "类型不能为空", trigger: "blur"}
+    ],
+    content: [
+      {required: true, message: "内容不能为空", trigger: "blur"}
+    ],
+    status: [
+      {required: true, message: "状态不能为空", trigger: "blur"}
+    ],
+  }
+});
+const { isShowDialog,formData,loading,userListOptions,rules,title} = toRefs(state)
+onMounted(() => {
+  remoteUserMethod("");
+});
+// 打开弹窗
+const openDialog = (row?: SysNoticeInfoData) => {
+  resetForm();
+  if (row) {
+    getSysNotice(row.id!).then((res: any) => {
+      const data = res.data;
+      data.type = parseInt(data.type)
+      if(data.type===2&&data.receiverUser){
+        const userListOptions = [...state.userListOptions,...data.receiverUser]
+        let uniqueSet = new Set(userListOptions.map(item => item.id));
+        state.userListOptions = userListOptions.filter((value, index, self) => {
+          return uniqueSet.has(value.id) && uniqueSet.delete(value.id)
+        });
       }
-    });
-    onMounted(() => {
-      remoteUserMethod("");
-    });
-    // 打开弹窗
-    const openDialog = (row?: SysNoticeInfoData) => {
-      resetForm();
-      if (row) {
-        getSysNotice(row.id!).then((res: any) => {
-          const data = res.data;
-          data.type = parseInt(data.type)
-          if(data.type===2&&data.receiverUser){
-            const userListOptions = [...state.userListOptions,...data.receiverUser]
-            let uniqueSet = new Set(userListOptions.map(item => item.id));
-            state.userListOptions = userListOptions.filter((value, index, self) => {
-              return uniqueSet.has(value.id) && uniqueSet.delete(value.id)
-            });
-          }
-          data.tag = '' + data.tag
-          data.status = parseInt(data.status)
-          state.formData = data;
+      data.tag = '' + data.tag
+      data.status = parseInt(data.status)
+      state.formData = data;
+    })
+  }
+  state.isShowDialog = true;
+};
+const remoteUserMethod = (query: string) => {
+  //console.log("remoteMethod", query)
+  state.userListOptions = []
+  getUserList(query).then((res: any) => {
+    /*console.log(res)*/
+    // let list:object[]
+    //list=res.data
+    state.userListOptions = res.data.userList
+  })
+  /*      if (query) {
+    loading.value = true
+    setTimeout(() => {
+      loading.value = false
+      options.value = list.value.filter((item) => {
+        return item.label.toLowerCase().includes(query.toLowerCase())
+      })
+    }, 200)
+  } else {
+    options.value = []
+  }*/
+}
+//设置类型
+const setType = (type: number) => {
+  state.formData.type = type
+  if (type == 1) {
+    state.title = "通知"
+  } else if (type == 2) {
+    state.title = "私信"
+  }
+};
+
+// 关闭弹窗
+const closeDialog = () => {
+  state.isShowDialog = false;
+};
+// 取消
+const onCancel = () => {
+  closeDialog();
+};
+// 提交
+const onSubmit = () => {
+  const formWrap = unref(formRef) as any;
+  if (!formWrap) return;
+  formWrap.validate((valid: boolean) => {
+    if (valid) {
+      state.loading = true;
+      if (!state.formData.id || state.formData.id === 0) {
+        //添加
+        addSysNotice(state.formData).then(() => {
+          ElMessage.success('添加成功');
+          closeDialog(); // 关闭弹窗
+          emit('sysNoticeList')
+        }).finally(() => {
+          state.loading = false;
+        })
+      } else {
+        //修改
+        updateSysNotice(state.formData).then(() => {
+          ElMessage.success('修改成功');
+          closeDialog(); // 关闭弹窗
+          emit('sysNoticeList')
+        }).finally(() => {
+          state.loading = false;
         })
       }
-      state.isShowDialog = true;
-    };
-
-    const remoteUserMethod = (query: string) => {
-      //console.log("remoteMethod", query)
-      state.userListOptions = []
-      getUserList(query).then((res: any) => {
-        /*console.log(res)*/
-        // let list:object[]
-        //list=res.data
-        state.userListOptions = res.data.userList
-      })
-      /*      if (query) {
-        loading.value = true
-        setTimeout(() => {
-          loading.value = false
-          options.value = list.value.filter((item) => {
-            return item.label.toLowerCase().includes(query.toLowerCase())
-          })
-        }, 200)
-      } else {
-        options.value = []
-      }*/
     }
-    //设置类型
-    const setType = (type: number) => {
-      state.formData.type = type
-      if (type == 1) {
-        state.title = "通知"
-      } else if (type == 2) {
-        state.title = "私信"
-      }
-    };
-
-    // 关闭弹窗
-    const closeDialog = () => {
-      state.isShowDialog = false;
-    };
-    // 取消
-    const onCancel = () => {
-      closeDialog();
-    };
-    // 提交
-    const onSubmit = () => {
-      const formWrap = unref(formRef) as any;
-      if (!formWrap) return;
-      formWrap.validate((valid: boolean) => {
-        if (valid) {
-          state.loading = true;
-          if (!state.formData.id || state.formData.id === 0) {
-            //添加
-            addSysNotice(state.formData).then(() => {
-              ElMessage.success('添加成功');
-              closeDialog(); // 关闭弹窗
-              emit('sysNoticeList')
-            }).finally(() => {
-              state.loading = false;
-            })
-          } else {
-            //修改
-            updateSysNotice(state.formData).then(() => {
-              ElMessage.success('修改成功');
-              closeDialog(); // 关闭弹窗
-              emit('sysNoticeList')
-            }).finally(() => {
-              state.loading = false;
-            })
-          }
-        }
-      });
-    };
-    const resetForm = () => {
-      state.formData = {
-        receiver: undefined,
-        type: undefined,
-        id: undefined,
-        title: undefined,
-        tag: undefined,
-        content: undefined,
-        remark: undefined,
-        sort: 0,
-        status: 1,
-        createdBy: undefined,
-        updatedBy: undefined,
-        createdAt: undefined,
-        updatedAt: undefined,
-        deletedAt: undefined
-      }
-    };
-    //富文本编辑器内容
-    const setContentEditContent = (data: string) => {
-      state.formData.content = data
-    }
-    return {
-      proxy,
-      openDialog,
-      setType,
-      closeDialog,
-      onCancel,
-      onSubmit,
-      remoteUserMethod,
-      menuRef,
-      formRef,
-      //富文本编辑器内容
-      setContentEditContent,
-      ...toRefs(state),
-    };
+  });
+};
+const resetForm = () => {
+  state.formData = {
+    receiver: undefined,
+    type: undefined,
+    id: undefined,
+    title: undefined,
+    tag: undefined,
+    content: undefined,
+    remark: undefined,
+    sort: 0,
+    status: 1,
+    createdBy: undefined,
+    updatedBy: undefined,
+    createdAt: undefined,
+    updatedAt: undefined,
+    deletedAt: undefined
   }
-})
+};
+//富文本编辑器内容
+const setContentEditContent = (data: string) => {
+  state.formData.content = data
+}
+defineExpose({openDialog,setType})
 </script>
 <style scoped>
 .kv-label {

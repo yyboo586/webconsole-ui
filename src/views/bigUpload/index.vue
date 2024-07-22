@@ -73,7 +73,7 @@
   </div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 
 import { onMounted, ref, defineComponent, getCurrentInstance} from 'vue';
 import getTableData from '/@/views/bigUpload/tableData'
@@ -81,14 +81,7 @@ import {addBigFile, deleteBigFile} from "/@/api/system/bigFile";
 import {ElMessage, ElMessageBox} from "element-plus";
 import EditBigUpload from '/@/views/bigUpload/component/editBigUpload.vue'
 
-
-export default defineComponent({
-  name: "bigUpload",
-  components:{
-    EditBigUpload
-  },
-  setup() {
-
+defineOptions({ name: "bigUpload"})
     const {
       total,
       queryParams,
@@ -98,20 +91,13 @@ export default defineComponent({
       getBigFileList,
       resetBigFileList
     } = getTableData()
-
-
     const editBigUploadRef = ref();
-
-
     const {proxy} = <any>getCurrentInstance();
-
     const selected = ref<number[]>([])
-
     // 文件上传
     const uploadHandle = function () {
       proxy.mittBus.emit("bigUploader.uploadFile")
     }
-
     onMounted(()=> {
       proxy.mittBus.on("bigUploader.uploadFileSuccess", (res:any) => {
         //console.log(res)
@@ -182,26 +168,6 @@ export default defineComponent({
         return ""
       }
     }
-
-
-    return {
-      total,
-      queryParams,
-      tableData,
-      queryRef,
-      resetQuery,
-      getBigFileList,
-      resetBigFileList,
-      uploadHandle,
-      handleSelectionChange,
-      byteText,
-      edit,
-      del,
-      delMult,
-      editBigUploadRef
-    }
-  }
-})
 </script>
 
 <style scoped lang="scss">

@@ -38,7 +38,7 @@
   </div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import { toRefs, reactive, computed, defineComponent, onMounted } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useThemeConfig } from '/@/stores/themeConfig';
@@ -54,32 +54,21 @@ interface LoginState {
 	tabsActiveName: string;
 	isScan: boolean;
 }
-
-export default defineComponent({
-	name: 'loginIndex',
-	components: { Account, Mobile, Scan },
-	setup() {
-		const storesThemeConfig = useThemeConfig();
-		const { themeConfig } = storeToRefs(storesThemeConfig);
-		const state = reactive<LoginState>({
-			tabsActiveName: 'account',
-			isScan: false,
-		});
-		// 获取布局配置信息
-		const getThemeConfig = computed(() => {
-			return themeConfig.value;
-		});
-		// 页面加载时
-		onMounted(() => {
-			NextLoading.done();
-		});
-		return {
-			logoMini,
-			loginIconTwo,
-			getThemeConfig,
-			...toRefs(state),
-		};
-	},
+defineOptions({ name: "loginIndex"})
+const storesThemeConfig = useThemeConfig();
+const { themeConfig } = storeToRefs(storesThemeConfig);
+const state = reactive<LoginState>({
+  tabsActiveName: 'account',
+  isScan: false,
+});
+const { tabsActiveName,isScan } = toRefs(state);
+// 获取布局配置信息
+const getThemeConfig = computed(() => {
+  return themeConfig.value;
+});
+// 页面加载时
+onMounted(() => {
+  NextLoading.done();
 });
 </script>
 

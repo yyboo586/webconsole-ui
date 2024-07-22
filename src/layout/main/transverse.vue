@@ -6,12 +6,8 @@
 	</el-container>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import Header from '/@/layout/component/header.vue';
 import Main from '/@/layout/component/main.vue';
-
-export default {
-	name: 'layoutTransverse',
-	components: { Header, Main },
-};
+defineOptions({ name: "layoutTransverse"})
 </script>

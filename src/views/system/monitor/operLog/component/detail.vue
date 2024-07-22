@@ -48,7 +48,7 @@
     </el-drawer>
   </div>
 </template>
-<script lang="ts">
+<script setup lang="ts">
 import { reactive, toRefs, defineComponent,ref,getCurrentInstance,computed } from 'vue';
 import {
   getSysOperLog
@@ -57,120 +57,107 @@ import {
   SysOperLogInfoData,
   SysOperLogEditState,
 } from "/@/views/system/monitor/operLog/component/model"
-export default defineComponent({
-  name:"apiV1SystemSysOperLogDetail",
-  components:{
+defineOptions({ name: "apiV1SystemSysOperLogDetail"})
+const props = defineProps({
+  requestMethodOptions:{
+    type:Array,
+    default:()=>[]
   },
-  props:{
-    requestMethodOptions:{
-      type:Array,
-      default:()=>[]
+})
+const emit = defineEmits(['getSysDeptItemsDeptName'])
+const {proxy} = <any>getCurrentInstance()
+const formRef = ref<HTMLElement | null>(null);
+const menuRef = ref();
+const state = reactive<SysOperLogEditState>({
+  loading:false,
+  isShowDialog: false,
+  formData: {
+    operId: undefined,
+    title: undefined,
+    businessType: undefined,
+    method: undefined,
+    requestMethod: undefined,
+    operatorType: undefined,
+    operName: undefined,
+    deptName: undefined,
+    operUrl: undefined,
+    operIp: undefined,
+    operLocation: undefined,
+    operParam: undefined,
+    jsonResult: undefined,
+    status: false ,
+    errorMsg: undefined,
+    operTime: undefined,
+    linkedSysOperLogSysDept: {
+      deptId:undefined,    // 部门id
+      deptName:undefined,    // 部门名称
     },
   },
-  setup(props,{emit}) {
-    const {proxy} = <any>getCurrentInstance()
-    const formRef = ref<HTMLElement | null>(null);
-    const menuRef = ref();
-    const state = reactive<SysOperLogEditState>({
-      loading:false,
-      isShowDialog: false,
-      formData: {
-        operId: undefined,
-        title: undefined,
-        businessType: undefined,
-        method: undefined,
-        requestMethod: undefined,
-        operatorType: undefined,
-        operName: undefined,
-        deptName: undefined,
-        operUrl: undefined,
-        operIp: undefined,
-        operLocation: undefined,
-        operParam: undefined,
-        jsonResult: undefined,
-        status: false ,
-        errorMsg: undefined,
-        operTime: undefined,
-        linkedSysOperLogSysDept: {
-          deptId:undefined,    // 部门id
-          deptName:undefined,    // 部门名称
-        },
-      },
-      // 表单校验
-      rules: {
-        operId : [
-          { required: true, message: "日志编号不能为空", trigger: "blur" }
-        ],
-        operName : [
-          { required: true, message: "操作人员不能为空", trigger: "blur" }
-        ],
-        deptName : [
-          { required: true, message: "部门名称不能为空", trigger: "blur" }
-        ],
-        status : [
-          { required: true, message: "操作状态（0正常 1异常）不能为空", trigger: "blur" }
-        ],
-      }
-    });
-    // 打开弹窗
-    const openDialog = (row?: SysOperLogInfoData) => {
-      resetForm();
-      if(row) {
-        getSysOperLog(row.operId!).then((res:any)=>{
-          const data = res.data;
-          state.formData = data;
-        })
-      }
-      state.isShowDialog = true;
-    };
-    // 关闭弹窗
-    const closeDialog = () => {
-      state.isShowDialog = false;
-    };
-    // 取消
-    const onCancel = () => {
-      closeDialog();
-    };
-    const resetForm = ()=>{
-      state.formData = {
-        operId: undefined,
-        title: undefined,
-        businessType: undefined,
-        method: undefined,
-        requestMethod: undefined,
-        operatorType: undefined,
-        operName: undefined,
-        deptName: undefined,
-        operUrl: undefined,
-        operIp: undefined,
-        operLocation: undefined,
-        operParam: undefined,
-        jsonResult: undefined,
-        status: false ,
-        errorMsg: undefined,
-        operTime: undefined,
-        linkedSysOperLogSysDept: {
-          deptId:undefined,    // 部门id
-          deptName:undefined,    // 部门名称
-        },
-      }
-    };
-    //关联sys_dept表选项
-    const getSysDeptItemsDeptName = () => {
-      emit("getSysDeptItemsDeptName")
-    }
-    return {
-      proxy,
-      openDialog,
-      closeDialog,
-      onCancel,
-      menuRef,
-      formRef,
-      getSysDeptItemsDeptName,
-      ...toRefs(state),
-    };
+  // 表单校验
+  rules: {
+    operId : [
+      { required: true, message: "日志编号不能为空", trigger: "blur" }
+    ],
+    operName : [
+      { required: true, message: "操作人员不能为空", trigger: "blur" }
+    ],
+    deptName : [
+      { required: true, message: "部门名称不能为空", trigger: "blur" }
+    ],
+    status : [
+      { required: true, message: "操作状态（0正常 1异常）不能为空", trigger: "blur" }
+    ],
   }
-})
+});
+const {isShowDialog,formData} = toRefs(state);
+// 打开弹窗
+const openDialog = (row?: SysOperLogInfoData) => {
+  resetForm();
+  if(row) {
+    getSysOperLog(row.operId!).then((res:any)=>{
+      const data = res.data;
+      state.formData = data;
+    })
+  }
+  state.isShowDialog = true;
+};
+defineExpose({ openDialog})
+// 关闭弹窗
+const closeDialog = () => {
+  state.isShowDialog = false;
+};
+// 取消
+const onCancel = () => {
+  closeDialog();
+};
+const resetForm = ()=>{
+  state.formData = {
+    operId: undefined,
+    title: undefined,
+    businessType: undefined,
+    method: undefined,
+    requestMethod: undefined,
+    operatorType: undefined,
+    operName: undefined,
+    deptName: undefined,
+    operUrl: undefined,
+    operIp: undefined,
+    operLocation: undefined,
+    operParam: undefined,
+    jsonResult: undefined,
+    status: false ,
+    errorMsg: undefined,
+    operTime: undefined,
+    linkedSysOperLogSysDept: {
+      deptId:undefined,    // 部门id
+      deptName:undefined,    // 部门名称
+    },
+  }
+};
+//关联sys_dept表选项
+const getSysDeptItemsDeptName = () => {
+  emit("getSysDeptItemsDeptName")
+}
 </script>
 <style scoped>
 .system-sysOperLog-detail :deep(.el-form-item--large .el-form-item__label){

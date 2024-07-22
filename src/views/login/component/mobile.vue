@@ -29,8 +29,8 @@
 	</el-form>
 </template>
 
-<script lang="ts">
-import { toRefs, reactive, defineComponent } from 'vue';
+<script setup lang="ts">
+import {ref} from 'vue';
 
 // 定义接口来定义对象的类型
 interface LoginMobileState {
@@ -39,20 +39,11 @@ interface LoginMobileState {
 }
 
 // 定义对象与类型
-const ruleForm: LoginMobileState = {
+const ruleForm = ref<LoginMobileState>({
 	userName: '',
 	code: '',
-};
-
-export default defineComponent({
-	name: 'loginMobile',
-	setup() {
-		const state = reactive({ ruleForm });
-		return {
-			...toRefs(state),
-		};
-	},
 });
+defineOptions({ name: "loginMobile"})
 </script>
 
 <style scoped lang="scss">

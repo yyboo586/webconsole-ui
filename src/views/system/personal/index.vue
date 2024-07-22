@@ -203,7 +203,7 @@
   </div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import { toRefs, reactive, computed, defineComponent,getCurrentInstance,onMounted } from 'vue';
 import { formatAxis } from '/@/utils/formatTime';
 import { storeToRefs } from 'pinia';
@@ -224,120 +224,106 @@ interface PersonalState {
   newsInfoList: any;
   recommendList: any;
 }
+defineOptions({ name: "personals"})
 
-export default defineComponent({
-  name: 'personals',
-  setup() {
-    const baseURL:string|undefined|boolean = import.meta.env.VITE_API_URL
-    const {proxy} = <any>getCurrentInstance();
-    const stores = useUserInfo();
-    const { userInfos } = storeToRefs(stores);
-    const dataParam = reactive({
-      token:getToken(),
-    })
-    const state = reactive<PersonalState>({
-      newsInfoList,
-      recommendList,
-      imageUrl:'',
-      deptName:'',
-      roles:[],
-      personalForm: {
-        nickname: '',
-        userEmail: '',
-        describe: '',
-        mobile: '',
-        sex: '',
-        remark:'',
-        avatar:'',
-        lastLoginIp:'',
-        lastLoginTime:''
-      },
-    });
-
-    // const  handleUpload =
-    const handleUpload = () => {
-      // console.log(state.personalForm)
-      editPersonal(state.personalForm).then((res:any)=>{
-          const userInfo = res.data.userInfo
-          userInfo.avatar = proxy.getUpFileUrl(userInfo.avatar)
-          // 存储 token 到浏览器缓存
-          Session.set('token', res.data.token);
-          // 存储用户信息到浏览器缓存
-          Session.set('userInfo', userInfo);
-          useUserInfo().setUserInfos();
-          ElMessage.success('已更新');
-      });
-    };
-    // 当前时间提示语
-    const currentTime = computed(() => {
-
-      return formatAxis(new Date());
-    });
-    const handleAvatarSuccess: UploadProps['onSuccess'] = (
-        response,
-        uploadFile
-    ) => {
-       if(response.code == 0){
-          state.imageUrl = response.data.path;
-          state.personalForm.avatar = response.data.path;
-         handleUpload();
-       }
-
-    };
-
-    /** 重置密码按钮操作 */
-    const handleEditPass = ()=> {
-      ElMessageBox.prompt('请输入"' + state.personalForm.nickname + '"的新密码', "提示", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消"
-      }).then(({ value }) => {
-        if(!value || value==''){
-          ElMessage.success('密码不能为空');
-          return
-        }
-        resetPwdPersonal({password:value}).then(() => {
-          ElMessage.success("修改成功，新密码是：" + value);
-        });
-      }).catch(() => {});
-    };
-    // 初始化用户数据
-    const initUserInfo = () => {
-      getPersonalInfo().then((res:any)=>{
-        const user = res.data.user;
-        state.imageUrl = user.avatar;
-        state.personalForm = {
-          nickname:user.userNickname,
-          userEmail:user.userEmail,
-          describe: user.describe,
-          mobile: user.mobile,
-          sex: String(user.sex),
-          remark:user.remark,
-          avatar:user.avatar,
-          lastLoginIp:user.lastLoginIp,
-          lastLoginTime:user.lastLoginTime
-        }
-        state.deptName = res.data.deptName;
-        state.roles = res.data.roles;
-      })
-
-    };
-    // 页面加载时
-    onMounted(() => {
-      initUserInfo();
-    });
-    return {
-      proxy,
-      baseURL,
-      userInfos,
-      currentTime,
-      handleUpload,
-      handleEditPass,
-      handleAvatarSuccess,
-      dataParam,
-      ...toRefs(state),
-    };
+const baseURL:string|undefined|boolean = import.meta.env.VITE_API_URL
+const {proxy} = <any>getCurrentInstance();
+const stores = useUserInfo();
+const { userInfos } = storeToRefs(stores);
+const dataParam = reactive({
+  token:getToken(),
+})
+const state = reactive<PersonalState>({
+  newsInfoList,
+  recommendList,
+  imageUrl:'',
+  deptName:'',
+  roles:[],
+  personalForm: {
+    nickname: '',
+    userEmail: '',
+    describe: '',
+    mobile: '',
+    sex: '',
+    remark:'',
+    avatar:'',
+    lastLoginIp:'',
+    lastLoginTime:''
   },
 });
+
+const { deptName,roles,imageUrl,personalForm} = toRefs(state);
+const handleUpload = () => {
+  // console.log(state.personalForm)
+  editPersonal(state.personalForm).then((res:any)=>{
+      const userInfo = res.data.userInfo
+      userInfo.avatar = proxy.getUpFileUrl(userInfo.avatar)
+      // 存储 token 到浏览器缓存
+      Session.set('token', res.data.token);
+      // 存储用户信息到浏览器缓存
+      Session.set('userInfo', userInfo);
+      useUserInfo().setUserInfos();
+      ElMessage.success('已更新');
+  });
+};
+// 当前时间提示语
+const currentTime = computed(() => {
+
+  return formatAxis(new Date());
+});
+const handleAvatarSuccess: UploadProps['onSuccess'] = (
+    response,
+    uploadFile
+) => {
+   if(response.code == 0){
+      state.imageUrl = response.data.path;
+      state.personalForm.avatar = response.data.path;
+     handleUpload();
+   }
+
+};
+
+/** 重置密码按钮操作 */
+const handleEditPass = ()=> {
+  ElMessageBox.prompt('请输入"' + state.personalForm.nickname + '"的新密码', "提示", {
+    confirmButtonText: "确定",
+    cancelButtonText: "取消"
+  }).then(({ value }) => {
+    if(!value || value==''){
+      ElMessage.success('密码不能为空');
+      return
+    }
+    resetPwdPersonal({password:value}).then(() => {
+      ElMessage.success("修改成功，新密码是：" + value);
+    });
+  }).catch(() => {});
+};
+// 初始化用户数据
+const initUserInfo = () => {
+  getPersonalInfo().then((res:any)=>{
+    const user = res.data.user;
+    state.imageUrl = user.avatar;
+    state.personalForm = {
+      nickname:user.userNickname,
+      userEmail:user.userEmail,
+      describe: user.describe,
+      mobile: user.mobile,
+      sex: String(user.sex),
+      remark:user.remark,
+      avatar:user.avatar,
+      lastLoginIp:user.lastLoginIp,
+      lastLoginTime:user.lastLoginTime
+    }
+    state.deptName = res.data.deptName;
+    state.roles = res.data.roles;
+  })
+
+};
+// 页面加载时
+onMounted(() => {
+  initUserInfo();
+});
+
 </script>
 
 <style scoped lang="scss">

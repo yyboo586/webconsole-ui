@@ -23,7 +23,7 @@
             <SvgIcon
                 name="ele-RefreshRight"
                 class="ml5 layout-navbars-tagsview-ul-li-refresh"
-                @click.stop="refreshCurrentTagsView($route.fullPath)"
+                @click.stop="refreshCurrentTagsView(getThemeConfig.isShareTagsView ? v.path : v.url)"
             />
             <SvgIcon
                 name="ele-Close"
@@ -45,7 +45,7 @@
   </div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import {
   toRefs,
   reactive,
@@ -101,11 +101,7 @@ interface CurrentContextmenu {
   path: string;
   contextMenuClickId: string | number;
 }
-
-export default defineComponent({
-  name: 'layoutTagsView',
-  components: { Contextmenu },
-  setup() {
+defineOptions({ name: "layoutTagsView"})
     const { proxy } = <any>getCurrentInstance();
     const tagsRefs = ref<any[]>([]);
     const scrollbarRef = ref();
@@ -128,6 +124,7 @@ export default defineComponent({
       tagsViewList: [],
       tagsViewRoutesList: [],
     });
+    const { tagsViewList, dropdown} = toRefs(state)
     // 动态设置 tagsView 风格样式
     const setTagsStyle = computed(() => {
       return themeConfig.value.tagsStyle;
@@ -367,7 +364,7 @@ export default defineComponent({
           // 刷新当前
           if (meta.isDynamic) await router.push({ name, params });
           else await router.push({ path, query });
-          refreshCurrentTagsView(route.fullPath);
+          refreshCurrentTagsView(getThemeConfig.value.isShareTagsView ? path : url);
           break;
         case 1:
           // 关闭当前
@@ -580,25 +577,6 @@ export default defineComponent({
           deep: true,
         }
     );
-    return {
-      isActive,
-      onContextmenu,
-      onTagsClick,
-      tagsRefs,
-      contextmenuRef,
-      scrollbarRef,
-      tagsUlRef,
-      onHandleScroll,
-      getThemeConfig,
-      setTagsStyle,
-      setTagsViewNameI18n,
-      refreshCurrentTagsView,
-      closeCurrentTagsView,
-      onCurrentContextmenuClick,
-      ...toRefs(state),
-    };
-  },
-});
 </script>
 
 <style scoped lang="scss">

@@ -43,22 +43,22 @@
           <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" >
             <el-form-item label="有效时间">
               <el-radio-group v-model="formData.effectiveType">
-                <el-radio :label="0">不设置</el-radio>
-                <el-radio :label="1">按起止日期</el-radio>
-                <el-radio :label="2">按时间段</el-radio>
+                <el-radio :value="0">不设置</el-radio>
+                <el-radio :value="1">按起止日期</el-radio>
+                <el-radio :value="2">按时间段</el-radio>
               </el-radio-group>
             </el-form-item>
           </el-col>
           <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" v-show="formData.effectiveType===2">
             <el-form-item label="每周">
               <el-checkbox-group v-model="formData.weekDay">
-                <el-checkbox :label="1" >周一</el-checkbox>
-                <el-checkbox :label="2" >周二</el-checkbox>
-                <el-checkbox :label="3" >周三</el-checkbox>
-                <el-checkbox :label="4" >周四</el-checkbox>
-                <el-checkbox :label="5" >周五</el-checkbox>
-                <el-checkbox :label="6" >周六</el-checkbox>
-                <el-checkbox :label="0" >周日</el-checkbox>
+                <el-checkbox :value="1" >周一</el-checkbox>
+                <el-checkbox :value="2" >周二</el-checkbox>
+                <el-checkbox :value="3" >周三</el-checkbox>
+                <el-checkbox :value="4" >周四</el-checkbox>
+                <el-checkbox :value="5" >周五</el-checkbox>
+                <el-checkbox :value="6" >周六</el-checkbox>
+                <el-checkbox :value="0" >周日</el-checkbox>
               </el-checkbox-group>
             </el-form-item>
           </el-col>
@@ -120,7 +120,7 @@
 	</div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import { reactive, toRefs, defineComponent,ref,getCurrentInstance,unref } from 'vue';
 import {addRole, editRole, getRole, getRoleParams} from "/@/api/system/role";
 import {ElMessage} from "element-plus";
@@ -162,190 +162,175 @@ interface RoleState {
 	};
   rules: object;
 }
-
-export default defineComponent({
-	name: 'systemEditRole',
-  props:{
-    roleData:{
-      type:Array,
-      default:()=>[]
-    }
+defineOptions({ name: "systemEditRole"})
+const props = defineProps({
+  roleData:{
+    type:Array,
+    default:()=>[]
+  }
+})
+const emit = defineEmits(['getRoleList']);
+const {proxy} = getCurrentInstance() as any;
+const formRef = ref<HTMLElement | null>(null);
+const menuRef = ref();
+const state = reactive<RoleState>({
+  loading:false,
+  isShowDialog: false,
+  formData: {
+    id:0,
+    pid:0,
+    name: '',
+    status: 1,
+    listOrder: 0,
+    remark: '',
+    menuIds:[],
+    effectiveType:0,
+    weekDay:[1,2,3,4,5],
+    dayRange:[
+      '2024-02-01 08:00:00',
+      '2024-02-01 19:00:00',
+    ],
+    dateRange:[],
   },
-	setup(props,{emit}) {
-    const {proxy} = getCurrentInstance() as any;
-    const formRef = ref<HTMLElement | null>(null);
-    const menuRef = ref();
-		const state = reactive<RoleState>({
-      loading:false,
-			isShowDialog: false,
-			formData: {
-        id:0,
-        pid:0,
-        name: '',
-        status: 1,
-        listOrder: 0,
-        remark: '',
-        menuIds:[],
-        effectiveType:0,
-        weekDay:[1,2,3,4,5],
-        dayRange:[
-          '2024-02-01 08:00:00',
-          '2024-02-01 19:00:00',
-        ],
-        dateRange:[],
-			},
-      // 表单校验
-      rules: {
-        name:[
-          {required: true, message: "角色名称不能为空", trigger: "blur"},
-        ]
-      },
-			menuData: [],
-      menuExpand:false,
-      menuNodeAll:false,
-      menuCheckStrictly:false,
-			menuProps: {
-				children: 'children',
-				label: 'title',
-				disabled:'disabled'
-			},
-		});
-		// 打开弹窗
-		const openDialog = (row?: DialogRow) => {
-      resetForm();
-			getMenuData();
-      if(row) {
-        getRole(row.id).then((res:any)=>{
-          if(res.data.role){
-            state.formData = res.data.role;
-            if(!state.formData.weekDay){
-              state.formData.weekDay = [1,2,3,4,5]
-            }
-            state.formData.menuIds = res.data.menuIds??[]
-          }
+  // 表单校验
+  rules: {
+    name:[
+      {required: true, message: "角色名称不能为空", trigger: "blur"},
+    ]
+  },
+  menuData: [],
+  menuExpand:false,
+  menuNodeAll:false,
+  menuCheckStrictly:false,
+  menuProps: {
+    children: 'children',
+    label: 'title',
+    disabled:'disabled'
+  },
+});
+// 打开弹窗
+const openDialog = (row?: DialogRow) => {
+  resetForm();
+  getMenuData();
+  if(row) {
+    getRole(row.id).then((res:any)=>{
+      if(res.data.role){
+        state.formData = res.data.role;
+        if(!state.formData.weekDay){
+          state.formData.weekDay = [1,2,3,4,5]
+        }
+        state.formData.menuIds = res.data.menuIds??[]
+      }
+    })
+  }
+  state.isShowDialog = true;
+};
+defineExpose({ openDialog})
+// 关闭弹窗
+const closeDialog = () => {
+  state.isShowDialog = false;
+};
+// 取消
+const onCancel = () => {
+  closeDialog();
+};
+// 新增
+const onSubmit = () => {
+  const formWrap = unref(formRef) as any;
+  if (!formWrap) return;
+  formWrap.validate((valid: boolean) => {
+    if (valid) {
+      state.loading = true;
+      state.formData.menuIds = getMenuAllCheckedKeys();
+      if(state.formData.id===0){
+        //添加
+        addRole(state.formData).then(()=>{
+          ElMessage.success('角色添加成功');
+          closeDialog(); // 关闭弹窗
+          resetMenuSession()
+          emit('getRoleList')
+        }).finally(()=>{
+          state.loading = false;
+        })
+      }else{
+        //修改
+        editRole(state.formData).then(()=>{
+          ElMessage.success('角色修改成功');
+          closeDialog(); // 关闭弹窗
+          resetMenuSession()
+          emit('getRoleList')
+        }).finally(()=>{
+          state.loading = false;
         })
       }
-			state.isShowDialog = true;
-		};
-		// 关闭弹窗
-		const closeDialog = () => {
-			state.isShowDialog = false;
-		};
-		// 取消
-		const onCancel = () => {
-			closeDialog();
-		};
-		// 新增
-		const onSubmit = () => {
-      const formWrap = unref(formRef) as any;
-      if (!formWrap) return;
-      formWrap.validate((valid: boolean) => {
-        if (valid) {
-          state.loading = true;
-          state.formData.menuIds = getMenuAllCheckedKeys();
-          if(state.formData.id===0){
-            //添加
-            addRole(state.formData).then(()=>{
-              ElMessage.success('角色添加成功');
-              closeDialog(); // 关闭弹窗
-              resetMenuSession()
-              emit('getRoleList')
-            }).finally(()=>{
-              state.loading = false;
-            })
-          }else{
-            //修改
-            editRole(state.formData).then(()=>{
-              ElMessage.success('角色修改成功');
-              closeDialog(); // 关闭弹窗
-              resetMenuSession()
-              emit('getRoleList')
-            }).finally(()=>{
-              state.loading = false;
-            })
-          }
-        }
-      });
-		};
-		// 获取菜单结构数据
-		const getMenuData = () => {
-      getRoleParams().then((res:any)=>{
-				const menus = res.data.menu??[]
-				const accessMenus = res.data.accessMenus??[]
-				menus.map((item:any)=>{
-					item.disabled = !accessMenus.includes(item.id)
-				})
-        state.menuData = proxy.handleTree(menus, "id","pid");
-      })
-		};
-    const resetForm = ()=>{
-      state.menuCheckStrictly=false;
-      state.menuExpand = false;
-      state.menuNodeAll = false;
-      state.formData = {
-        id:0,
-        pid:0,
-        name: '',
-        status: 1,
-        listOrder: 0,
-        remark: '',
-        menuIds:[],
-        effectiveType:0,
-        weekDay:[1,2,3,4,5],
-        dayRange:[
-          '2024-02-01 08:00:00',
-          '2024-02-01 19:00:00',
-        ],
-        dateRange:[]
-      }
-    };
-    /** 树权限（展开/折叠）*/
-    const handleCheckedTreeExpand = (value:any) => {
-      let treeList = state.menuData;
-      for (let i = 0; i < treeList.length; i++) {
-        menuRef.value.store.nodesMap[treeList[i].id].expanded = value;
-      }
     }
+  });
+};
+// 获取菜单结构数据
+const getMenuData = () => {
+  getRoleParams().then((res:any)=>{
+    const menus = res.data.menu??[]
+    const accessMenus = res.data.accessMenus??[]
+    menus.map((item:any)=>{
+      item.disabled = !accessMenus.includes(item.id)
+    })
+    state.menuData = proxy.handleTree(menus, "id","pid");
+  })
+};
+const resetForm = ()=>{
+  state.menuCheckStrictly=false;
+  state.menuExpand = false;
+  state.menuNodeAll = false;
+  state.formData = {
+    id:0,
+    pid:0,
+    name: '',
+    status: 1,
+    listOrder: 0,
+    remark: '',
+    menuIds:[],
+    effectiveType:0,
+    weekDay:[1,2,3,4,5],
+    dayRange:[
+      '2024-02-01 08:00:00',
+      '2024-02-01 19:00:00',
+    ],
+    dateRange:[]
+  }
+};
+const {formData, menuData,menuExpand,menuNodeAll,menuCheckStrictly,menuProps,rules,loading,isShowDialog} = toRefs(state)
+/** 树权限（展开/折叠）*/
+const handleCheckedTreeExpand = (value:any) => {
+  let treeList = state.menuData;
+  for (let i = 0; i < treeList.length; i++) {
+    menuRef.value.store.nodesMap[treeList[i].id].expanded = value;
+  }
+}
 
-    /** 树权限（全选/全不选） */
-    const handleCheckedTreeNodeAll = (value:any) => {
-        menuRef.value.setCheckedNodes(value ? state.menuData : []);
-    }
+/** 树权限（全选/全不选） */
+const handleCheckedTreeNodeAll = (value:any) => {
+    menuRef.value.setCheckedNodes(value ? state.menuData : []);
+}
 
-    /** 树权限（父子联动） */
-    const handleCheckedTreeConnect = (value:any) => {
-      state.menuCheckStrictly = value ? true : false;
-    }
+/** 树权限（父子联动） */
+const handleCheckedTreeConnect = (value:any) => {
+  state.menuCheckStrictly = value ? true : false;
+}
 
-    /** 所有菜单节点数据 */
-    function getMenuAllCheckedKeys() {
-      // 目前被选中的菜单节点
-      let checkedKeys = menuRef.value.getCheckedKeys();
-      // 半选中的菜单节点
-      let halfCheckedKeys = menuRef.value.getHalfCheckedKeys();
-      checkedKeys.unshift.apply(checkedKeys, halfCheckedKeys);
-      return checkedKeys;
-    }
+/** 所有菜单节点数据 */
+function getMenuAllCheckedKeys() {
+  // 目前被选中的菜单节点
+  let checkedKeys = menuRef.value.getCheckedKeys();
+  // 半选中的菜单节点
+  let halfCheckedKeys = menuRef.value.getHalfCheckedKeys();
+  checkedKeys.unshift.apply(checkedKeys, halfCheckedKeys);
+  return checkedKeys;
+}
 
-    // 重置菜单session
-    const resetMenuSession = () => {
-      refreshBackEndControlRoutes();
-    };
-		return {
-			openDialog,
-			closeDialog,
-			onCancel,
-			onSubmit,
-      menuRef,
-      formRef,
-      handleCheckedTreeExpand,
-      handleCheckedTreeNodeAll,
-      handleCheckedTreeConnect,
-      resetMenuSession,
-			...toRefs(state),
-		};
-	},
-});
+// 重置菜单session
+const resetMenuSession = () => {
+  refreshBackEndControlRoutes();
+};
 </script>
 
 <style scoped lang="scss">

@@ -104,77 +104,64 @@
 	</div>
 </template>
 
-<script lang="ts">
-import { defineComponent, inject, reactive, ref, unref } from 'vue';
+<script setup lang="ts">
+import { inject, reactive, ref, unref } from 'vue';
 import type { FormInstance, FormRules } from 'element-plus';
 import type { TableDataInfo } from '/@/views/system/tools/gen/component/model';
 import { ElMessage } from 'element-plus';
-export default defineComponent({
-	name: 'toolsBasicInfoForm',
-	emits: ['goNext','close'],
-	setup(props, { emit }) {
-		const basicInfoFormRef = ref<FormInstance>();
-    const overwriteOptions = ref([
-      {key:"api",name:"覆盖api"},
-      {key:"controller",name:"覆盖controller"},
-      {key:"dao",name:"覆盖dao"},
-      {key:"dao_internal",name:"覆盖dao_internal"},
-      {key:"logic",name:"覆盖logic"},
-      {key:"model",name:"覆盖model"},
-      {key:"model_do",name:"覆盖model_do"},
-      {key:"model_entity",name:"覆盖model_entity"},
-      {key:"router",name:"覆盖router"},
-      {key:"router_func",name:"覆盖router_func"},
-      {key:"service",name:"覆盖service"},
-      {key:"sql",name:"覆盖菜单sql"},
-      {key:"tsApi",name:"覆盖tsApi"},
-      {key:"tsModel",name:"覆盖tsModel"},
-      {key:"vue",name:"覆盖vue-list"},
-      {key:"vueDetail",name:"覆盖vue-detail"},
-      {key:"vueEdit",name:"覆盖vue-edit"},
-    ])
-		const info = inject<TableDataInfo>('tableData') as TableDataInfo;
-		const nextTip = (): boolean => {
-			//表单验证
-			let tag = false;
-			const formWrap = unref(basicInfoFormRef) as any;
-			if (!formWrap) return false;
-			formWrap.validate((valid: boolean) => {
-				if (valid) {
-					emit('goNext');
-					tag = true;
-				} else {
-					ElMessage.error('请将表单填写完整');
-				}
-			});
-			return tag;
-		};
-    const close = ()=>{
-      emit('close')
+defineOptions({ name: "toolsBasicInfoForm"})
+const emit = defineEmits(['goNext','close']);
+const basicInfoFormRef = ref<FormInstance>();
+const overwriteOptions = ref([
+  {key:"api",name:"覆盖api"},
+  {key:"controller",name:"覆盖controller"},
+  {key:"dao",name:"覆盖dao"},
+  {key:"dao_internal",name:"覆盖dao_internal"},
+  {key:"logic",name:"覆盖logic"},
+  {key:"model",name:"覆盖model"},
+  {key:"model_do",name:"覆盖model_do"},
+  {key:"model_entity",name:"覆盖model_entity"},
+  {key:"router",name:"覆盖router"},
+  {key:"router_func",name:"覆盖router_func"},
+  {key:"service",name:"覆盖service"},
+  {key:"sql",name:"覆盖菜单sql"},
+  {key:"tsApi",name:"覆盖tsApi"},
+  {key:"tsModel",name:"覆盖tsModel"},
+  {key:"vue",name:"覆盖vue-list"},
+  {key:"vueDetail",name:"覆盖vue-detail"},
+  {key:"vueEdit",name:"覆盖vue-edit"},
+])
+const info = inject<TableDataInfo>('tableData') as TableDataInfo;
+const nextTip = (): boolean => {
+  //表单验证
+  let tag = false;
+  const formWrap = unref(basicInfoFormRef) as any;
+  if (!formWrap) return false;
+  formWrap.validate((valid: boolean) => {
+    if (valid) {
+      emit('goNext');
+      tag = true;
+    } else {
+      ElMessage.error('请将表单填写完整');
     }
-    const overwriteChange = (value:boolean)=>{
-      info.value.overwriteInfo.map((item:any)=>{
-        item.value = value
-      })
-    }
-		const rules = reactive<FormRules>({
-			tableName: [{ required: true, message: '请输入表名称', trigger: 'blur' }],
-			tableComment: [{ required: true, message: '请输入表描述', trigger: 'blur' }],
-			className: [{ required: true, message: '请输入实体类名称', trigger: 'blur' }],
-			functionAuthor: [{ required: true, message: '请输入作者', trigger: 'blur' }],
-			sortColumn: [{ required: true, message: '请选择排序字段', trigger: 'blur' }],
-			sortType: [{ required: true, message: '请选择排序类型', trigger: 'blur' }],
-		});
-		return {
-			basicInfoFormRef,
-			info,
-			rules,
-      overwriteOptions,
-			nextTip,
-      overwriteChange,
-      close
-		};
-	},
+  });
+  return tag;
+};
+const close = ()=>{
+  emit('close')
+}
+const overwriteChange = (value:boolean)=>{
+  info.value.overwriteInfo.map((item:any)=>{
+    item.value = value
+  })
+}
+const rules = reactive<FormRules>({
+  tableName: [{ required: true, message: '请输入表名称', trigger: 'blur' }],
+  tableComment: [{ required: true, message: '请输入表描述', trigger: 'blur' }],
+  className: [{ required: true, message: '请输入实体类名称', trigger: 'blur' }],
+  functionAuthor: [{ required: true, message: '请输入作者', trigger: 'blur' }],
+  sortColumn: [{ required: true, message: '请选择排序字段', trigger: 'blur' }],
+  sortType: [{ required: true, message: '请选择排序类型', trigger: 'blur' }],
 });
 </script>
 

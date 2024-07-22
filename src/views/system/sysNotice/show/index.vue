@@ -90,7 +90,7 @@
 
   </div>
 </template>
-<script lang="ts">
+<script setup lang="ts">
 import {useRoute} from "vue-router";
 import {toRefs, reactive, onMounted, ref, defineComponent, getCurrentInstance} from 'vue';
 import {ElMessageBox, ElMessage, FormInstance} from 'element-plus';
@@ -102,122 +102,107 @@ import {
   SysNoticeTableDataState,
 } from "/@/views/system/sysNotice/list/component/model"
 import {readNotice} from "/@/api/system/notice/sysNoticeRead";
-
-export default defineComponent({
-  name: "",
-  components: {},
-  setup() {
-    const route = useRoute();
-    const {proxy} = <any>getCurrentInstance()
-    const loading = ref(false)
-    const state = reactive<SysNoticeTableDataState>({
-      ids: [],
-      tableData: {
-        data: [],
-        total: 0,
-        loading: false,
-        param: {
-          pageNum: 1,
-          pageSize: 10,
-          id: undefined,
-          title: undefined,
-          type: 1,
-          tag: undefined,
-          status: undefined,
-          createdAt: undefined,
-          dateRange: []
-        },
-      },
-    });
-    // 页面加载时
-    onMounted(() => {
-      if (route.query.type){
-        state.tableData.param.type = parseInt(route.query.type as string)
-      }
-      initTableData();
-    });
-    // 初始化表格数据
-    const initTableData = () => {
-      sysNoticeList()
-    };
-    /** 重置按钮操作 */
-    const resetQuery = (formEl: FormInstance | undefined) => {
-      if (!formEl) return
-      formEl.resetFields()
-      sysNoticeList()
-    };
-    // 获取列表数据
-    const sysNoticeList = () => {
-      loading.value = true
-      listShowNotice(state.tableData.param).then((res: any) => {
-        let list = res.data.list ?? [];
-        list.map((item: any) => {
-          item.createdBy = item.createdUser?.userNickname
-        })
-        state.tableData.data = list;
-        state.tableData.total = res.data.total;
-        loading.value = false
-      })
-    };
-
-
-    const handleTabsClick = (e: any) => {
-      //console.log(e.props.name)
-      state.tableData.param.type = e.props.name
-      sysNoticeList()
-    }
-
-
-    const handleDelete = (row: SysNoticeTableColumns) => {
-      let msg = '你确定要删除所选数据？';
-      let id: number[] = [];
-      if (row) {
-        msg = `此操作将永久删除数据，是否继续?`
-        id = [row.id]
-      } else {
-        id = state.ids
-      }
-      if (id.length === 0) {
-        ElMessage.error('请选择要删除的数据。');
-        return
-      }
-      ElMessageBox.confirm(msg, '提示', {
-        confirmButtonText: '确认',
-        cancelButtonText: '取消',
-        type: 'warning',
-      })
-          .then(() => {
-            delSysNotice(id).then(() => {
-              ElMessage.success('删除成功');
-              sysNoticeList();
-            })
-          })
-          .catch(() => {
-          });
-    }
-    // eslint-disable-next-line no-undef
-    const handleRead = (item: any) => {
-      // console.log("handleRead", item)
-      let query = {
-        noticeId: item.id
-      }
-      readNotice(query).then(() => {
-        sysNoticeList()
-        ElMessage.success("已读");
-      })
-    }
-    return {
-      proxy,
-      loading,
-      resetQuery,
-      sysNoticeList,
-      handleTabsClick,
-      handleDelete,
-      handleRead,
-      ...toRefs(state),
-    }
+defineOptions({ name: "apiV1SystemSysNoticeShow"})
+const route = useRoute();
+const {proxy} = <any>getCurrentInstance()
+const loading = ref(false)
+const state = reactive<SysNoticeTableDataState>({
+  ids: [],
+  tableData: {
+    data: [],
+    total: 0,
+    loading: false,
+    param: {
+      pageNum: 1,
+      pageSize: 10,
+      id: undefined,
+      title: undefined,
+      type: 1,
+      tag: undefined,
+      status: undefined,
+      createdAt: undefined,
+      dateRange: []
+    },
+  },
+});
+const { tableData}= toRefs(state)
+// 页面加载时
+onMounted(() => {
+  if (route.query.type){
+    state.tableData.param.type = parseInt(route.query.type as string)
   }
-})
+  initTableData();
+});
+// 初始化表格数据
+const initTableData = () => {
+  sysNoticeList()
+};
+/** 重置按钮操作 */
+const resetQuery = (formEl: FormInstance | undefined) => {
+  if (!formEl) return
+  formEl.resetFields()
+  sysNoticeList()
+};
+// 获取列表数据
+const sysNoticeList = () => {
+  loading.value = true
+  listShowNotice(state.tableData.param).then((res: any) => {
+    let list = res.data.list ?? [];
+    list.map((item: any) => {
+      item.createdBy = item.createdUser?.userNickname
+    })
+    state.tableData.data = list;
+    state.tableData.total = res.data.total;
+    loading.value = false
+  })
+};
+
+
+const handleTabsClick = (e: any) => {
+  //console.log(e.props.name)
+  state.tableData.param.type = e.props.name
+  sysNoticeList()
+}
+
+
+const handleDelete = (row: SysNoticeTableColumns) => {
+  let msg = '你确定要删除所选数据？';
+  let id: number[] = [];
+  if (row) {
+    msg = `此操作将永久删除数据，是否继续?`
+    id = [row.id]
+  } else {
+    id = state.ids
+  }
+  if (id.length === 0) {
+    ElMessage.error('请选择要删除的数据。');
+    return
+  }
+  ElMessageBox.confirm(msg, '提示', {
+    confirmButtonText: '确认',
+    cancelButtonText: '取消',
+    type: 'warning',
+  })
+      .then(() => {
+        delSysNotice(id).then(() => {
+          ElMessage.success('删除成功');
+          sysNoticeList();
+        })
+      })
+      .catch(() => {
+      });
+}
+// eslint-disable-next-line no-undef
+const handleRead = (item: any) => {
+  // console.log("handleRead", item)
+  let query = {
+    noticeId: item.id
+  }
+  readNotice(query).then(() => {
+    sysNoticeList()
+    ElMessage.success("已读");
+  })
+}
 </script>
 <style lang="scss" scoped>
 .el_icon {

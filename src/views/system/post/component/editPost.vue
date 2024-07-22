@@ -31,7 +31,7 @@
 	</div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import { reactive, toRefs, defineComponent,ref,unref } from 'vue';
 import {addPost, editPost} from "/@/api/system/post";
 import {ElMessage} from "element-plus";
@@ -57,113 +57,101 @@ interface PostState {
 	};
   rules: object;
 }
-
-export default defineComponent({
-	name: 'systemEditPost',
-	setup(props,{emit}) {
-    const formRef = ref<HTMLElement | null>(null);
-    const menuRef = ref();
-		const state = reactive<PostState>({
-      loading:false,
-			isShowDialog: false,
-			formData: {
-        postId:0,
-        postCode:'',
-        postName:'',
-        postSort:0,
-        status:1,
-        remark:'',
-			},
-      // 表单校验
-      rules: {
-        postName: [
-          { required: true, message: "岗位名称不能为空", trigger: "blur" }
-        ],
-        postCode: [
-          { required: true, message: "岗位编码不能为空", trigger: "blur" }
-        ],
-        postSort: [
-          { required: true, message: "岗位顺序不能为空", trigger: "blur" }
-        ]
-      },
-      menuExpand:false,
-      menuNodeAll:false,
-      menuCheckStrictly:false,
-			menuProps: {
-				children: 'children',
-				label: 'title',
-			},
-		});
-		// 打开弹窗
-		const openDialog = (row?: DialogRow) => {
-      resetForm();
-      if(row) {
-        state.formData = row;
-      }
-			state.isShowDialog = true;
-		};
-		// 关闭弹窗
-		const closeDialog = () => {
-			state.isShowDialog = false;
-		};
-		// 取消
-		const onCancel = () => {
-			closeDialog();
-		};
-		// 新增
-		const onSubmit = () => {
-      const formWrap = unref(formRef) as any;
-      if (!formWrap) return;
-      formWrap.validate((valid: boolean) => {
-        if (valid) {
-          state.loading = true;
-          if(state.formData.postId===0){
-            //添加
-            addPost(state.formData).then(()=>{
-              ElMessage.success('岗位添加成功');
-              closeDialog(); // 关闭弹窗
-              emit('getPostList')
-            }).finally(()=>{
-              state.loading = false;
-            })
-          }else{
-            //修改
-            editPost(state.formData).then(()=>{
-              ElMessage.success('岗位修改成功');
-              closeDialog(); // 关闭弹窗
-              emit('getPostList')
-            }).finally(()=>{
-              state.loading = false;
-            })
-          }
-        }
-      });
-		};
-    const resetForm = ()=>{
-      state.menuCheckStrictly=false;
-      state.menuExpand = false;
-      state.menuNodeAll = false;
-      state.formData = {
-        postId:0,
-        postCode:'',
-        postName:'',
-        postSort:0,
-        status:1,
-        remark:'',
-      }
-    };
-
-		return {
-			openDialog,
-			closeDialog,
-			onCancel,
-			onSubmit,
-      menuRef,
-      formRef,
-			...toRefs(state),
-		};
-	},
+defineOptions({ name: "systemEditPost"})
+const emit = defineEmits(['getPostList']);
+const formRef = ref<HTMLElement | null>(null);
+const menuRef = ref();
+const state = reactive<PostState>({
+  loading:false,
+  isShowDialog: false,
+  formData: {
+    postId:0,
+    postCode:'',
+    postName:'',
+    postSort:0,
+    status:1,
+    remark:'',
+  },
+  // 表单校验
+  rules: {
+    postName: [
+      { required: true, message: "岗位名称不能为空", trigger: "blur" }
+    ],
+    postCode: [
+      { required: true, message: "岗位编码不能为空", trigger: "blur" }
+    ],
+    postSort: [
+      { required: true, message: "岗位顺序不能为空", trigger: "blur" }
+    ]
+  },
+  menuExpand:false,
+  menuNodeAll:false,
+  menuCheckStrictly:false,
+  menuProps: {
+    children: 'children',
+    label: 'title',
+  },
 });
+const {isShowDialog,formData,loading,rules} = toRefs(state);
+// 打开弹窗
+const openDialog = (row?: DialogRow) => {
+  resetForm();
+  if(row) {
+    state.formData = row;
+  }
+  state.isShowDialog = true;
+};
+defineExpose({ openDialog})
+// 关闭弹窗
+const closeDialog = () => {
+  state.isShowDialog = false;
+};
+// 取消
+const onCancel = () => {
+  closeDialog();
+};
+// 新增
+const onSubmit = () => {
+  const formWrap = unref(formRef) as any;
+  if (!formWrap) return;
+  formWrap.validate((valid: boolean) => {
+    if (valid) {
+      state.loading = true;
+      if(state.formData.postId===0){
+        //添加
+        addPost(state.formData).then(()=>{
+          ElMessage.success('岗位添加成功');
+          closeDialog(); // 关闭弹窗
+          emit('getPostList')
+        }).finally(()=>{
+          state.loading = false;
+        })
+      }else{
+        //修改
+        editPost(state.formData).then(()=>{
+          ElMessage.success('岗位修改成功');
+          closeDialog(); // 关闭弹窗
+          emit('getPostList')
+        }).finally(()=>{
+          state.loading = false;
+        })
+      }
+    }
+  });
+};
+const resetForm = ()=>{
+  state.menuCheckStrictly=false;
+  state.menuExpand = false;
+  state.menuNodeAll = false;
+  state.formData = {
+    postId:0,
+    postCode:'',
+    postName:'',
+    postSort:0,
+    status:1,
+    remark:'',
+  }
+};
 </script>
 
 <style scoped lang="scss">

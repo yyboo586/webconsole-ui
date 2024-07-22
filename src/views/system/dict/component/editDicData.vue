@@ -26,8 +26,8 @@
 
         <el-form-item label="状态" prop="status">
           <el-radio-group v-model="ruleForm.status">
-            <el-radio :label="1" >启用</el-radio>
-            <el-radio :label="0" >禁用</el-radio>
+            <el-radio :value="1" >启用</el-radio>
+            <el-radio :value="0" >禁用</el-radio>
           </el-radio-group>
         </el-form-item>
         <el-form-item label="备注" prop="remark">
@@ -44,7 +44,7 @@
 	</div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import { reactive, toRefs, defineComponent,ref, unref } from 'vue';
 import { getData,addData,editData } from '/@/api/system/dict/data';
 import {ElMessage} from "element-plus";
@@ -63,104 +63,94 @@ interface DicState {
 	ruleForm: RuleFormState;
   rules:{}
 }
-
-export default defineComponent({
-	name: 'systemEditDicData',
-  props:{
-    dictType:{
-      type:String,
-      default:()=>''
-    }
+defineOptions({ name: "systemEditDicData"})
+const prop = defineProps({
+  dictType:{
+    type:String,
+    default:''
+  }
+})
+const emit = defineEmits(['dataList']);
+const formRef = ref<HTMLElement | null>(null);
+const state = reactive<DicState>({
+  isShowDialog: false,
+  ruleForm: {
+    dictCode: 0,
+    dictLabel: '',
+    dictValue: '',
+    dictSort: 0,
+    isDefault:0,
+    status: 1,
+    remark: '',
+    dictType:prop.dictType
   },
-	setup(prop,{emit}) {
-    const formRef = ref<HTMLElement | null>(null);
-		const state = reactive<DicState>({
-			isShowDialog: false,
-			ruleForm: {
-        dictCode: 0,
-        dictLabel: '',
-        dictValue: '',
-        dictSort: 0,
-        isDefault:0,
-        status: 1,
-        remark: '',
-        dictType:prop.dictType
-			},
-      rules: {
-        dictLabel: [
-          { required: true, message: "数据标签不能为空", trigger: "blur" }
-        ],
-        dictValue: [
-          { required: true, message: "数据键值不能为空", trigger: "blur" }
-        ],
-        dictSort: [
-          { required: true, message: "数据顺序不能为空", trigger: "blur" }
-        ]
-      }
-		});
-		// 打开弹窗
-		const openDialog = (row: RuleFormState|null) => {
-      resetForm();
-      if (row){
-        getData(row.dictCode).then((res:any)=>{
-          state.ruleForm = res.data.dict
-        })
-        state.ruleForm = row;
-      }
-			state.isShowDialog = true;
-		};
-    const resetForm = ()=>{
-      state.ruleForm = {
-        dictCode: 0,
-        dictLabel: '',
-        dictValue: '',
-        dictSort: 0,
-        isDefault:0,
-        status: 1,
-        remark: '',
-        dictType:prop.dictType
-      }
-    };
-		// 关闭弹窗
-		const closeDialog = () => {
-			state.isShowDialog = false;
-		};
-		// 取消
-		const onCancel = () => {
-			closeDialog();
-		};
-		// 新增
-		const onSubmit = () => {
-      const formWrap = unref(formRef) as any;
-      if (!formWrap) return;
-      formWrap.validate((valid: boolean) => {
-        if (valid) {
-          if(state.ruleForm.dictCode!==0){
-            //修改
-            editData(state.ruleForm).then(()=>{
-              ElMessage.success('字典数据修改成功');
-              closeDialog(); // 关闭弹窗
-              emit('dataList')
-            })
-          }else{
-            //添加
-            addData(state.ruleForm).then(()=>{
-              ElMessage.success('字典数据添加成功');
-              closeDialog(); // 关闭弹窗
-              emit('dataList')
-            })
-          }
-        }
-      });
-		};
-		return {
-			openDialog,
-			closeDialog,
-			onCancel,
-			onSubmit,
-      formRef,
-			...toRefs(state),
-		};
-	},
+  rules: {
+    dictLabel: [
+      { required: true, message: "数据标签不能为空", trigger: "blur" }
+    ],
+    dictValue: [
+      { required: true, message: "数据键值不能为空", trigger: "blur" }
+    ],
+    dictSort: [
+      { required: true, message: "数据顺序不能为空", trigger: "blur" }
+    ]
+  }
 });
+const { isShowDialog,ruleForm,rules } = toRefs(state);
+// 打开弹窗
+const openDialog = (row: RuleFormState|null) => {
+  resetForm();
+  if (row){
+    getData(row.dictCode).then((res:any)=>{
+      state.ruleForm = res.data.dict
+    })
+    state.ruleForm = row;
+  }
+  state.isShowDialog = true;
+};
+defineExpose({ openDialog})
+const resetForm = ()=>{
+  state.ruleForm = {
+    dictCode: 0,
+    dictLabel: '',
+    dictValue: '',
+    dictSort: 0,
+    isDefault:0,
+    status: 1,
+    remark: '',
+    dictType:prop.dictType
+  }
+};
+// 关闭弹窗
+const closeDialog = () => {
+  state.isShowDialog = false;
+};
+// 取消
+const onCancel = () => {
+  closeDialog();
+};
+// 新增
+const onSubmit = () => {
+  const formWrap = unref(formRef) as any;
+  if (!formWrap) return;
+  formWrap.validate((valid: boolean) => {
+    if (valid) {
+      if(state.ruleForm.dictCode!==0){
+        //修改
+        editData(state.ruleForm).then(()=>{
+          ElMessage.success('字典数据修改成功');
+          closeDialog(); // 关闭弹窗
+          emit('dataList')
+        })
+      }else{
+        //添加
+        addData(state.ruleForm).then(()=>{
+          ElMessage.success('字典数据添加成功');
+          closeDialog(); // 关闭弹窗
+          emit('dataList')
+        })
+      }
+    }
+  });
+};
 </script>

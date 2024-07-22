@@ -792,7 +792,7 @@ export default defineComponent({
 	height: 100%;
 	width: 100%;
 	overflow: hidden;
-	background: url(https://img-blog.csdnimg.cn/6267533849444025811bf0840f9366e3.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBAbHl0LXRvcA==,size_20,color_FFFFFF,t_70,g_se,x_16);
+	background: url(/@/assets/board2.jpg);
 	background-size: 100% 100%;
 	display: flex;
 	flex-direction: column;
@@ -822,15 +822,6 @@ export default defineComponent({
 			background-size: 200% 100%;
 			animation: masked-animation 4s infinite linear;
 			-webkit-box-reflect: below -2px -webkit-gradient(linear, left top, left bottom, from(rgba(0, 0, 0, 0)), to(rgba(255, 255, 255, 0.1)));
-			@keyframes masked-animation {
-				0% {
-					background-position: 0 0;
-				}
-				100% {
-					background-position: -100% 0;
-				}
-			}
-			position: relative;
 			&::after {
 				content: '';
 				width: 50%;
@@ -1340,5 +1331,13 @@ export default defineComponent({
 			}
 		}
 	}
+}
+@keyframes masked-animation {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
 }
 </style>

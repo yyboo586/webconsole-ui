@@ -80,7 +80,7 @@
   </el-form>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import {
   toRefs,
   reactive,
@@ -103,139 +103,125 @@ import { formatAxis } from '/@/utils/formatTime';
 import { NextLoading } from '/@/utils/loading';
 import {captcha, login} from "/@/api/login";
 import GoCaptchaBtn from "/@/components/goCaptcha/GoCaptchaBtn.vue";
-export default defineComponent({
-	name: 'loginAccount',
-  components: {GoCaptchaBtn},
-	setup() {
-		const { t } = useI18n();
-    const {proxy} = <any>getCurrentInstance();
-		const storesThemeConfig = useThemeConfig();
-		const { themeConfig } = storeToRefs(storesThemeConfig);
-		const route = useRoute();
-		const router = useRouter();
-    const loginForm = ref(null)
-    const checkCaptchaResult = ref('default')
-    const verifyStatus = ref(0)
-		const state = reactive({
-			isShowPassword: false,
-			ruleForm: {
-        username: 'demo',
-				password: '123456',
-        verifyCode: '',
-        verifyKey:''
-			},
-      formRules:{
-        username: [
-          { required: true, trigger: "blur", message: "用户名不能为空" }
-        ],
-        password: [
-          { required: true, trigger: "blur", message: "密码不能为空" }
-        ]
-      },
-			loading: {
-				signIn: false,
-			},
-      captchaSrc:'',
-		});
-    onMounted(() => {
-      getCaptcha();
-    });
-    const getCaptcha = () => {
-      // 验证码V1版
-      captcha().then((res:any)=>{
-        state.captchaSrc = res.data.img
-        state.ruleForm.verifyKey = res.data.key
-        verifyStatus.value = res.data.verifyStatus
-      })
-    };
-		// 时间获取
-		const currentTime = computed(() => {
-			return formatAxis(new Date());
-		});
-		// 登录
-		const onSignIn = async () => {
-      if(state.loading.signIn){
-        return
-      }
-      const formWrap = unref(loginForm) as any;
-      if (!formWrap) return;
-      formWrap.validate((valid: boolean) => {
-        if(valid){
-          state.loading.signIn = true;
-          login(state.ruleForm).then(async (res:any)=>{
-            const userInfo = res.data.userInfo
-            userInfo.avatar = proxy.getUpFileUrl(userInfo.avatar)
-            // 存储 token 到浏览器缓存
-            Session.set('token', res.data.token);
-            // 存储用户信息到浏览器缓存
-            Session.set('userInfo', userInfo);
-            // 设置用户菜单
-            Session.set('userMenu',res.data.menuList)
-            // 设置按钮权限
-            Session.set('permissions',res.data.permissions)
-            // 模拟数据，对接接口时，记得删除多余代码及对应依赖的引入。用于 `/src/stores/userInfo.ts` 中不同用户登录判断（模拟数据）
-            Cookies.set('username', state.ruleForm.username);
-            if (!themeConfig.value.isRequestRoutes) {
-              // 前端控制路由，2、请注意执行顺序
-              await initFrontEndControlRoutes();
-              signInSuccess();
-            } else {
-              // 模拟后端控制路由，isRequestRoutes 为 true，则开启后端控制路由
-              // 添加完动态路由，再进行 router 跳转，否则可能报错 No match found for location with path "/"
-              await initBackEndControlRoutes();
-              // 执行完 initBackEndControlRoutes，再执行 signInSuccess
-              signInSuccess();
-            }
-          }).catch(()=>{
-            state.loading.signIn = false;
-            state.ruleForm.verifyKey = ''
-            state.ruleForm.verifyCode = ''
-            checkCaptchaResult.value = 'default'
-            // 验证码V1版
-            getCaptcha();
-          })
-        }
-      })
-		};
-		// 登录成功后的跳转
-		const signInSuccess = () => {
-			// 初始化登录成功时间问候语
-			let currentTimeInfo = currentTime.value;
-			// 登录成功，跳到转首页
-			// 如果是复制粘贴的路径，非首页/登录页，那么登录成功后重定向到对应的路径中
-			if (route.query?.redirect) {
-				router.push({
-					path: <string>route.query?.redirect,
-					query: Object.keys(<string>route.query?.params).length > 0 ? JSON.parse(<string>route.query?.params) : '',
-				});
-			} else {
-				router.push('/');
-			}
-			// 登录成功提示
-			// 关闭 loading
-			state.loading.signIn = true;
-			const signInText = t('message.signInText');
-			ElMessage.success(`${currentTimeInfo}，${signInText}`);
-			// 添加 loading，防止第一次进入界面时出现短暂空白
-			NextLoading.start();
-		};
-
-    const handleVerifyCodeConfirm = (data:{key:string,dots:string})=>{
-      state.ruleForm.verifyCode = data.dots
-      state.ruleForm.verifyKey = data.key
-    }
-
-		return {
-			onSignIn,
-      getCaptcha,
-      checkCaptchaResult,
-      handleVerifyCodeConfirm,
-      loginForm,
-      verifyStatus,
-			...toRefs(state),
-		};
-	},
+defineOptions({ name: "loginAccount"})
+const { t } = useI18n();
+const {proxy} = <any>getCurrentInstance();
+const storesThemeConfig = useThemeConfig();
+const { themeConfig } = storeToRefs(storesThemeConfig);
+const route = useRoute();
+const router = useRouter();
+const loginForm = ref(null)
+const checkCaptchaResult = ref('default')
+const verifyStatus = ref(0)
+const state = reactive({
+  isShowPassword: false,
+  ruleForm: {
+    username: 'demo',
+    password: '123456',
+    verifyCode: '',
+    verifyKey:''
+  },
+  formRules:{
+    username: [
+      { required: true, trigger: "blur", message: "用户名不能为空" }
+    ],
+    password: [
+      { required: true, trigger: "blur", message: "密码不能为空" }
+    ]
+  },
+  loading: {
+    signIn: false,
+  },
+  captchaSrc:'',
 });
+const { isShowPassword,ruleForm,formRules,loading,captchaSrc} = toRefs(state);
+onMounted(() => {
+  getCaptcha();
+});
+const getCaptcha = () => {
+  // 验证码V1版
+  captcha().then((res:any)=>{
+    state.captchaSrc = res.data.img
+    state.ruleForm.verifyKey = res.data.key
+    verifyStatus.value = res.data.verifyStatus
+  })
+};
+// 时间获取
+const currentTime = computed(() => {
+  return formatAxis(new Date());
+});
+// 登录
+const onSignIn = async () => {
+  if(state.loading.signIn){
+    return
+  }
+  const formWrap = unref(loginForm) as any;
+  if (!formWrap) return;
+  formWrap.validate((valid: boolean) => {
+    if(valid){
+      state.loading.signIn = true;
+      login(state.ruleForm).then(async (res:any)=>{
+        const userInfo = res.data.userInfo
+        userInfo.avatar = proxy.getUpFileUrl(userInfo.avatar)
+        // 存储 token 到浏览器缓存
+        Session.set('token', res.data.token);
+        // 存储用户信息到浏览器缓存
+        Session.set('userInfo', userInfo);
+        // 设置用户菜单
+        Session.set('userMenu',res.data.menuList)
+        // 设置按钮权限
+        Session.set('permissions',res.data.permissions)
+        // 模拟数据，对接接口时，记得删除多余代码及对应依赖的引入。用于 `/src/stores/userInfo.ts` 中不同用户登录判断（模拟数据）
+        Cookies.set('username', state.ruleForm.username);
+        if (!themeConfig.value.isRequestRoutes) {
+          // 前端控制路由，2、请注意执行顺序
+          await initFrontEndControlRoutes();
+          signInSuccess();
+        } else {
+          // 模拟后端控制路由，isRequestRoutes 为 true，则开启后端控制路由
+          // 添加完动态路由，再进行 router 跳转，否则可能报错 No match found for location with path "/"
+          await initBackEndControlRoutes();
+          // 执行完 initBackEndControlRoutes，再执行 signInSuccess
+          signInSuccess();
+        }
+      }).catch(()=>{
+        state.loading.signIn = false;
+        state.ruleForm.verifyKey = ''
+        state.ruleForm.verifyCode = ''
+        checkCaptchaResult.value = 'default'
+        // 验证码V1版
+        getCaptcha();
+      })
+    }
+  })
+};
+// 登录成功后的跳转
+const signInSuccess = () => {
+  // 初始化登录成功时间问候语
+  let currentTimeInfo = currentTime.value;
+  // 登录成功，跳到转首页
+  // 如果是复制粘贴的路径，非首页/登录页，那么登录成功后重定向到对应的路径中
+  if (route.query?.redirect) {
+    router.push({
+      path: <string>route.query?.redirect,
+      query: Object.keys(<string>route.query?.params).length > 0 ? JSON.parse(<string>route.query?.params) : '',
+    });
+  } else {
+    router.push('/');
+  }
+  // 登录成功提示
+  // 关闭 loading
+  state.loading.signIn = true;
+  const signInText = t('message.signInText');
+  ElMessage.success(`${currentTimeInfo}，${signInText}`);
+  // 添加 loading，防止第一次进入界面时出现短暂空白
+  NextLoading.start();
+};
+
+const handleVerifyCodeConfirm = (data:{key:string,dots:string})=>{
+  state.ruleForm.verifyCode = data.dots
+  state.ruleForm.verifyKey = data.key
+}
 </script>
 
 

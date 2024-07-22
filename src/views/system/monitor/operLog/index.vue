@@ -43,7 +43,6 @@
                     v-model="tableData.param.operName"
                     placeholder="请输入操作人员"
                     clearable
-                    size="small"
                     @keyup.enter.native="sysOperLogList"
                 />
               </el-form-item>
@@ -165,7 +164,7 @@
     ></apiV1SystemSysOperLogDetail>
   </div>
 </template>
-<script lang="ts">
+<script setup lang="ts">
 import {ItemOptions} from "/@/api/items";
 import {toRefs, reactive, onMounted, ref, defineComponent, computed,getCurrentInstance,toRaw} from 'vue';
 import {ElMessageBox, ElMessage, FormInstance} from 'element-plus';
@@ -180,175 +179,144 @@ import {
   SysOperLogTableDataState,
 } from "/@/views/system/monitor/operLog/component/model"
 import apiV1SystemSysOperLogDetail from "/@/views/system/monitor/operLog/component/detail.vue"
-export default defineComponent({
-  name: "apiV1SystemSysOperLogList",
-  components:{
-    apiV1SystemSysOperLogDetail
-  },
-  setup() {
-    const {proxy} = <any>getCurrentInstance()
-    const loading = ref(false)
-    const queryRef = ref()
-    const editRef = ref();
-    const detailRef = ref();
-    // 是否显示所有搜索选项
-    const showAll =  ref(false)
-    // 非单个禁用
-    const single = ref(true)
-    // 非多个禁用
-    const multiple =ref(true)
-    const word = computed(()=>{
-      if(showAll.value === false) {
-        //对文字进行处理
-        return "展开搜索";
-      } else {
-        return "收起搜索";
-      }
-    })
-    // 字典选项数据
-    const {
-      sys_oper_log_type,
-    } = proxy.useDict(
-      'sys_oper_log_type',
-    )
-    // deptNameOptions关联表数据
-    const deptNameOptions = ref<Array<ItemOptions>>([])
-    const state = reactive<SysOperLogTableDataState>({
-      operIds:[],
-      tableData: {
-        data: [],
-        total: 0,
-        loading: false,
-        param: {
-          pageNum: 1,
-          pageSize: 10,
-          title: undefined,
-          requestMethod: undefined,
-          operName: undefined,
-          status: undefined,
-          dateRange: []
-        },
-      },
-    });
-    // 页面加载时
-    onMounted(() => {
-      initTableData();
-    });
-    // 初始化表格数据
-    const initTableData = () => {
-      sysOperLogList()
-    };
-    /** 重置按钮操作 */
-    const resetQuery = (formEl: FormInstance | undefined) => {
-      if (!formEl) return
-      formEl.resetFields()
-      sysOperLogList()
-    };
-    // 获取列表数据
-    const sysOperLogList = ()=>{
-      loading.value = true
-      listSysOperLog(state.tableData.param).then((res:any)=>{
-        let list = res.data.list??[];
-        state.tableData.data = list;
-        state.tableData.total = res.data.total;
-        loading.value = false
-      })
-    };
-    const toggleSearch = () => {
-      showAll.value = !showAll.value;
-    }
-    // 请求方式字典翻译
-    const requestMethodFormat = (row:SysOperLogTableColumns) => {
-      return proxy.selectDictLabel(sys_oper_log_type.value, row.requestMethod);
-    }
-    // 多选框选中数据
-    const handleSelectionChange = (selection:Array<SysOperLogInfoData>) => {
-      state.operIds = selection.map(item => item.operId)
-      single.value = selection.length!=1
-      multiple.value = !selection.length
-    }
-    const handleAdd =  ()=>{
-      editRef.value.openDialog()
-    }
-    const handleUpdate = (row: SysOperLogTableColumns) => {
-      if(!row){
-        row = state.tableData.data.find((item:SysOperLogTableColumns)=>{
-          return item.operId ===state.operIds[0]
-        }) as SysOperLogTableColumns
-      }
-      editRef.value.openDialog(toRaw(row));
-    };
-    const handleDelete = (row: SysOperLogTableColumns) => {
-      let msg = '你确定要删除所选数据？';
-      let ids:number[] = [] ;
-      if(row){
-        msg = `此操作将永久删除数据，是否继续?`
-        ids = [row.operId]
-      }else{
-        ids = state.operIds
-      }
-      if(ids.length===0){
-        ElMessage.error('请选择要删除的数据。');
-        return
-      }
-      ElMessageBox.confirm(msg, '提示', {
-        confirmButtonText: '确认',
-        cancelButtonText: '取消',
-        type: 'warning',
-      })
-          .then(() => {
-            delSysOperLog(ids).then(()=>{
-              ElMessage.success('删除成功');
-              sysOperLogList();
-            })
-          })
-          .catch(() => {});
-    }
-    // 清空日志
-    const onRowClear = () => {
-      ElMessageBox.confirm('你确定要删除所选数据？', '提示', {
-        confirmButtonText: '确认',
-        cancelButtonText: '取消',
-        type: 'warning',
-      })
-          .then(() => {
-            clearOperLog().then(()=>{
-              ElMessage.success('清除成功');
-              sysOperLogList();
-            })
-          })
-          .catch(() => {});
-    };
-    const handleView = (row:SysOperLogTableColumns)=>{
-      detailRef.value.openDialog(toRaw(row));
-    }
-    return {
-      proxy,
-      editRef,
-      detailRef,
-      showAll,
-      loading,
-      single,
-      multiple,
-      word,
-      queryRef,
-      resetQuery,
-      sysOperLogList,
-      toggleSearch,
-      requestMethodFormat,
-      sys_oper_log_type,
-      //关联表数据选项
-      deptNameOptions,
-      handleSelectionChange,
-      handleAdd,
-      handleUpdate,
-      handleDelete,
-      handleView,
-      onRowClear,
-      ...toRefs(state),
-    }
+defineOptions({ name: "apiV1SystemSysOperLogList"})
+const {proxy} = <any>getCurrentInstance()
+const loading = ref(false)
+const queryRef = ref()
+const editRef = ref();
+const detailRef = ref();
+// 是否显示所有搜索选项
+const showAll =  ref(false)
+// 非单个禁用
+const single = ref(true)
+// 非多个禁用
+const multiple =ref(true)
+const word = computed(()=>{
+  if(showAll.value === false) {
+    //对文字进行处理
+    return "展开搜索";
+  } else {
+    return "收起搜索";
   }
 })
+// 字典选项数据
+const {
+  sys_oper_log_type,
+} = proxy.useDict(
+  'sys_oper_log_type',
+)
+// deptNameOptions关联表数据
+const deptNameOptions = ref<Array<ItemOptions>>([])
+const state = reactive<SysOperLogTableDataState>({
+  operIds:[],
+  tableData: {
+    data: [],
+    total: 0,
+    loading: false,
+    param: {
+      pageNum: 1,
+      pageSize: 10,
+      title: undefined,
+      requestMethod: undefined,
+      operName: undefined,
+      status: undefined,
+      dateRange: []
+    },
+  },
+});
+const { tableData } = toRefs(state);
+// 页面加载时
+onMounted(() => {
+  initTableData();
+});
+// 初始化表格数据
+const initTableData = () => {
+  sysOperLogList()
+};
+/** 重置按钮操作 */
+const resetQuery = (formEl: FormInstance | undefined) => {
+  if (!formEl) return
+  formEl.resetFields()
+  sysOperLogList()
+};
+// 获取列表数据
+const sysOperLogList = ()=>{
+  loading.value = true
+  listSysOperLog(state.tableData.param).then((res:any)=>{
+    let list = res.data.list??[];
+    state.tableData.data = list;
+    state.tableData.total = res.data.total;
+    loading.value = false
+  })
+};
+const toggleSearch = () => {
+  showAll.value = !showAll.value;
+}
+// 请求方式字典翻译
+const requestMethodFormat = (row:SysOperLogTableColumns) => {
+  return proxy.selectDictLabel(sys_oper_log_type.value, row.requestMethod);
+}
+// 多选框选中数据
+const handleSelectionChange = (selection:Array<SysOperLogInfoData>) => {
+  state.operIds = selection.map(item => item.operId)
+  single.value = selection.length!=1
+  multiple.value = !selection.length
+}
+const handleAdd =  ()=>{
+  editRef.value.openDialog()
+}
+const handleUpdate = (row: SysOperLogTableColumns) => {
+  if(!row){
+    row = state.tableData.data.find((item:SysOperLogTableColumns)=>{
+      return item.operId ===state.operIds[0]
+    }) as SysOperLogTableColumns
+  }
+  editRef.value.openDialog(toRaw(row));
+};
+const handleDelete = (row: SysOperLogTableColumns|null) => {
+  let msg = '你确定要删除所选数据？';
+  let ids:number[] = [] ;
+  if(row){
+    msg = `此操作将永久删除数据，是否继续?`
+    ids = [row.operId]
+  }else{
+    ids = state.operIds
+  }
+  if(ids.length===0){
+    ElMessage.error('请选择要删除的数据。');
+    return
+  }
+  ElMessageBox.confirm(msg, '提示', {
+    confirmButtonText: '确认',
+    cancelButtonText: '取消',
+    type: 'warning',
+  })
+      .then(() => {
+        delSysOperLog(ids).then(()=>{
+          ElMessage.success('删除成功');
+          sysOperLogList();
+        })
+      })
+      .catch(() => {});
+}
+// 清空日志
+const onRowClear = () => {
+  ElMessageBox.confirm('你确定要删除所选数据？', '提示', {
+    confirmButtonText: '确认',
+    cancelButtonText: '取消',
+    type: 'warning',
+  })
+      .then(() => {
+        clearOperLog().then(()=>{
+          ElMessage.success('清除成功');
+          sysOperLogList();
+        })
+      })
+      .catch(() => {});
+};
+const handleView = (row:SysOperLogTableColumns)=>{
+  detailRef.value.openDialog(toRaw(row));
+}
 </script>
 <style lang="scss" scoped>
 .colBlock {

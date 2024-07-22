@@ -80,78 +80,62 @@
 	</div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import {ref, toRefs, reactive, onBeforeMount, defineComponent, getCurrentInstance, unref} from 'vue';
 import { ElMessageBox, ElMessage } from 'element-plus';
 import EditMenu from '/@/views/system/menu/component/editMenu.vue';
 import {delMenu, getMenuList} from "/@/api/system/menu";
-export default defineComponent({
-	name: 'apiV1SystemAuthMenuList',
-	components: { EditMenu },
-	setup() {
-		const editMenuRef = ref();
-		const state = reactive({
-      queryParams:{
-        title:"",
-        component:""
-      },
-      menuTableData:[],
-    });
-    const {proxy} = getCurrentInstance() as any;
-    const {sys_show_hide} = proxy.useDict('sys_show_hide')
-    const acType = ref('add')
-		// 打开新增菜单弹窗
-		const onOpenAddMenu = (row:any) => {
-      acType.value = 'add'
-      editMenuRef.value.openDialog(row);
-		};
-		// 打开编辑菜单弹窗
-		const onOpenEditMenu = (row: any) => {
-      acType.value='edit'
-			editMenuRef.value.openDialog(row);
-		};
-		// 删除当前行
-		const onTabelRowDel = (row: any) => {
-			ElMessageBox.confirm(`此操作将永久删除菜单：“${row.title}”, 是否继续?`, '提示', {
-				confirmButtonText: '删除',
-				cancelButtonText: '取消',
-				type: 'warning',
-			})
-				.then(() => {
-          delMenu(row.id).then(()=>{
-            ElMessage.success('删除成功');
-            proxy.$refs['editMenuRef'].resetMenuSession()
-            menuList();
-          })
-				})
-				.catch(() => {});
-		};
-    const formatIsHide = (row:any)=>{
-      return proxy.selectDictLabel(unref(sys_show_hide), ''+row.isHide);
-    };
-    onBeforeMount(()=>{
-      menuList()
-    });
-    const handleQuery=() => {
-      menuList();
-    };
-    const menuList = ()=>{
-      getMenuList(state.queryParams).then(res=>{
-        state.menuTableData = proxy.handleTree(res.data.rules??[], "id","pid");
-      })
-    };
-		return {
-			editMenuRef,
-			onOpenAddMenu,
-			onOpenEditMenu,
-			onTabelRowDel,
-      formatIsHide,
-      menuList,
-      handleQuery,
-			...toRefs(state),
-      sys_show_hide,
-      acType
-		};
-	},
+defineOptions({ name: "apiV1SystemAuthMenuList"})
+const editMenuRef = ref();
+const state = reactive({
+  queryParams:{
+    title:"",
+    component:""
+  },
+  menuTableData:[],
 });
+const {queryParams,menuTableData} = toRefs(state);
+const {proxy} = getCurrentInstance() as any;
+const {sys_show_hide} = proxy.useDict('sys_show_hide')
+const acType = ref('add')
+// 打开新增菜单弹窗
+const onOpenAddMenu = (row:any) => {
+  acType.value = 'add'
+  editMenuRef.value.openDialog(row);
+};
+// 打开编辑菜单弹窗
+const onOpenEditMenu = (row: any) => {
+  acType.value='edit'
+  editMenuRef.value.openDialog(row);
+};
+// 删除当前行
+const onTabelRowDel = (row: any) => {
+  ElMessageBox.confirm(`此操作将永久删除菜单：“${row.title}”, 是否继续?`, '提示', {
+    confirmButtonText: '删除',
+    cancelButtonText: '取消',
+    type: 'warning',
+  })
+    .then(() => {
+      delMenu(row.id).then(()=>{
+        ElMessage.success('删除成功');
+        proxy.$refs['editMenuRef'].resetMenuSession()
+        menuList();
+      })
+    })
+    .catch(() => {});
+};
+const formatIsHide = (row:any)=>{
+  return proxy.selectDictLabel(unref(sys_show_hide), ''+row.isHide);
+};
+onBeforeMount(()=>{
+  menuList()
+});
+const handleQuery=() => {
+  menuList();
+};
+const menuList = ()=>{
+  getMenuList(state.queryParams).then(res=>{
+    state.menuTableData = proxy.handleTree(res.data.rules??[], "id","pid");
+  })
+};
 </script>

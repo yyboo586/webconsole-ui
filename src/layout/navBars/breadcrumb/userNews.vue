@@ -88,159 +88,144 @@
   </div>
 </template>
 
-<script lang="ts">
-import {reactive, toRefs, defineComponent, computed, watch} from 'vue';
+<script setup lang="ts">
+import {reactive, toRefs, onMounted} from 'vue';
 import {
   listShowNotice,
    unReadCount,
 } from "/@/api/system/notice/sysNotice";
-import {ElMessage, ElMessageBox, ElNotification} from "element-plus";
+import {ElMessage, ElMessageBox} from "element-plus";
 import {readNotice} from "/@/api/system/notice/sysNoticeRead";
 import {SysNoticeInfoData} from "/@/views/system/sysNotice/list/component/model";
 import {useRouter} from "vue-router";
-export default defineComponent({
-  name: 'layoutBreadcrumbUserNews',
-  created() {
-    this.getUnReadCount()
-    this.getData(1)
-  },
-  setup() {
-    const router = useRouter();
-    const state = reactive({
-      type1Num: 0,
-      type2Num: 0,
-      // notifyList: [],
-      noticeList: [],
-      count: {
-        notify: 0,
-        notice: 0
-      },
-      tabsActive: 1,
-      activeInfo: 1,
-      isShowDialog: false,
-      barName: "通知"
-    });
+defineOptions({ name: "layoutBreadcrumbUserNews"})
 
-    /** 改变tab*/
-    const handleTabChange = (tabName: number) => {
-      if (tabName === 1) {
-        state.barName = "通知"
-      } else {
-        state.barName = "公告"
-      }
-      getData(tabName)
-    };
-    //获取维度信息
-    const getUnReadCount = () => {
-      unReadCount().then((res: any) => {
-        if (res.data != null) {
-          state.count.notice = res.data.noticeCount || 0
-          state.count.notify = res.data.notifyCount || 0
-        }
-      })
+onMounted(()=>{
+  getUnReadCount()
+  getData(1)
+})
+
+const router = useRouter();
+const state = reactive({
+  type1Num: 0,
+  type2Num: 0,
+  // notifyList: [],
+  noticeList: [],
+  count: {
+    notify: 0,
+    notice: 0
+  },
+  tabsActive: 1,
+  activeInfo: 1,
+  isShowDialog: false,
+  barName: "通知"
+});
+const { tabsActive, activeInfo, isShowDialog, count, noticeList} = toRefs(state)
+/** 改变tab*/
+const handleTabChange = (tabName: number) => {
+  if (tabName === 1) {
+    state.barName = "通知"
+  } else {
+    state.barName = "公告"
+  }
+  getData(tabName)
+};
+//获取维度信息
+const getUnReadCount = () => {
+  unReadCount().then((res: any) => {
+    if (res.data != null) {
+      state.count.notice = res.data.noticeCount || 0
+      state.count.notify = res.data.notifyCount || 0
     }
-    //获取数据
-    const getData = (barName: number | undefined) => {
-      /*    let notifyParam = {
-            pageNum: 1,
-            pageSize: 5,
-            type: barName,
-          }
-          listSysNotice(notifyParam).then((res: any) => {
-            console.log("listSysNotice",res)
-            state.notifyList = res.data.list || []
-          })*/
-      let noticeParam = {
+  })
+}
+//获取数据
+const getData = (barName: number | undefined) => {
+  /*    let notifyParam = {
         pageNum: 1,
         pageSize: 5,
         type: barName,
       }
-      listShowNotice(noticeParam).then((res: any) => {
-        state.noticeList = res.data.list || []
+      listSysNotice(notifyParam).then((res: any) => {
+        console.log("listSysNotice",res)
+        state.notifyList = res.data.list || []
+      })*/
+  let noticeParam = {
+    pageNum: 1,
+    pageSize: 5,
+    type: barName,
+  }
+  listShowNotice(noticeParam).then((res: any) => {
+    state.noticeList = res.data.list || []
+  })
+};
+const readAllItem = () => {
+
+}
+// 全部已读点击
+const onAllReadClick = () => {
+  state.noticeList = [];
+};
+// 前往通知中心点击
+const onGoToGiteeClick = () => {
+  /*window.open('https://gitee.com/tiger1103/gfast');*/
+  state.isShowDialog = true
+};
+const hendleClear = (type: string) => {
+  ElMessageBox.confirm("是否清除全部" + type + "!", '提示', {
+    confirmButtonText: '确认',
+    cancelButtonText: '取消',
+    type: 'warning',
+  })
+      .then(() => {/*
+        delSysNotice(id).then(() => {
+          ElMessage.success('删除成功');
+        })*/
+        let typeIndex = (type == "通知") ? 1 : 2
+        let query = {
+          type: typeIndex,
+        }
+        /*  clearNews(query).then((res: any) => {
+            console.log(res)
+            ElMessage.success('清空成功');
+          })*/
       })
-    };
-    const readAllItem = () => {
+      .catch(() => {
+      });
 
-    }
-    // 全部已读点击
-    const onAllReadClick = () => {
-      state.noticeList = [];
-    };
-    // 前往通知中心点击
-    const onGoToGiteeClick = () => {
-      /*window.open('https://gitee.com/tiger1103/gfast');*/
-      state.isShowDialog = true
-    };
-    const hendleClear = (type: string) => {
-      ElMessageBox.confirm("是否清除全部" + type + "!", '提示', {
-        confirmButtonText: '确认',
-        cancelButtonText: '取消',
-        type: 'warning',
+};
+const hendleAllread = (type: string) => {
+
+  ElMessageBox.confirm("是否将全部" + type + "标记为已读!", '提示', {
+    confirmButtonText: '确认',
+    cancelButtonText: '取消',
+    type: 'warning',
+  })
+      .then(() => {/*
+        delSysNotice(id).then(() => {
+          ElMessage.success('删除成功');
+        })*/
       })
-          .then(() => {/*
-            delSysNotice(id).then(() => {
-              ElMessage.success('删除成功');
-            })*/
-            let typeIndex = (type == "通知") ? 1 : 2
-            let query = {
-              type: typeIndex,
-            }
-            /*  clearNews(query).then((res: any) => {
-                console.log(res)
-                ElMessage.success('清空成功');
-              })*/
-          })
-          .catch(() => {
-          });
-
-    };
-    const hendleAllread = (type: string) => {
-
-      ElMessageBox.confirm("是否将全部" + type + "标记为已读!", '提示', {
-        confirmButtonText: '确认',
-        cancelButtonText: '取消',
-        type: 'warning',
-      })
-          .then(() => {/*
-            delSysNotice(id).then(() => {
-              ElMessage.success('删除成功');
-            })*/
-          })
-          .catch(() => {
-          });
-    };
-    const hendleShowMore = () => {
-     // console.log(emit)
-      router.push("/system/sysNotice/show")
-    };
+      .catch(() => {
+      });
+};
+const hendleShowMore = () => {
+ // console.log(emit)
+  router.push("/system/sysNotice/show")
+};
 
 
-    const handleRead = (item: SysNoticeInfoData) => {
-      // console.log("handleRead", item)
-      let query = {
-        noticeId: item.id
-      }
-      readNotice(query).then(() => {
-        //  console.log(res)
-        getData(item.type)
-        ElMessage.success("已读");
-      })
-    }
-    return {
-      getData,
-      readAllItem,
-      onAllReadClick,
-      onGoToGiteeClick,
-      hendleClear,
-      hendleAllread,
-      hendleShowMore,
-      getUnReadCount,
-      handleRead,
-      ...toRefs(state),
-      handleTabChange
-    };
-  },
-});
+const handleRead = (item: SysNoticeInfoData) => {
+  // console.log("handleRead", item)
+  let query = {
+    noticeId: item.id
+  }
+  readNotice(query).then(() => {
+    //  console.log(res)
+    getData(item.type)
+    ElMessage.success("已读");
+  })
+}
 </script>
 
 <style scoped lang="scss">

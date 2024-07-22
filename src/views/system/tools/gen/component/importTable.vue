@@ -48,85 +48,69 @@
   </el-dialog>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import {defineComponent, reactive, ref, toRefs} from "vue";
 import {ImportTableDataState,TableData} from "/@/views/system/tools/gen/component/model"
 import {getImportTableList, importTable} from "/@/api/system/tools/gen";
 import {ElMessage} from "element-plus/es";
-export default defineComponent({
-  name: "importTable",
-  emits:['ok'],
-  setup(prop,{emit}) {
-    const queryFormRef = ref()
-    const tableRef = ref()
-    const visible = ref(false)
-    // 选中数组值
-    let tables:string[] = []
-    const state = reactive<ImportTableDataState>({
-      tableData:{
-        data:[],
-        total:0,
-        loading:true,
-        param:{
-          pageNum: 1,
-          pageSize: 10,
-          tableName: '',
-          tableComment: ''
-        },
-      }
-    })
-    const getList = ()=>{
-      getImportTableList(state.tableData.param).then(res=>{
-        state.tableData.data = res.data.list??[]
-        state.tableData.total = res.data.total
-      })
-    }
-    const handleQuery = ()=>{
-      state.tableData.param.pageNum = 1
-      getList()
-    }
-    const resetQuery=()=>{
-      queryFormRef.value.resetFields()
-      getList()
-    }
-    const clickRow=(row:TableData)=>{
-      tableRef.value.toggleRowSelection(row);
-    }
-    const handleSelectionChange=(selection:Array<any>)=>{
-      tables = selection.map(item => item.tableName);
-    }
-    const handleImportTable=()=>{
-      if(tables.length==0){
-        ElMessage.error("请选择要导入的表格");
-        return
-      }
-      importTable(tables).then((res:any)=>{
-        if (res.code === 0) {
-          ElMessage.success('导入成功');
-          visible.value = false;
-          emit("ok");
-        }
-      })
-    }
-    const openDialog = ()=>{
-      getList()
-      visible.value = true
-    }
-    return {
-      queryFormRef,
-      tableRef,
-      visible,
-      getList,
-      handleQuery,
-      resetQuery,
-      clickRow,
-      handleSelectionChange,
-      handleImportTable,
-      openDialog,
-      ...toRefs(state),
-    };
+defineOptions({ name: "importTable"})
+const emit = defineEmits(['ok'])
+const queryFormRef = ref()
+const tableRef = ref()
+const visible = ref(false)
+// 选中数组值
+let tables:string[] = []
+const state = reactive<ImportTableDataState>({
+  tableData:{
+    data:[],
+    total:0,
+    loading:true,
+    param:{
+      pageNum: 1,
+      pageSize: 10,
+      tableName: '',
+      tableComment: ''
+    },
   }
 })
+const {tableData} = toRefs(state)
+const getList = ()=>{
+  getImportTableList(state.tableData.param).then(res=>{
+    state.tableData.data = res.data.list??[]
+    state.tableData.total = res.data.total
+  })
+}
+const handleQuery = ()=>{
+  state.tableData.param.pageNum = 1
+  getList()
+}
+const resetQuery=()=>{
+  queryFormRef.value.resetFields()
+  getList()
+}
+const clickRow=(row:TableData)=>{
+  tableRef.value.toggleRowSelection(row);
+}
+const handleSelectionChange=(selection:Array<any>)=>{
+  tables = selection.map(item => item.tableName);
+}
+const handleImportTable=()=>{
+  if(tables.length==0){
+    ElMessage.error("请选择要导入的表格");
+    return
+  }
+  importTable(tables).then((res:any)=>{
+    if (res.code === 0) {
+      ElMessage.success('导入成功');
+      visible.value = false;
+      emit("ok");
+    }
+  })
+}
+const openDialog = ()=>{
+  getList()
+  visible.value = true
+}
 </script>
 
 <style scoped>
