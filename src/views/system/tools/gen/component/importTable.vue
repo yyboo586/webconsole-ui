@@ -111,6 +111,7 @@ const openDialog = ()=>{
   getList()
   visible.value = true
 }
+defineExpose({openDialog})
 </script>
 
 <style scoped>

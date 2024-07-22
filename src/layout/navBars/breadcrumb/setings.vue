@@ -413,10 +413,7 @@ import {
   onUnmounted,
   onMounted,
   getCurrentInstance,
-  defineComponent,
   computed,
-  reactive,
-  toRefs,
   ref
 } from 'vue';
 import { ElMessage } from 'element-plus';
@@ -650,6 +647,7 @@ onMounted(() => {
 onUnmounted(() => {
   proxy.mittBus.off('layoutMobileResize', () => {});
 });
+defineExpose({openDrawer})
 </script>
 
 <style scoped lang="scss">
