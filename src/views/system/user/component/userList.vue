@@ -197,5 +197,5 @@ const handleStatusChange = (row:any)=> {
     row.userStatus =row.userStatus === 0 ?1 : 0;
   });
 };
-defineExpose({userList})
+defineExpose({userList,onOpenAddUser})
 </script>
