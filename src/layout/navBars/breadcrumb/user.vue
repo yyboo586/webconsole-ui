@@ -142,6 +142,7 @@ const onLayoutSetingClick = () => {
 const removeCacheClick = ()=>{
   //清除浏览器缓存
   Session.remove('userMenu');
+  localStorage.clear();
   //清除后端缓存
   removeCache().then(()=>{
     ElMessage.success('缓存清除成功');
