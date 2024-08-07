@@ -49,7 +49,7 @@
 import {toRefs, reactive, onMounted, ref, getCurrentInstance} from 'vue';
 import {ElMessageBox, ElMessage} from 'element-plus';
 import EditUser from '/@/views/system/user/component/editUser.vue';
-import {getUserList, resetUserPwd, changeUserStatus, deleteUser} from '/@/api/system/user/index';
+import {getUserList, resetUserPwd, changeUserStatus, deleteUser} from '/@/api/system/user';
 
 interface TableDataState {
   ids:number[];
@@ -197,5 +197,5 @@ const handleStatusChange = (row:any)=> {
     row.userStatus =row.userStatus === 0 ?1 : 0;
   });
 };
-defineExpose({userList,onOpenAddUser})
+defineExpose({userList,onOpenAddUser,onRowDel})
 </script>
