@@ -8,7 +8,7 @@
 		/>
 		<el-breadcrumb class="layout-navbars-breadcrumb-hide">
 			<transition-group name="breadcrumb">
-				<el-breadcrumb-item v-for="(v, k) in breadcrumbList" :key="!v.meta.tagsViewName ? v.meta.title : v.meta.tagsViewName">
+				<el-breadcrumb-item v-for="(v, k) in breadcrumbList" :key="v.path">
 					<span v-if="k === breadcrumbList.length - 1" class="layout-navbars-breadcrumb-span">
 						<SvgIcon :name="v.meta.icon" class="layout-navbars-breadcrumb-iconfont" v-if="themeConfig.isBreadcrumbIcon" />
 						<div v-if="!v.meta.tagsViewName">{{ $t(v.meta.title) }}</div>
@@ -24,10 +24,9 @@
 </template>
 
 <script setup lang="ts">
-import { toRefs, reactive, computed, onMounted, defineComponent } from 'vue';
+import { toRefs, reactive, computed, onMounted } from 'vue';
 import { onBeforeRouteUpdate, useRoute, useRouter } from 'vue-router';
 import { Local } from '/@/utils/storage';
-import other from '/@/utils/other';
 import { storeToRefs } from 'pinia';
 import { useThemeConfig } from '/@/stores/themeConfig';
 import { useRoutesList } from '/@/stores/routesList';
@@ -78,17 +77,49 @@ const setLocalThemeConfig = () => {
 };
 // 处理面包屑数据
 const getBreadcrumbList = (arr: Array<string>) => {
-  arr.forEach((item: any) => {
-    state.routeSplit.forEach((v: any, k: number, arrs: any) => {
-      if (state.routeSplitFirst === item.path) {
-        state.routeSplitFirst += `/${arrs[state.routeSplitIndex]}`;
-        state.breadcrumbList.push(item);
-        state.routeSplitIndex++;
-        if (item.children) getBreadcrumbList(item.children);
-      }
-    });
-  });
+  let parents :any[] = []
+  arr.map((item:any)=>{
+    parents.push(...getBreadcrumbParent(item,route.path,null))
+    if(parents.length>0){
+      return
+    }
+  })
+  parents.push(route)
+  parents = uniqueByPath(parents)
+  state.breadcrumbList = parents
 };
+const getBreadcrumbParent = (item:any,path:string,parent:any)=>{
+  const parents:any[] = []
+  if(item.path==path){
+    if(parent){
+      parents.push(parent)
+    }
+    return parents
+  }
+  if(item.children){
+    for(let i=0;i<item.children.length;i++){
+      const res = getBreadcrumbParent(item.children[i],path,item)
+      if(res && res.length>0){
+        parents.push(item,...res)
+        return parents
+      }
+    }
+  }
+  return parents
+}
+const  uniqueByPath = (arr:any[]) => {
+  let seen:any = {}; // 用来存储已见过的name
+  let result:any[] = []; // 存储去重后的结果
+
+  arr.forEach(item => {
+    if (!seen[item.path]) { // 如果name还没见过
+      seen[item.path] = true; // 标记为已见过
+      result.push(item); // 添加到结果数组
+    }
+  });
+
+  return result;
+}
 // 当前路由字符串切割成数组，并删除第一项空内容
 const initRouteSplit = (path: string) => {
   if (!themeConfig.value.isBreadcrumb) return false;
@@ -98,8 +129,8 @@ const initRouteSplit = (path: string) => {
   state.routeSplitFirst = `/${state.routeSplit[0]}`;
   state.routeSplitIndex = 1;
   getBreadcrumbList(routesList.value);
-  if (route.name === 'home' || (route.name === 'notFound' && state.breadcrumbList.length > 1)) state.breadcrumbList.shift();
-  if (state.breadcrumbList.length > 0) state.breadcrumbList[state.breadcrumbList.length - 1].meta.tagsViewName = other.setTagsViewNameI18n(route);
+  //if (route.name === 'home' || (route.name === 'notFound' && state.breadcrumbList.length > 1)) state.breadcrumbList.shift();
+  //if (state.breadcrumbList.length > 0) state.breadcrumbList[state.breadcrumbList.length - 1].meta.tagsViewName = other.setTagsViewNameI18n(route);
 };
 // 页面加载时
 onMounted(() => {

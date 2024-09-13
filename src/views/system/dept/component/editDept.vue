@@ -131,7 +131,7 @@ const { isShowDialog, ruleForm, deptData,rules } = toRefs(state);
 const openDialog = (row?: RuleFormState|number) => {
   resetForm()
   getDeptList().then((res:any)=>{
-    state.deptData =  proxy.handleTree(res.data.deptList??[], "deptId","parentId");
+    state.deptData =  proxy.handleTree(res.data.deptList??[], "deptId","parentId",'children',true);
   });
   if(row && typeof row === "object"){
     state.ruleForm = row;

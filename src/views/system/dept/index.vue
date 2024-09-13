@@ -108,7 +108,7 @@ const initTableData = () => {
 };
 const deptList = ()=>{
   getDeptList(state.tableData.param).then((res:any)=>{
-    state.tableData.data = proxy.handleTree(res.data.deptList??[], "deptId","parentId");
+    state.tableData.data = proxy.handleTree(res.data.deptList??[], "deptId","parentId",'children',true);
   });
 };
 // 打开新增菜单弹窗
