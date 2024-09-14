@@ -100,11 +100,11 @@
 </template>
 
 <script setup lang="ts">
-import {toRefs, reactive, onMounted, ref, defineComponent, watch, getCurrentInstance} from 'vue';
+import {toRefs, reactive, onMounted, ref, watch, getCurrentInstance} from 'vue';
 import {ElTree,FormInstance} from 'element-plus';
 import { Search } from '@element-plus/icons-vue'
 import UserList from '/@/views/system/user/component/userList.vue';
-import {getDeptTree} from '/@/api/system/user/index';
+import {getDeptTree} from '/@/api/system/user';
 
 interface QueryParam {
   ids:number[];
@@ -165,7 +165,7 @@ const state = reactive<QueryParam>({
 const { deptData,deptProps,param}=toRefs(state)
 // 初始化表格数据
 const initTableData = () => {
-  getDeptTree().then((res:any)=>{
+  getDeptTree(true).then((res:any)=>{
     state.deptData = res.data.deps
   })
 };

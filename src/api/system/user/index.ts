@@ -36,10 +36,11 @@ export function getUserSelector(query:Object) {
     })
 }
 
-export function getDeptTree() {
+export function getDeptTree(showOwner?:boolean) {
     return request({
         url: '/api/v1/system/dept/treeSelect',
-        method: 'get'
+        method: 'get',
+        params:{showOwner}
     })
 }
 
