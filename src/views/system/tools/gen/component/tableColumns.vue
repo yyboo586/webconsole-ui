@@ -121,6 +121,7 @@
               <el-option label="树形单选框" value="treeSelect" />
               <el-option label="树形多选框" value="treeSelects" />
               <el-option label="单选框" value="radio" />
+              <el-option label="开关" value="switch" />
               <el-option label="复选框" value="checkbox" />
               <el-option label="日期控件" value="date" />
               <el-option label="日期时间控件" value="datetime" />
