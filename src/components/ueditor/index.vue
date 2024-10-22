@@ -30,7 +30,7 @@ export default defineComponent({
           initialFrameHeight: 400,
           maximumWords: 5000,
           topOffset: 80,
-          zIndex:9000
+          zIndex:2020
         }
       }
     },
@@ -50,6 +50,7 @@ export default defineComponent({
       },
       toolbars: [props.toolBars],
       UEDITOR_HOME_URL: import.meta.env.BASE_URL + "js/ueditor/", // 访问 UEditor 静态资源的根路径，可参考常见问题1
+      UEDITOR_CORS_URL: import.meta.env.BASE_URL + "js/ueditor/", // 访问 UEditor 静态资源的根路径，可参考常见问题1
       serverUrl: baseURL+'api/v1/system/uEditor/action?token='+encodeURIComponent(getToken()), // 服务端接口（这个地址是我为了方便各位体验文件上传功能搭建的临时接口，请勿在生产环境使用！！！）
     },props.ueditorConfig)
     const editorConfig = reactive(config)

@@ -56,7 +56,7 @@ const changeSteps = (args: number) => {
     switch (args) {
       case 2:
         //验证基本信息表单
-        if (toolsBasicInfoFormRef.value.nextTip()) {
+        if (toolsBasicInfoFormRef.value.nextTip && toolsBasicInfoFormRef.value.nextTip()) {
           active.value = args;
         }
         break;
@@ -64,12 +64,12 @@ const changeSteps = (args: number) => {
         //验证生成信息表单
         if (active.value==1){
           //验证基本信息表单
-          if (toolsBasicInfoFormRef.value.nextTip()) {
+          if (toolsBasicInfoFormRef.value.nextTip&&toolsBasicInfoFormRef.value.nextTip()) {
             active.value = args;
           }
         }else{
           //验证生成信息表单
-          if (genInfoFormRef.value.nextTip()) {
+          if (genInfoFormRef.value.nextTip&&genInfoFormRef.value.nextTip()) {
             active.value = args;
           }
         }

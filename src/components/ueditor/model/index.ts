@@ -91,5 +91,6 @@ export const toolbar = [
     "print",               // 打印
     "preview",             // 预览
     "searchreplace",       // 查询替换
+    "contentimport",       // 导入
     "help",                // 帮助
 ]

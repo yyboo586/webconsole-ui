@@ -225,7 +225,6 @@ const openDialog = (row?: DialogRow) => {
   }
   state.isShowDialog = true;
 };
-defineExpose({ openDialog})
 // 关闭弹窗
 const closeDialog = () => {
   state.isShowDialog = false;
@@ -331,6 +330,7 @@ function getMenuAllCheckedKeys() {
 const resetMenuSession = () => {
   refreshBackEndControlRoutes();
 };
+defineExpose({ openDialog,resetMenuSession})
 </script>
 
 <style scoped lang="scss">

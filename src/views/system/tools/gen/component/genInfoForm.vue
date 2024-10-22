@@ -55,6 +55,23 @@
 						<el-input v-model="info.functionName" />
 					</el-form-item>
 				</el-col>
+        <el-col class="mb20" :span="12" >
+          <el-form-item label="上级菜单">
+            <el-cascader
+                :options="menuData"
+                :props="{ label: 'title',value: 'id',checkStrictly: true,emitPath: false }"
+                placeholder="请选择上级菜单,默认为根目录"
+                clearable
+                class="w100"
+                v-model="info.menuPid"
+            >
+              <template #default="{ node, data }">
+                <span>{{ data.title }}</span>
+                <span v-if="!node.isLeaf"> ({{ data.children.length }}) </span>
+              </template>
+            </el-cascader>
+          </el-form-item>
+        </el-col>
 			</el-row>
 
 			<div v-show="info.tplCategory == 'tree'">
@@ -151,11 +168,12 @@
 </template>
 
 <script setup lang="ts">
-import {defineComponent, inject, reactive, ref, unref} from 'vue';
+import {defineComponent, getCurrentInstance, inject, onMounted, reactive, ref, unref} from 'vue';
 import type { FormInstance, FormRules } from 'element-plus';
 import { TableDataInfo } from '/@/views/system/tools/gen/component/model';
 import {ElMessage} from "element-plus";
 import {Ref, UnwrapRef} from "@vue/reactivity";
+import {getMenuParams} from "/@/api/system/menu";
 defineOptions({ name: "genInfoForm"})
 const emit = defineEmits(['goNext','close']);
 const genInfoFormRef = ref<FormInstance>();
@@ -167,6 +185,15 @@ const rules = reactive<FormRules>({
   businessName: [{ required: true, message: '请输入生成业务名', trigger: 'blur' }],
   functionName: [{ required: true, message: '请输入生成功能名', trigger: 'blur' }],
 });
+const { proxy } = <any>getCurrentInstance();
+const menuData = ref<any[]>([]);
+onMounted(()=>{
+  getMenuParams().then((res:any)=>{
+    const menu = { id: 0, title: '主类目', children: [] };
+    menu.children = proxy.handleTree(res.data.menus, "id","pid");
+    menuData.value=new Array(menu) as any;
+  });
+})
 const nextTip = ()=>{
   //表单验证
   let tag = false;
