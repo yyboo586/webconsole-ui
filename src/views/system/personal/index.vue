@@ -327,7 +327,7 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
-@import '../../../theme/mixins/index.scss';
+@use '../../../theme/mixins/index.scss' as *;
 .personal {
   .personal-user {
     height: 130px;
