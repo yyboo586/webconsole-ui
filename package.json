@@ -1,6 +1,7 @@
 {
   "name": "vue-next-admin",
   "version": "2.4.33",
+  "GFastVersion": "2.3.0",
   "description": "vue3 vite next admin template",
   "author": "lyt_20201208",
   "license": "MIT",
