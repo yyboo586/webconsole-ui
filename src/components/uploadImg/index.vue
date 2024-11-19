@@ -12,6 +12,7 @@
         :on-exceed = "handleExceed"
         :before-upload="beforeAvatarUpload"
         :data="dataParam"
+        ref="upImageRef"
     >
       <el-icon><ele-Plus  /></el-icon>
     </el-upload>
@@ -66,7 +67,9 @@ export default defineComponent({
       }
     },
   },
+  emits:['update:modelValue'],
   setup(props,{ emit }) {
+    const upImageRef = ref()
     const baseURL:string|undefined|boolean = import.meta.env.VITE_API_URL
     const {proxy} = <any>getCurrentInstance();
     const dialogImageUrl = ref('')
@@ -93,7 +96,7 @@ export default defineComponent({
         return value
       },
       set: val => {
-        emit('uploadData', val)
+        emit('update:modelValue', val)
       }
     });
 
@@ -144,7 +147,11 @@ export default defineComponent({
     const setDataFileList = () => {
       dataFileList.value = uploadedFile
     };
+    const stopUpImage = ()=>{
+      upImageRef.value.abort()
+    }
     return {
+      upImageRef,
       dataFileList,
       imageUrl,
       baseURL,
@@ -155,6 +162,7 @@ export default defineComponent({
       handleRemove,
       handlePictureCardPreview,
       handleAvatarSuccess,
+      stopUpImage,
       dataParam
     };
   },

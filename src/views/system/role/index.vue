@@ -73,12 +73,12 @@
 		<el-dialog :title="selectRow.name+'-用户列表'" v-model="isShowDialog" width="70vw">
 			<UserList v-if="isShowDialog" ref="userListRef" :dept-data="deptData" :gender-data="sys_user_sex" :param="userListParam" @getUserList="userList"/>
 		</el-dialog>
-    <select-user   ref="selectUserRef"    @selectUser="confirmUser" @okBack="setRoleUser" :selectedUsers="roleUsers"></select-user>
+    <select-user v-show="false" ref="selectUserRef" v-model="roleUsers"></select-user>
 	</div>
 </template>
 
 <script setup lang="ts">
-import {toRefs, reactive, onMounted, ref, defineComponent, toRaw,getCurrentInstance} from 'vue';
+import {toRefs, reactive, onMounted, ref, defineComponent, toRaw, getCurrentInstance, watch} from 'vue';
 import { ElMessageBox, ElMessage,ElLoading } from 'element-plus';
 import EditRole from '/@/views/system/role/component/editRole.vue';
 import DataScope from '/@/views/system/role/component/dataScope.vue';
@@ -257,26 +257,10 @@ const handleCommand = (command: string )=>{
       break
   }
 }
-const confirmUser = (data:any[]) => {
-  if(data.length>0){
-    const ids = roleUsers.value.map((item:any)=>{
-      return item.id
-    })
-    console.log('ids = ',ids)
-    data.map((item:any)=>{
-      // 若存在某个用户 则不添加
-      if (!ids.includes(item.id)){
-        roleUsers.value.push(item as never)
-      }
-    })
-  }else{
-    roleUsers.value = []
-  }
-};
-const setRoleUser = ()=>{
-  const ids = roleUsers.value.map((item:any)=>{
-    return item.id
-  })
+watch(roleUsers,(newVal) => {
+  setRoleUser(newVal)
+})
+const setRoleUser = (ids:any)=>{
   //用户授权提交
   setRoleUsers({roleId:setRole.value,userIds:ids}).then((res:any)=>{
     roleList()

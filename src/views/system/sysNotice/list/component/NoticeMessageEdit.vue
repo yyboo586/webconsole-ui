@@ -50,8 +50,7 @@
           </el-select>
         </el-form-item>
         <el-form-item label="内容">
-          <gf-ueditor editorId="ueSysNoticeContent" v-model="formData.content"
-                      @setEditContent="setContentEditContent"></gf-ueditor>
+          <gf-ueditor editorId="ueSysNoticeContent" v-model="formData.content"></gf-ueditor>
         </el-form-item>
         <el-form-item label="状态" prop="status">
           <!--          <el-radio-group v-model="formData.status">

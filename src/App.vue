@@ -5,7 +5,6 @@
 		<Setings ref="setingsRef" v-show="themeConfig.lockScreenTime > 1" />
 		<CloseFull v-if="!themeConfig.isLockScreen" />
 	</el-config-provider>
-  <BigUploader></BigUploader>
 </template>
 
 <script lang="ts">
@@ -20,11 +19,10 @@ import setIntroduction from '/@/utils/setIconfont';
 import LockScreen from '/@/layout/lockScreen/index.vue';
 import Setings from '/@/layout/navBars/breadcrumb/setings.vue';
 import CloseFull from '/@/layout/navBars/breadcrumb/closeFull.vue';
-import BigUploader from '/@/components/bigUploader/index.vue'
 
 export default defineComponent({
 	name: 'app',
-	components: { LockScreen, Setings, CloseFull,BigUploader },
+	components: { LockScreen, Setings, CloseFull},
 	setup() {
 		const { proxy } = <any>getCurrentInstance();
 		const setingsRef = ref();

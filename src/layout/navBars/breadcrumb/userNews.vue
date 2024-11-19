@@ -152,8 +152,9 @@ const getData = (barName: number | undefined) => {
       })*/
   let noticeParam = {
     pageNum: 1,
-    pageSize: 5,
+    pageSize: 10,
     type: barName,
+    isTrim:true
   }
   listShowNotice(noticeParam).then((res: any) => {
     state.noticeList = res.data.list || []
@@ -225,12 +226,14 @@ const handleRead = (item: SysNoticeInfoData) => {
     getData(item.type)
     ElMessage.success("已读");
   })
+  getUnReadCount()
 }
 </script>
 
 <style scoped lang="scss">
 .layout-navbars-breadcrumb-user-news {
-
+  height: calc(100vh - 150px);
+  overflow-y: auto;
   .content-box {
     font-size: 13px;
 

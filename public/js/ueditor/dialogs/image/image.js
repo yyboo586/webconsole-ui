@@ -937,21 +937,18 @@
 
             if (!_this.listEnd && !this.isLoadingData) {
                 this.isLoadingData = true;
-                var url = editor.getActionUrl(editor.getOpt('imageManagerActionName')),
-                    isJsonp = utils.isCrossDomainUrl(url);
+                var url = editor.getActionUrl(editor.getOpt('imageManagerActionName'));
                 ajax.request(url, {
-                    'timeout': 100000,
-                    'dataType': isJsonp ? 'jsonp' : '',
-                    'headers': editor.options.serverHeaders || {},
-                    'data': utils.extend({
+                    timeout: 100000,
+                    data: utils.extend({
                         start: this.listIndex,
                         size: this.listSize
                     }, editor.queryCommandValue('serverparam')),
-                    'method': 'get',
+                    headers: editor.options.serverHeaders || {},
+                    method: 'get',
                     'onsuccess': function (r) {
                         try {
-                            var json = isJsonp ? r : eval('(' + r.responseText + ')');
-                            json = editor.options.serverResponsePrepare(json);
+                            var json = eval('(' + r.responseText + ')');
                             if (json.state === 'SUCCESS') {
                                 _this.pushData(json.list);
                                 _this.listIndex = parseInt(json.start) + parseInt(json.list.length);

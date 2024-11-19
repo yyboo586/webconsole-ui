@@ -30,7 +30,7 @@ export default defineComponent({
           initialFrameHeight: 400,
           maximumWords: 5000,
           topOffset: 80,
-          zIndex:2020
+          zIndex:2050
         }
       }
     },
@@ -41,6 +41,7 @@ export default defineComponent({
       }
     }
   },
+  emits:['update:modelValue'],
   setup(props,{emit}){
     const config = Object.assign({
       elementPathEnabled: false,
@@ -59,7 +60,7 @@ export default defineComponent({
         return props.modelValue
       },
       set:(newVal)=>{
-        emit('setEditContent',newVal)
+        emit('update:modelValue',newVal)
       }
     })
     return {

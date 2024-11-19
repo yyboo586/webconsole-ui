@@ -27,15 +27,7 @@
 					</el-col>
 					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" >
 						<el-form-item label="负责人">
-              <div   v-if="deptUser.length > 0">
-                <el-tag  closable  :disable-transitions="false" class="u-m-r-10" v-for="(item,index) in deptUser"  :key="index" @close="handleClose(item,index)" >{{item.userNickname}}</el-tag>
-              </div>
-<!--							<el-input v-model="ruleForm.leader" placeholder="请输入负责人" clearable></el-input>-->
-              <el-button
-                  style="padding-left: 10px;"
-                  type="primary"
-                  link
-                  @click="handleSelectUser" >请选择</el-button>
+              <select-user v-model="ruleForm.leader"></select-user>
 						</el-form-item>
 					</el-col>
 					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" >
@@ -68,13 +60,11 @@
 			</template>
 		</el-dialog>
 	</div>
-  <select-user   ref="selectUserRef"    @selectUser="confirmUser" :selectedUsers="deptUser"></select-user>
 </template>
 
 <script setup lang="ts">
-import {reactive, toRefs, defineComponent, getCurrentInstance,ref,unref} from 'vue';
+import {reactive, toRefs,  getCurrentInstance,ref,unref} from 'vue';
 import {addDept,editDept, getDeptList} from "/@/api/system/dept";
-import {getUserByIds} from '/@/api/system/user';
 import {ElMessage} from "element-plus";
 import selectUser from "/@/components/selectUser/index.vue"
 
@@ -105,8 +95,6 @@ defineOptions({ name: "systemEditDept"})
 const emit = defineEmits(['deptList'])
 const {proxy} = getCurrentInstance() as any;
 const formRef = ref<HTMLElement | null>(null);
-const selectUserRef = ref();
-const  deptUser = ref([]);
 const state = reactive<DeptSate>({
   isShowDialog: false,
   ruleForm: {
@@ -135,24 +123,8 @@ const openDialog = (row?: RuleFormState|number) => {
   });
   if(row && typeof row === "object"){
     state.ruleForm = row;
-    let  leaders  = row.leader??[]
-    if (leaders.length > 0){
-      //获取部门负责人信息
-      getUserByIds({ids:leaders}).then((res:any)=>{
-            if(res.code === 0){
-              deptUser.value = res.data.userList;
-            }
-      });
-    }else{
-      //清空 deptUser, 避免缓存影响
-      deptUser.value = [];
-    }
-
-  }else if(row && typeof row === 'number'){
+  }else if(row){
     state.ruleForm.parentId = row
-    deptUser.value = [];
-  }else{
-    deptUser.value = [];
   }
   state.isShowDialog = true;
 };
@@ -200,31 +172,6 @@ const resetForm = ()=>{
     email: '',
     status: 1,
   }
-};
-
-const handleClose = (data:any,key:number) => {
-     deptUser.value.splice(key, 1);
-     state.ruleForm.leader = deptUser.value.map((item:any) => item.id)
-};
-const confirmUser = (data:any[]) => {
-  let leaderArr = state.ruleForm.leader??[];
-  if(data.length>0){
-    data.map((item:any)=>{
-      // 若存在某个用户 则不添加
-      if (!leaderArr.includes(item.id)){
-        deptUser.value.push(item as never)
-        leaderArr.push(item.id)
-      }
-    })
-    state.ruleForm.leader = leaderArr;
-  }else{
-    deptUser.value = []
-    state.ruleForm.leader = []
-  }
-};
-//选择用户
-const  handleSelectUser = () =>{
-  selectUserRef.value.openDialog()
 };
 </script>
 <style>

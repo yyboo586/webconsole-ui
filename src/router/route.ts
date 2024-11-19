@@ -60,38 +60,6 @@ export const dynamicRoutes: Array<RouteRecordRaw> = [
 					roles: ['admin'],
 					icon: 'iconfont icon-diannao',
 				},
-			},
-			{
-				path: '/bigUpload',
-				name: 'bigUpload',
-				component: () => import('/@/layout/routerView/parent.vue'),
-				meta:{
-					title: '大文件上传',
-					isLink: '',
-					isHide: false,
-					isKeepAlive: true,
-					isAffix: false,
-					isIframe: false,
-					roles: ['admin'],
-					icon: 'iconfont icon-diannao',
-				},
-				children:[
-					{
-						path: '/bigUpload/list',
-						name: 'bigUploadList',
-						component: () => import('/@/views/bigUpload/index.vue'),
-						meta: {
-							title: '大文件上传',
-							isLink: '',
-							isHide: false,
-							isKeepAlive: true,
-							isAffix: false,
-							isIframe: false,
-							roles: ['admin', 'common'],
-							icon: 'iconfont icon-shouye',
-						},
-					},
-				]
 			}
 		],
 	},

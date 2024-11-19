@@ -130,6 +130,12 @@
               <el-option label="多图上传" value="images" />
               <el-option label="单文件上传" value="file" />
               <el-option label="多文件上传" value="files" />
+              <el-option label="图片选择器" value="imageSelector" />
+              <el-option label="附件选择器" value="fileSelector" />
+              <el-option label="用户选择器（单选）" value="userSelectorSingle" />
+              <el-option label="用户选择器（多选）" value="userSelectorMultiple" />
+              <el-option label="部门选择器（单选）" value="deptSelectorSingle" />
+              <el-option label="部门选择器（多选）" value="deptSelectorMultiple" />
               <el-option label="键值对" value="keyValue" />
             </el-select>
           </template>

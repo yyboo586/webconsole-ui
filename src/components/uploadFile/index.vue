@@ -14,6 +14,7 @@
         :on-success="handleSuccess"
         :data="dataParam"
         :on-preview="handlePreview"
+        ref="upFileRef"
     >
     <el-icon class="el-icon--upload"><ele-UploadFilled /></el-icon>
     <div class="el-upload__text">
@@ -54,9 +55,11 @@ export default defineComponent({
       }
     },
   },
+  emits:['update:modelValue'],
   setup(props,{ emit }) {
     let  uploadedFile:Array<any> = [] ;
     const {proxy} = <any>getCurrentInstance();
+    const upFileRef = ref()
     const dataParam = reactive({
       token:getToken(),
     })
@@ -73,7 +76,7 @@ export default defineComponent({
         return value
       },
       set: val => {
-        emit('upFileData', val)
+        emit('update:modelValue', val)
       }
     });
     const beforeUpload: UploadProps['beforeUpload'] = () => {
@@ -130,6 +133,9 @@ export default defineComponent({
     const handlePreview = (file:UploadUserFile)=>{
       window.open(file.url)
     }
+    const stopUpFile = ()=>{
+      upFileRef.value.abort()
+    }
     return {
       dataFileList,
       handleSuccess,
@@ -139,6 +145,8 @@ export default defineComponent({
       handleChange,
       handleExceed,
       handlePreview,
+      upFileRef,
+      stopUpFile,
       dataParam
     };
   },

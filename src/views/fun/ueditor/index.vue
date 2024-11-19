@@ -1,6 +1,6 @@
 <template>
   <div>
-    <gf-ueditor v-if="show" editorId="demoEdit01" v-model="content" @setEditContent="setEditContent"></gf-ueditor>
+    <gf-ueditor v-if="show" editorId="demoEdit01" v-model="content"></gf-ueditor>
     <h3>同步获取编辑器内容如下：</h3>
     <div v-html="content"></div>
   </div>

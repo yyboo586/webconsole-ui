@@ -1,5 +1,13 @@
 <template>
   <div>
+    <div v-if="deptUser.length > 0">
+      <el-tag  closable  :disable-transitions="false" class="u-m-r-10" v-for="(item,index) in deptUser"  :key="'sel_'+index" @close="handleClose(index)" >{{item.userNickname}}</el-tag>
+    </div>
+    <el-button
+        style="padding-left: 10px;"
+        type="primary"
+        link
+        @click="handleSelectUser" >请选择</el-button>
     <el-dialog title="选择用户" v-model="visible" width="80%" top="5vh" append-to-body :close-on-click-modal="false">
       <div class="system-user-container">
         <el-row :gutter="10" style="width: 100%;">
@@ -61,7 +69,7 @@
                   </el-form-item>
                 </el-form>
               </div>
-              <UserList ref="userListRef" :dept-data="deptData" :gender-data="sys_user_sex" :param="param" :multiple="multiple" @ok="handleSelectUserOk"/>
+              <UserList ref="userListRef" :dept-data="deptData" :gender-data="sys_user_sex" :param="param" @ok="handleSelectUserOk"/>
             </el-card>
           </el-col>
           <el-col :span="6">
@@ -97,11 +105,11 @@
 </template>
 
 <script lang="ts">
-import {toRefs, reactive, ref, defineComponent, watch, getCurrentInstance, nextTick, computed} from 'vue';
+import {toRefs, reactive, ref, defineComponent, watch, getCurrentInstance, nextTick, computed, onMounted} from 'vue';
 import {ElTree,FormInstance} from 'element-plus';
 import { Search } from '@element-plus/icons-vue'
 import UserList from './component/userList.vue';
-import {getDeptTree} from '/@/api/system/user/index';
+import {getDeptTree, getUserByIds} from '/@/api/system/user/index';
 
 interface QueryParam {
   ids:number[];
@@ -122,14 +130,14 @@ export default defineComponent({
   props:{
     multiple:{
       type:Boolean,
-      default:false
+      default:true
     },
-    selectedUsers:{
-      type:Array,
+    modelValue:{
+      type:Array<number>,
       default:()=>[]
     }
   },
-  emits:['selectUser','okBack'],
+  emits:['update:modelValue'],
   setup(prop,{emit}) {
     const selectedUsersPage = ref(1)
     const visible = ref(false)
@@ -140,6 +148,39 @@ export default defineComponent({
     const filterText = ref('');
     const treeRef = ref<InstanceType<typeof ElTree>>();
     const search = Search
+    const  deptUser = ref<any>([]);
+    const selectedUsers = computed({
+      get: ()=>{
+        return prop.modelValue??[]
+      },
+      set:(val:any[])=>{
+        emit('update:modelValue',val)
+      }
+    })
+    const selectedUserInfo = computed(()=>{
+      let start = (selectedUsersPage.value-1)*10
+      let end = start+10
+      return deptUser.value.slice(start,end)
+    });
+    const initData = ()=>{
+      if(prop.modelValue&&prop.modelValue.length>0){
+        getUserByIds({ids:prop.modelValue}).then((res:any)=>{
+          if(res.code === 0){
+            deptUser.value = res.data.userList;
+          }
+        });
+      }else{
+        deptUser.value = []
+      }
+    };
+    onMounted(()=>{
+      initData()
+    })
+    watch(selectedUsers,(value, oldValue)=>{
+      if(value!=oldValue){
+        initData()
+      }
+    })
     const state = reactive<QueryParam>({
       ids:[],
       deptProps:{
@@ -155,16 +196,6 @@ export default defineComponent({
         keyWords:'',
         dateRange:[]
       },
-    });
-    const selectedUserInfo = computed({
-      get:()=>{
-        let start = (selectedUsersPage.value-1)*10
-        let end = start+10
-        return prop.selectedUsers.slice(start,end)
-      } ,
-      set:(v)=>{
-        emit("selectUser",v);
-      }
     });
     const getUserList = ()=>{
       userListRef.value.setUserList();
@@ -202,21 +233,35 @@ export default defineComponent({
       })
     }
     const handleSelectUserOk = (row:any)=>{
-      selectedUserInfo.value = [...selectedUserInfo.value,row]
+      if(!prop.multiple){
+        selectedUsers.value = [row.id]
+      }else{
+        if(!selectedUsers.value.includes(row.id)){
+          selectedUsers.value = [...selectedUsers.value!,row.id]
+        }
+      }
+
     }
     const goBack = ()=>{
       visible.value = false;
-      emit("okBack");
     }
     const removeAll = ()=>{
-      selectedUserInfo.value = []
+      selectedUsers.value = []
     }
     const remove = (index:number)=>{
       index = (selectedUsersPage.value-1)*10+index
-      let newSel:any = [...selectedUserInfo.value]
-      selectedUserInfo.value = []
+      let newSel:any = [...selectedUsers.value!]
+      selectedUsers.value = []
       newSel.splice(index,1)
-      selectedUserInfo.value = newSel
+      selectedUsers.value = newSel
+    }
+    const handleSelectUser = ()=>{
+      openDialog()
+    }
+    const handleClose = (index:number)=>{
+      let newSel:any = [...selectedUsers.value!]
+      newSel.splice(index, 1);
+      selectedUsers.value = newSel
     }
     return {
       selectedUsersPage,
@@ -228,6 +273,8 @@ export default defineComponent({
       treeRef,
       search,
       sys_user_sex,
+      selectedUsers,
+      deptUser,
       selectedUserInfo,
       openDialog,
       getUserList,
@@ -237,8 +284,15 @@ export default defineComponent({
       goBack,
       removeAll,
       remove,
+      handleClose,
+      handleSelectUser,
       ...toRefs(state),
     };
   },
 });
 </script>
+<style scoped>
+.u-m-r-10{
+  margin-right: 8px;
+}
+</style>
