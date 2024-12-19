@@ -105,7 +105,7 @@ const onHandleSelect = (item: any) => {
 const onSearchBlur = () => {
   closeSearch();
 };
-
+defineExpose({openSearch})
 </script>
 
 <style scoped lang="scss">

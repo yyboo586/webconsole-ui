@@ -205,7 +205,7 @@ const handleUserScope = ((row:any)=>{
   setRole.value = row.id
   getUsersById(row.id).then((res:any)=>{
     ld.close()
-    roleUsers.value=res.data.userList??[]
+    roleUsers.value=res.data.userList?res.data.userList.map((user:any)=>user.id):[]
     selectUserRef.value.openDialog()
   })
 })

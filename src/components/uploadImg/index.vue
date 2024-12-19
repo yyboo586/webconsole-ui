@@ -18,7 +18,7 @@
     </el-upload>
 
     <el-dialog v-model="dialogVisible">
-      <img w-full :src="dialogImageUrl" alt="Preview Image" />
+      <el-image :src="dialogImageUrl" fit="contain" />
     </el-dialog>
   </div>
   <div class="up-img" v-else>

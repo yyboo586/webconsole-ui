@@ -8,7 +8,11 @@
           v-model:file-list="dataFileList"
           ref="upImageRef"
           :list-type="fileType=='image'?'picture-card':'text'"
+          :on-preview="handlePictureCardPreview"
       ></el-upload>
+      <el-dialog v-model="dialogVisible">
+        <el-image :src="dialogImageUrl" fit="contain" />
+      </el-dialog>
     </div>
     <el-dialog title="选择文件" v-model="isShowDialog" width="1000px" :close-on-click-modal="false" :destroy-on-close="true">
       <el-card shadow="hover">
@@ -159,7 +163,7 @@
 </template>
 <script setup lang="ts">
 import {toRefs, reactive, ref, computed,getCurrentInstance} from 'vue';
-import {FormInstance, UploadUserFile} from 'element-plus';
+import {FormInstance, type UploadProps, UploadUserFile} from 'element-plus';
 import {
     listSysAttachment,
 } from "/@/api/system/sysAttachment";
@@ -213,6 +217,8 @@ const isShowDialog = ref(false)
 const loading = ref(false)
 const queryRef = ref()
 const editRef = ref();
+const dialogImageUrl = ref('')
+const dialogVisible = ref(false)
 // 是否显示所有搜索选项
 const showAll =  ref(false)
 // 非单个禁用
@@ -335,6 +341,10 @@ const reset = ()=>{
   resetQuery(queryRef.value)
   state.ids = []
 }
+const handlePictureCardPreview: UploadProps['onPreview'] = (uploadFile) => {
+  dialogImageUrl.value = uploadFile.url!
+  dialogVisible.value = true
+};
 </script>
 <style lang="scss" scoped>
     .system-sysAttachment-container{

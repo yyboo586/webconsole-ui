@@ -76,7 +76,7 @@ export function uploadPart(data:Object,progress:Callback,cancelToken:CancelToken
     }
   })*/
   return axios({
-    url: baseURL+'/api/v1/system/upload/uploadPart',
+    url: baseURL+'api/v1/system/upload/uploadPart',
     method: 'post',
     data:data,
     headers: {
