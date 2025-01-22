@@ -1,6 +1,7 @@
 <template>
 	<div class="system-user-list-container"  style="min-height: 600px;">
-    <el-table :data="tableData.data" style="width: 100%" >
+    <el-table :data="tableData.data" style="width: 100%" @selection-change="handleSelectionChange">
+      <el-table-column v-if="multiple" type="selection" width="55" align="center" />
       <el-table-column type="index" label="序号" width="60" />
       <el-table-column prop="userNickname" label="姓名" show-overflow-tooltip></el-table-column>
       <el-table-column label="操作" width="100" >
@@ -58,9 +59,13 @@ export default defineComponent({
     genderData:{
       type:Array,
       default:()=>[]
+    },
+    multiple:{
+      type:Boolean,
+      default:true
     }
   },
-  emits:['ok'],
+  emits:['ok','okBatch'],
 	components: {  },
 	setup(prop,{emit}) {
     const {proxy,props} = <any>getCurrentInstance();
@@ -99,10 +104,15 @@ export default defineComponent({
     const onOpenSelectUser = (row:any) => {
       emit("ok",row);
     }
+    // 多选框选中数据
+    const handleSelectionChange = (selection:any[])=> {
+      emit("okBatch",selection)
+    };
 		return {
       sys_user_sex,
       setUserList,
       onOpenSelectUser,
+      handleSelectionChange,
 			...toRefs(state),
 		};
 	},

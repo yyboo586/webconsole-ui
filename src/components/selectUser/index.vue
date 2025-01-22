@@ -1,7 +1,7 @@
 <template>
   <div>
     <div v-if="deptUser.length > 0">
-      <el-tag  closable  :disable-transitions="false" class="u-m-r-10" v-for="(item,index) in deptUser"  :key="'sel_'+index" @close="handleClose(index)" >{{item.userNickname}}</el-tag>
+      <el-tag  closable  :disable-transitions="false" class="u-m-r-10" v-for="(item) in deptUser"  :key="'sel_'+item.id" @close="handleClose(item.id)" >{{item.userNickname}}</el-tag>
     </div>
     <el-button
         style="padding-left: 10px;"
@@ -69,7 +69,8 @@
                   </el-form-item>
                 </el-form>
               </div>
-              <UserList ref="userListRef" :dept-data="deptData" :gender-data="sys_user_sex" :param="param" @ok="handleSelectUserOk"/>
+              <UserList ref="userListRef" :dept-data="deptData" :gender-data="sys_user_sex" :param="param" :multiple="multiple"
+                        @ok="handleSelectUserOk" @okBatch="handleSelectUserOkBatch"/>
             </el-card>
           </el-col>
           <el-col :span="6">
@@ -88,7 +89,7 @@
                   <el-table :data="selectedUserInfo">
                     <el-table-column  label="操作"  >
                       <template #default="scope">
-                        <el-button type="danger" plain @click="remove(scope.$index)">移除</el-button>
+                        <el-button type="danger" plain @click="remove(scope.row.id)">移除</el-button>
                       </template>
                     </el-table-column>
                     <el-table-column prop="userNickname" label="姓名"  />
@@ -242,26 +243,37 @@ export default defineComponent({
       }
 
     }
+    const handleSelectUserOkBatch = (row:any[])=>{
+      if(prop.multiple){
+        const ids:any[] = []
+        row.forEach((item:any)=>{
+          if(!selectedUsers.value.includes(item.id)){
+            ids.push(item.id)
+          }
+        })
+        if(ids.length>0){
+          selectedUsers.value = [...selectedUsers.value!,...ids]
+        }
+      }
+    }
     const goBack = ()=>{
       visible.value = false;
     }
     const removeAll = ()=>{
       selectedUsers.value = []
     }
-    const remove = (index:number)=>{
-      index = (selectedUsersPage.value-1)*10+index
-      let newSel:any = [...selectedUsers.value!]
-      selectedUsers.value = []
-      newSel.splice(index,1)
-      selectedUsers.value = newSel
+    const remove = (id:number)=>{
+      selectedUsers.value = selectedUsers.value.filter((item:any)=>{
+        return item !== id
+      })
     }
     const handleSelectUser = ()=>{
       openDialog()
     }
-    const handleClose = (index:number)=>{
-      let newSel:any = [...selectedUsers.value!]
-      newSel.splice(index, 1);
-      selectedUsers.value = newSel
+    const handleClose = (id:number)=>{
+      selectedUsers.value =  selectedUsers.value.filter((item:any)=>{
+        return item !== id
+      })
     }
     return {
       selectedUsersPage,
@@ -279,6 +291,7 @@ export default defineComponent({
       openDialog,
       getUserList,
       handleSelectUserOk,
+      handleSelectUserOkBatch,
       handleNodeClick,
       resetQuery,
       goBack,
