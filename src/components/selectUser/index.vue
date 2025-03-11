@@ -167,7 +167,7 @@ export default defineComponent({
       if(prop.modelValue&&prop.modelValue.length>0){
         getUserByIds({ids:prop.modelValue}).then((res:any)=>{
           if(res.code === 0){
-            deptUser.value = res.data.userList;
+            deptUser.value = res.data.userList??[];
           }
         });
       }else{
@@ -199,7 +199,7 @@ export default defineComponent({
       },
     });
     const getUserList = ()=>{
-      userListRef.value.setUserList();
+        userListRef.value.setUserList();
     };
     // 初始化表格数据
     const initTableData = () => {
