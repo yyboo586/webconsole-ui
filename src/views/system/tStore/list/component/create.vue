@@ -1,5 +1,5 @@
 <template>
-  <div class="system-tStore-edit">
+  <div class="system-tStore-create">
     <!-- 左侧弹出抽屉 -->
     <el-drawer v-model="isShowDialog" direction="ltr" size="80%">
       <template #header>
@@ -8,17 +8,17 @@
       <el-form ref="formRef" :model="formData" :rules="rules" label-width="120px">      
         <!-- <el-form-item label="门店ID" prop="id">
           <el-input v-model="formData.id" placeholder="请输入门店ID" v-bind:disabled="this.currentOp === 'edit'" />
-        </el-form-item>        
-        <el-form-item label="第三方平台门店ID" prop="thirdId">
+        </el-form-item>  -->      
+        <el-form-item label="第三方平台门店ID" prop="third_id">
           <el-input v-model="formData.third_id" placeholder="请输入第三方平台门店ID" />
-        </el-form-item>         -->
+        </el-form-item>
         <el-form-item label="门店名称" prop="name">
           <el-input v-model="formData.name" placeholder="请输入门店名称" />
         </el-form-item>        
         <el-form-item label="门店地址" prop="address">
           <el-input v-model="formData.address" placeholder="请输入门店地址" />
         </el-form-item>        
-        <!-- <el-form-item label="门店所有者标识" prop="owner_id">
+        <el-form-item label="门店所有者标识" prop="owner_id">
           <el-input v-model="formData.owner_id" placeholder="请输入门店所有者标识" />
         </el-form-item>        
         <el-form-item label="门店所有者姓名" prop="owner_name">
@@ -26,7 +26,7 @@
         </el-form-item>        
         <el-form-item label="门店所有者电话" prop="owner_phone">
           <el-input v-model="formData.owner_phone" placeholder="请输入门店所有者电话" />
-        </el-form-item>         -->
+        </el-form-item>        
         <el-form-item label="客服姓名" prop="customer_service_name">
           <el-input v-model="formData.customer_service_name" placeholder="请输入客服姓名" />
         </el-form-item>        
@@ -42,13 +42,13 @@
         <el-form-item label="支付平台密钥" prop="app_key">
           <el-input v-model="formData.app_key" placeholder="请输入支付平台密钥" />
         </el-form-item>        
-        <el-form-item label="门店状态" prop="status">
+        <!-- <el-form-item label="门店状态" prop="status">
             <el-select v-model="formData.status" placeholder="请选择门店状态" style="width: 100%;">
             <el-option label="正常营业" :value="1" />
             <el-option label="暂停营业" :value="2" />
             <el-option label="店铺倒闭" :value="3" />
           </el-select>
-        </el-form-item>
+        </el-form-item> -->
       </el-form>
       <template #footer>
         <div class="dialog-footer">
@@ -73,32 +73,32 @@ import {
   TStoreTableColumns,
   TStoreInfoData,
   TStoreTableDataState,
-  TStoreEditState
+  TStoreCreateState
 } from "/@/views/system/tStore/list/component/model"
-defineOptions({ name: "ApiV1SystemTStoreEdit"})
+defineOptions({ name: "ApiV1SystemTStoreCreate"})
 const emit = defineEmits(['tStoreList'])
 const {proxy} = <any>getCurrentInstance()
 const formRef = ref<HTMLElement | null>(null);
 const menuRef = ref();
-const state = reactive<TStoreEditState>({
+const state = reactive<TStoreCreateState>({
   loading:false,
   isShowDialog: false,
   formData: {    
     id: undefined,    
-    thirdId: undefined,    
+    third_id: undefined,    
     name: undefined,    
     address: undefined,    
-    ownerId: undefined,    
-    ownerName: undefined,    
-    ownerPhone: undefined,    
-    customerServiceName: undefined,    
-    customerServicePhone: undefined,    
-    customerServiceWechat: undefined,    
-    appId: undefined,    
-    appKey: undefined,    
+    owner_id: undefined,    
+    owner_name: undefined,    
+    owner_phone: undefined,    
+    customer_service_name: undefined,    
+    customer_service_phone: undefined,    
+    customer_service_wechat: undefined,    
+    app_id: undefined,    
+    app_key: undefined,    
     status: undefined,    
-    createdAt: undefined,    
-    updatedAt: undefined,    
+    created_at: undefined,    
+    updated_at: undefined,    
   },
   // 表单校验
   rules: {    
@@ -135,14 +135,13 @@ const { loading,isShowDialog,formData,rules } = toRefs(state);
 // 打开弹窗
 const openDialog = (row?: TStoreInfoData) => {
   resetForm();
-  // if(row) {
-  //   getTStore(row.id!).then((res:any)=>{
-  //     const data = res.data;      
-  //     // data.status = parseInt(data.status)      
-  //     state.formData = data;
-  //   })
-  // }
-  state.formData = row??{};
+//   if(row) {
+//     getTStore(row.id!).then((res:any)=>{
+//       const data = res.data;      
+//       // data.status = parseInt(data.status)      
+//       state.formData = data;
+//     })
+//   }
   state.isShowDialog = true;
 };
 // 关闭弹窗
@@ -163,8 +162,6 @@ const onSubmit = () => {
   formWrap.validate((valid: boolean) => {
     if (valid) {
       state.loading = true;
-      if(!state.formData.id || state.formData.id===0){
-        //添加
       addTStore(state.formData).then(()=>{
           ElMessage.success('添加成功');
           closeDialog(); // 关闭弹窗
@@ -172,37 +169,26 @@ const onSubmit = () => {
         }).finally(()=>{
           state.loading = false;
         })
-      }else{
-        //修改
-        console.log(state.formData)
-      updateTStore(state.formData.id, state.formData).then(()=>{
-          ElMessage.success('修改成功');
-          closeDialog(); // 关闭弹窗
-          emit('tStoreList')
-        }).finally(()=>{
-          state.loading = false;
-        })
-      }
     }
   });
 };
 const resetForm = ()=>{
   state.formData = {    
     id: undefined,    
-    thirdId: undefined,    
+    third_id: undefined,    
     name: undefined,    
     address: undefined,    
-    ownerId: undefined,    
-    ownerName: undefined,    
-    ownerPhone: undefined,    
-    customerServiceName: undefined,    
-    customerServicePhone: undefined,    
-    customerServiceWechat: undefined,    
-    appId: undefined,    
-    appKey: undefined,    
+    owner_id: undefined,    
+    owner_name: undefined,    
+    owner_phone: undefined,    
+    customer_service_name: undefined,    
+    customer_service_phone: undefined,    
+    customer_service_wechat: undefined,    
+    app_id: undefined,    
+    app_key: undefined,    
     status: '' ,    
-    createdAt: undefined,    
-    updatedAt: undefined,    
+    created_at: undefined,    
+    updated_at: undefined,    
   }  
 };
 </script>

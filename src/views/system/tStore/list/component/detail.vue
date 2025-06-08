@@ -1,129 +1,51 @@
 <template>
-  <!-- 门店信息表详情抽屉 -->  
   <div class="system-tStore-detail">
-    <el-drawer v-model="isShowDialog" size="80%" direction="ltr">
+    <!-- 左侧弹出抽屉 -->
+    <el-drawer v-model="isShowDialog" direction="ltr" size="80%">
       <template #header>
-        <h4>门店信息表详情</h4>
+        <div>{{ '门店信息' }}</div>
       </template>
-      <el-descriptions
-              class="margin-top"
-              :column="3"
-              border
-              style="margin: 8px;"
-      >        
-          <el-descriptions-item :span="1">            
-              <template #label>
-                <div class="cell-item">
-                  门店ID
-                </div>
-              </template>
-              {{ formData.id }}            
-          </el-descriptions-item>        
-          <el-descriptions-item :span="1">            
-              <template #label>
-                <div class="cell-item">
-                  第三方平台门店ID
-                </div>
-              </template>
-              {{ formData.thirdId }}            
-          </el-descriptions-item>        
-          <el-descriptions-item :span="1">            
-              <template #label>
-                <div class="cell-item">
-                  门店名称
-                </div>
-              </template>
-              {{ formData.name }}            
-          </el-descriptions-item>        
-          <el-descriptions-item :span="1">            
-              <template #label>
-                <div class="cell-item">
-                  门店地址
-                </div>
-              </template>
-              {{ formData.address }}            
-          </el-descriptions-item>        
-          <el-descriptions-item :span="1">            
-              <template #label>
-                <div class="cell-item">
-                  门店所有者标识
-                </div>
-              </template>
-              {{ formData.ownerId }}            
-          </el-descriptions-item>        
-          <el-descriptions-item :span="1">            
-              <template #label>
-                <div class="cell-item">
-                  门店所有者姓名
-                </div>
-              </template>
-              {{ formData.ownerName }}            
-          </el-descriptions-item>        
-          <el-descriptions-item :span="1">            
-              <template #label>
-                <div class="cell-item">
-                  门店所有者电话
-                </div>
-              </template>
-              {{ formData.ownerPhone }}            
-          </el-descriptions-item>        
-          <el-descriptions-item :span="1">            
-              <template #label>
-                <div class="cell-item">
-                  客服姓名
-                </div>
-              </template>
-              {{ formData.customerServiceName }}            
-          </el-descriptions-item>        
-          <el-descriptions-item :span="1">            
-              <template #label>
-                <div class="cell-item">
-                  客服联系电话
-                </div>
-              </template>
-              {{ formData.customerServicePhone }}            
-          </el-descriptions-item>        
-          <el-descriptions-item :span="1">            
-              <template #label>
-                <div class="cell-item">
-                  客服微信
-                </div>
-              </template>
-              {{ formData.customerServiceWechat }}            
-          </el-descriptions-item>        
-          <el-descriptions-item :span="1">            
-              <template #label>
-                <div class="cell-item">
-                  支付平台ID
-                </div>
-              </template>
-              {{ formData.appId }}            
-          </el-descriptions-item>        
-          <el-descriptions-item :span="1">            
-              <template #label>
-                <div class="cell-item">
-                  支付平台密钥
-                </div>
-              </template>
-              {{ formData.appKey }}            
-          </el-descriptions-item>        
-          <el-descriptions-item :span="1">            
-              <template #label>
-                <div class="cell-item">
-                  门店状态: 1=正常营业、2=暂停营业、3=店铺倒闭
-                </div>
-              </template>
-              {{ formData.status }}            
-          </el-descriptions-item>        
-          <el-descriptions-item :span="1">
-            <template #label>
-              <div class="cell-item">
-                门店创建时间
-              </div>
-            </template>
-            {{ proxy.parseTime(formData.createdAt, '{y}-{m}-{d} {h}:{i}:{s}') }}
-          </el-descriptions-item>        
-      </el-descriptions>
+      <el-form ref="formRef" :model="formData" label-width="180px" style="margin-top: 20px;">       
+        <el-form-item label="门店ID" prop="id">
+          <el-input v-model="formData.id" readonly/>
+        </el-form-item>        
+        <el-form-item label="第三方ID" prop="thirdId">
+          <el-input v-model="formData.third_id" readonly/>
+        </el-form-item>        
+        <el-form-item label="门店名称" prop="name">
+          <el-input v-model="formData.name" readonly/>
+        </el-form-item>        
+        <el-form-item label="门店地址" prop="address">
+          <el-input v-model="formData.address" readonly/>
+        </el-form-item>        
+        <el-form-item label="门店所有者标识" prop="owner_id">
+          <el-input v-model="formData.owner_id" readonly/>
+        </el-form-item>        
+        <el-form-item label="门店所有者姓名" prop="owner_name">
+          <el-input v-model="formData.owner_name" readonly/>
+        </el-form-item>        
+        <el-form-item label="门店所有者电话" prop="owner_phone">
+          <el-input v-model="formData.owner_phone" readonly/>
+        </el-form-item>        
+        <el-form-item label="客服姓名" prop="customer_service_name">
+          <el-input v-model="formData.customer_service_name" readonly/>
+        </el-form-item>        
+        <el-form-item label="客服联系电话" prop="customer_service_phone">
+          <el-input v-model="formData.customer_service_phone" readonly/>
+        </el-form-item>        
+        <el-form-item label="客服微信" prop="customer_service_wechat">
+          <el-input v-model="formData.customer_service_wechat" readonly/>
+        </el-form-item>        
+        <el-form-item label="支付平台ID" prop="app_id">
+          <el-input v-model="formData.app_id" readonly/>
+        </el-form-item>        
+        <el-form-item label="支付平台密钥" prop="app_key">
+          <el-input v-model="formData.app_key" readonly/>
+        </el-form-item>        
+        <el-form-item label="门店状态" prop="status">
+          <el-input v-model="formData.status" readonly/>
+        </el-form-item>
+      </el-form>
     </el-drawer>
   </div>
 </template>

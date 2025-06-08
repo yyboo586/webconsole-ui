@@ -2,7 +2,7 @@ import request from '/@/utils/request'
 // 查询门店信息表列表
 export function listTStore(query:object) {
   return request({
-    url: 'http://127.0.0.1:9999/api/v1/store_payment/stores',
+    url: '/api/v1/store_payment/stores',
     method: 'get',
     params: query
   })
@@ -10,26 +10,23 @@ export function listTStore(query:object) {
 // 查询门店信息表详细
 export function getTStore(id:string) {
   return request({
-    url: '/api/v1/system/tStore/get',
+    url: '/api/v1/store_payment/stores/'+id+'?type=internal',
     method: 'get',
-    params: {
-      id: id.toString()
-    }
   })
 }
 // 新增门店信息表
 export function addTStore(data:object) {
   return request({
-    url: '/api/v1/system/tStore/add',
+    url: '/api/v1/store_payment/stores',
     method: 'post',
     data: data
   })
 }
 // 修改门店信息表
-export function updateTStore(data:object) {
+export function updateTStore(id:string,data:object) {
   return request({
-    url: '/api/v1/system/tStore/edit',
-    method: 'put',
+    url: '/api/v1/store_payment/stores/'+ id,
+    method: 'patch',
     data: data
   })
 }

@@ -1,20 +1,20 @@
 <template>
   <div class="system-tStore-container">
     <el-card shadow="hover">
-        <!-- <div class="system-tStore-search mb15">
+        <div class="system-tStore-search mb15">
             <el-form :model="tableData.param" ref="queryRef" :inline="true" label-width="100px">
             <el-row>                
                 <el-col :span="8" class="colBlock">
-                  <el-form-item label="门店ID(主键、业务标识)" prop="id">
+                  <el-form-item label="门店ID" prop="id">
                     <el-input
                         v-model="tableData.param.id"
-                        placeholder="请输入门店ID(主键、业务标识)"
+                        placeholder="请输入门店ID"
                         clearable                        
                         @keyup.enter.native="tStoreList"
                     />                    
                   </el-form-item>
                 </el-col>                
-                <el-col :span="8" class="colBlock">
+                <!-- <el-col :span="8" class="colBlock">
                   <el-form-item label="第三方平台门店ID" prop="thirdId">
                     <el-input
                         v-model="tableData.param.thirdId"
@@ -23,19 +23,19 @@
                         @keyup.enter.native="tStoreList"
                     />                    
                   </el-form-item>
-                </el-col>                
+                </el-col>                 -->
                 <el-col :span="8" :class="!showAll ? 'colBlock' : 'colNone'">
                   <el-form-item>
-                    <el-button type="primary"  @click="tStoreList"><el-icon><ele-Search /></el-icon>搜索</el-button>
+                    <el-button type="primary"  @click="searchStore"><el-icon><ele-Search /></el-icon>搜索</el-button>
                     <el-button  @click="resetQuery(queryRef)"><el-icon><ele-Refresh /></el-icon>重置</el-button>
-                    <el-button type="primary" link  @click="toggleSearch">
+                    <!-- <el-button type="primary" link  @click="toggleSearch">
                       {{ word }}
                       <el-icon v-show="showAll"><ele-ArrowUp/></el-icon>
                       <el-icon v-show="!showAll"><ele-ArrowDown /></el-icon>
-                    </el-button>
+                    </el-button> -->
                   </el-form-item>
                 </el-col>                
-                <el-col :span="8" :class="showAll ? 'colBlock' : 'colNone'">
+                <!-- <el-col :span="8" :class="showAll ? 'colBlock' : 'colNone'">
                   <el-form-item label="门店名称" prop="name">
                     <el-input
                         v-model="tableData.param.name"
@@ -44,127 +44,8 @@
                         @keyup.enter.native="tStoreList"
                     />                    
                   </el-form-item>
-                </el-col>                
-                <el-col :span="8" :class="showAll ? 'colBlock' : 'colNone'">
-                  <el-form-item label="门店地址" prop="address">
-                    <el-input
-                        v-model="tableData.param.address"
-                        placeholder="请输入门店地址"
-                        clearable                        
-                        @keyup.enter.native="tStoreList"
-                    />                    
-                  </el-form-item>
-                </el-col>                
-                <el-col :span="8" :class="showAll ? 'colBlock' : 'colNone'">
-                  <el-form-item label="门店所有者标识" prop="ownerId">
-                    <el-input
-                        v-model="tableData.param.ownerId"
-                        placeholder="请输入门店所有者标识"
-                        clearable                        
-                        @keyup.enter.native="tStoreList"
-                    />                    
-                  </el-form-item>
-                </el-col>                
-                <el-col :span="8" :class="showAll ? 'colBlock' : 'colNone'">
-                  <el-form-item label="门店所有者姓名" prop="ownerName">
-                    <el-input
-                        v-model="tableData.param.ownerName"
-                        placeholder="请输入门店所有者姓名"
-                        clearable                        
-                        @keyup.enter.native="tStoreList"
-                    />                    
-                  </el-form-item>
-                </el-col>                
-                <el-col :span="8" :class="showAll ? 'colBlock' : 'colNone'">
-                  <el-form-item label="门店所有者电话" prop="ownerPhone">
-                    <el-input
-                        v-model="tableData.param.ownerPhone"
-                        placeholder="请输入门店所有者电话"
-                        clearable                        
-                        @keyup.enter.native="tStoreList"
-                    />                    
-                  </el-form-item>
-                </el-col>                
-                <el-col :span="8" :class="showAll ? 'colBlock' : 'colNone'">
-                  <el-form-item label="客服姓名" prop="customerServiceName">
-                    <el-input
-                        v-model="tableData.param.customerServiceName"
-                        placeholder="请输入客服姓名"
-                        clearable                        
-                        @keyup.enter.native="tStoreList"
-                    />                    
-                  </el-form-item>
-                </el-col>                
-                <el-col :span="8" :class="showAll ? 'colBlock' : 'colNone'">
-                  <el-form-item label="客服联系电话" prop="customerServicePhone">
-                    <el-input
-                        v-model="tableData.param.customerServicePhone"
-                        placeholder="请输入客服联系电话"
-                        clearable                        
-                        @keyup.enter.native="tStoreList"
-                    />                    
-                  </el-form-item>
-                </el-col>                
-                <el-col :span="8" :class="showAll ? 'colBlock' : 'colNone'">
-                  <el-form-item label="客服微信" prop="customerServiceWechat">
-                    <el-input
-                        v-model="tableData.param.customerServiceWechat"
-                        placeholder="请输入客服微信"
-                        clearable                        
-                        @keyup.enter.native="tStoreList"
-                    />                    
-                  </el-form-item>
-                </el-col>                
-                <el-col :span="8" :class="showAll ? 'colBlock' : 'colNone'">
-                  <el-form-item label="支付平台ID" prop="appId">
-                    <el-input
-                        v-model="tableData.param.appId"
-                        placeholder="请输入支付平台ID"
-                        clearable                        
-                        @keyup.enter.native="tStoreList"
-                    />                    
-                  </el-form-item>
-                </el-col>                
-                <el-col :span="8" :class="showAll ? 'colBlock' : 'colNone'">
-                  <el-form-item label="支付平台密钥" prop="appKey">
-                    <el-input
-                        v-model="tableData.param.appKey"
-                        placeholder="请输入支付平台密钥"
-                        clearable                        
-                        @keyup.enter.native="tStoreList"
-                    />                    
-                  </el-form-item>
-                </el-col>                
-                <el-col :span="8" :class="showAll ? 'colBlock' : 'colNone'">
-                  <el-form-item label="门店状态: 1=正常营业、2=暂停营业、3=店铺倒闭" prop="status">
-                    <el-select filterable v-model="tableData.param.status" placeholder="请选择门店状态: 1=正常营业、2=暂停营业、3=店铺倒闭" clearable style="width:200px;">
-                        <el-option label="请选择字典生成" value="" />
-                    </el-select>
-                  </el-form-item>
-                </el-col>                
-                <el-col :span="8" :class="showAll ? 'colBlock' : 'colNone'">
-                  <el-form-item label="门店创建时间" prop="createdAt">
-                    <el-date-picker
-                        clearable  style="width: 200px"
-                        v-model="tableData.param.createdAt"
-                        format="YYYY-MM-DD HH:mm:ss"
-                        value-format="YYYY-MM-DD HH:mm:ss"                    
-                        type="datetime"
-                        placeholder="选择门店创建时间"                    
-                    ></el-date-picker>
-                  </el-form-item>
-                </el-col>            
-                <el-col :span="8" :class="showAll ? 'colBlock' : 'colNone'">
-                  <el-form-item>
-                    <el-button type="primary"  @click="tStoreList"><el-icon><ele-Search /></el-icon>搜索</el-button>
-                    <el-button  @click="resetQuery(queryRef)"><el-icon><ele-Refresh /></el-icon>重置</el-button>
-                    <el-button type="primary" link  @click="toggleSearch">
-                        {{ word }}
-                        <el-icon v-show="showAll"><ele-ArrowUp/></el-icon>
-                        <el-icon v-show="!showAll"><ele-ArrowDown /></el-icon>
-                    </el-button>
-                  </el-form-item>
-                </el-col>            
+                </el-col>               
+        -->
               </el-row>
             </el-form>
             <el-row :gutter="10" class="mb8">
@@ -175,7 +56,7 @@
                   v-auth="'api/v1/system/tStore/add'"
                 ><el-icon><ele-Plus /></el-icon>新增</el-button>
               </el-col>
-              <el-col :span="1.5">
+              <!-- <el-col :span="1.5">
                 <el-button
                   type="success"
                   :disabled="single"
@@ -190,15 +71,15 @@
                   @click="handleDelete(null)"
                   v-auth="'api/v1/system/tStore/delete'"
                 ><el-icon><ele-Delete /></el-icon>删除</el-button>
-              </el-col>            
+              </el-col>             -->
             </el-row>
-        </div> -->
+        </div>
         <el-table v-loading="loading" :data="tableData.data" @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="55" align="center" />          
-          <!-- <el-table-column label="门店ID(主键、业务标识)" align="center" prop="id"
-            min-width="150px"            
+          <el-table-column label="门店ID" align="center" prop="id"
+            min-width="200px"            
              />          
-          <el-table-column label="第三方平台门店ID" align="center" prop="thirdId"
+          <!-- <el-table-column label="第三方平台门店ID" align="center" prop="thirdId"
             min-width="150px"            
              />           -->
           <el-table-column label="门店名称" align="center" prop="name"
@@ -213,7 +94,7 @@
           <el-table-column label="店主姓名" align="center" prop="owner_name"
             min-width="150px"            
              />          
-          <el-table-column label="店主电话" align="center" prop="owner_phone"
+          <!-- <el-table-column label="店主电话" align="center" prop="owner_phone"
             min-width="150px"            
              />          
           <el-table-column label="客服姓名" align="center" prop="customer_service_name"
@@ -224,7 +105,7 @@
              />          
           <el-table-column label="客服微信" align="center" prop="customer_service_wechat"
             min-width="150px"            
-             />          
+             />           -->
           <!-- <el-table-column label="支付平台ID" align="center" prop="appId"
             min-width="150px"            
              />          
@@ -246,15 +127,21 @@
               <el-button
                 type="primary"
                 link
+                @click="handleDetail(scope.row)"
+                v-auth="'api/v1/system/tStore/delete'"
+              ><el-icon><ele-View /></el-icon>详情</el-button>
+              <el-button
+                type="primary"
+                link
                 @click="handleUpdate(scope.row)"
                 v-auth="'api/v1/system/tStore/edit'"
               ><el-icon><ele-EditPen /></el-icon>修改</el-button>
               <el-button
                 type="primary"
                 link
-                @click="handleDelete(scope.row)"
-                v-auth="'api/v1/system/tStore/delete'"
-              ><el-icon><ele-DeleteFilled /></el-icon>删除</el-button>
+                @click="handleItemList(scope.row)"
+                v-auth="'api/v1/system/tStore/edit'"
+              ><el-icon><ele-EditPen /></el-icon>123</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -266,6 +153,9 @@
             @pagination="tStoreList"
         />
     </el-card>
+    <ApiV1SystemTStoreCreate
+      ref="createRef"      
+    ></ApiV1SystemTStoreCreate>
     <ApiV1SystemTStoreEdit
        ref="editRef"       
        @tStoreList="tStoreList"
@@ -273,7 +163,14 @@
     <ApiV1SystemTStoreDetail
       ref="detailRef"      
       @tStoreList="tStoreList"
-    ></ApiV1SystemTStoreDetail>    
+    ></ApiV1SystemTStoreDetail>
+    <ApiV1SystemTStoreDetail
+      ref="detailRef"      
+      @tStoreList="tStoreList"
+    ></ApiV1SystemTStoreDetail>
+    <ApiV1SystemTStoreItems ref="itemListRef" >
+
+    </ApiV1SystemTStoreItems>
   </div>
 </template>
 <script setup lang="ts">
@@ -292,14 +189,18 @@ import {
     TStoreInfoData,
     TStoreTableDataState,    
 } from "/@/views/system/tStore/list/component/model"
+import ApiV1SystemTStoreCreate from "/@/views/system/tStore/list/component/create.vue"
 import ApiV1SystemTStoreEdit from "/@/views/system/tStore/list/component/edit.vue"
 import ApiV1SystemTStoreDetail from "/@/views/system/tStore/list/component/detail.vue"
+import ApiV1SystemTStoreItems from "/@/views/system/tStore/list/component/itemList.vue"
 defineOptions({ name: "apiV1SystemTStoreList"})
 const {proxy} = <any>getCurrentInstance()
 const loading = ref(false)
 const queryRef = ref()
+const createRef = ref();
 const editRef = ref();
 const detailRef = ref();
+const itemListRef = ref()
 // 是否显示所有搜索选项
 const showAll =  ref(false)
 // 非单个禁用
@@ -307,12 +208,13 @@ const single = ref(true)
 // 非多个禁用
 const multiple =ref(true)
 const word = computed(()=>{
-    if(showAll.value === false) {
-        //对文字进行处理
-        return "展开搜索";
-    } else {
-        return "收起搜索";
-    }
+  showAll.value = false
+    // if(showAll.value === false) {
+    //     //对文字进行处理
+    //     return "展开搜索";
+    // } else {
+    //     return "收起搜索";
+    // }
 })
 // 字典选项数据
 const {    
@@ -369,6 +271,19 @@ const tStoreList = ()=>{
     loading.value = false
   })
 };
+const searchStore = ()=>{
+  const id = state.tableData.param.id;
+  if (!id || id.trim() === '') {
+    ElMessage.warning('门店ID不能为空');
+    return;
+  }
+  loading.value = true;
+  getTStore(state.tableData.param.id).then((res:any)=>{
+    state.tableData.data = [res.data];
+    state.tableData.total = 1;
+    loading.value = false;
+  })
+};
 const toggleSearch = () => {
     showAll.value = !showAll.value;
 }
@@ -379,7 +294,10 @@ const handleSelectionChange = (selection:Array<TStoreInfoData>) => {
     multiple.value = !selection.length
 }
 const handleAdd =  ()=>{
-    editRef.value.openDialog()
+    createRef.value.openDialog()
+}
+const handleItemList = (row?: TStoreInfoData) => {
+  itemListRef.value.openDialog(row)
 }
 const handleUpdate = (row: TStoreTableColumns|null) => {
     if(!row){
@@ -387,6 +305,7 @@ const handleUpdate = (row: TStoreTableColumns|null) => {
             return item.id ===state.ids[0]
         }) as TStoreTableColumns
     }
+    // console.log(row);
     editRef.value.openDialog(toRaw(row));
 };
 const handleDelete = (row: TStoreTableColumns|null) => {
@@ -415,7 +334,12 @@ const handleDelete = (row: TStoreTableColumns|null) => {
         })
         .catch(() => {});
 }
-const handleView = (row:TStoreTableColumns)=>{
+const handleDetail = (row:TStoreTableColumns)=>{
+    if(!row){
+        row = state.tableData.data.find((item:TStoreTableColumns)=>{
+            return item.id ===state.ids[0]
+        }) as TStoreTableColumns
+    }
     detailRef.value.openDialog(toRaw(row));
 }
 </script>
